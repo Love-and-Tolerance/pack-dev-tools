@@ -69,28 +69,8 @@
         ]
       },
       {
-        "name": "alt-textures",
-        "id_pos": [4, 5],
-        "exclusive": false,
-        "variants": [
-          { "name": "none", "id": "x", "base": "keep" },
-          {
-            "name": "classic",
-            "id": "c",
-            "base": "replace",
-            "url": "https://github.com/Love-and-Tolerance/Classic-Textures-Addon.git"
-          },
-          {
-            "name": "bronydog",
-            "id": "b",
-            "base": "replace",
-            "url": "https://github.com/Love-and-Tolerance/Bronydog-Textures-Addon.git"
-          }
-        ]
-      },
-      {
         "name": "holiday",
-        "id_pos": 6,
+        "id_pos": 4,
         "exclusive": true,
         "variants": [
           { "name": "none", "id": "x", "base": "keep" },
@@ -99,6 +79,34 @@
             "id": "h",
             "base": "replace",
             "url": "https://github.com/Love-and-Tolerance/Hearts-and-Hooves-Addon.git"
+          }
+        ]
+      },
+      {
+        "name": "classic",
+        "id_pos": 5,
+        "exclusive": true,
+        "variants": [
+          { "name": "none", "id": "x", "base": "keep" },
+          {
+            "name": "classic",
+            "id": "c",
+            "base": "replace",
+            "url": "https://github.com/Love-and-Tolerance/Classic-Textures-Addon.git"
+          }
+        ]
+      },
+       {
+        "name": "bronydog",
+        "id_pos": 6,
+        "exclusive": true,
+        "variants": [
+        { "name": "none", "id": "x", "base": "keep" },
+          {
+            "name": "bronydog",
+            "id": "b",
+            "base": "replace",
+            "url": "https://github.com/Love-and-Tolerance/Bronydog-Textures-Addon.git"
           }
         ]
       }
