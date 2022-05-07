@@ -1,93 +1,107 @@
 {
-    "repos": {
-        "base": {
-        "url": "https://github.com/Love-and-Tolerance/Love-and-Tolerance.git"
-        },
-        "add-ons": {
-            "seasonal": {
-                "id_pos": 1,
-                "exclusive": true,
-                "autumn": {
-                    "id": "a",
-                    "url": "https://github.com/Love-and-Tolerance/Autumn-Addon.git"
-                },
-                "spring": {
-                    "id": "s",
-                    "url": "https://github.com/Love-and-Tolerance/Spring-Addon.git"
-                },
-                "winter": {
-                    "id": "w",
-                    "url": "https://github.com/Love-and-Tolerance/Winter-Addon.git"
-                }
-            },
-            "music": {
-                "id_pos": 2,
-                "exclusive": true,
-                "none": {
-                    "id": "x",
-                    "base": "remove"
-                },
-                "a": {
-                    "id": "a",
-                    "base": "keep"
-                },
-                "b": {
-                    "id": "b",
-                    "base": "replace",
-                    "url": "https://github.com/Love-and-Tolerance/Music-side-B.git"
-                }
-            },
-            "3d-models": {
-                "id_pos": 3,
-                "exclusive": true,
-                "none": {
-                    "id": "x",
-                    "base": "keep"
-                },
-                "simple": {
-                    "id": "s",
-                    "base": "replace",
-                    "branch": "simple",
-                    "url": "https://github.com/Love-and-Tolerance/3d-Models-Addon.git"
-                },
-                "complex": {
-                    "id": "c",
-                    "base": "replace",
-                    "branch": "complex",
-                    "url": "https://github.com/Love-and-Tolerance/3d-Models-Addon.git"
-                }
-            },
-            "alt-textures": {
-                "id_pos": [4, 5],
-                "exclusive": false,
-                "none": {
-                    "id": "x",
-                    "base": "keep"
-                },
-                "classic": {
-                    "id": "c",
-                    "base": "replace",
-                    "url": "https://github.com/Love-and-Tolerance/Classic-Textures-Addon.git"
-                },
-                "bronydog": {
-                    "id": "b",
-                    "base": "replace",
-                    "url": "https://github.com/Love-and-Tolerance/Bronydog-Textures-Addon.git"
-                }
-            },
-            "holiday": {
-                "id_pos": 6,
-                "exclusive": true,
-                "none": {
-                    "id": "x",
-                    "base": "keep"
-                },
-                "hearts": {
-                    "id": "h",
-                    "base": "replace",
-                    "url": "https://github.com/Love-and-Tolerance/Hearts-and-Hooves-Addon.git"
-                }
-            }
-        }
-    }
+  "repos": {
+    "base": {
+      "url": "https://github.com/Love-and-Tolerance/Love-and-Tolerance.git"
+    },
+    "addons": [
+      {
+        "name": "seasonal",
+        "id_pos": 1,
+        "exclusive": true,
+        "variants": [
+          {
+            "name": "none",
+            "id": "x",
+            "base": "keep"
+          },
+          {
+            "name": "autumn",
+            "id": "a",
+            "url": "https://github.com/Love-and-Tolerance/Autumn-Addon.git"
+          },
+          {
+            "name": "spring",
+            "id": "s",
+            "url": "https://github.com/Love-and-Tolerance/Spring-Addon.git"
+          },
+          {
+            "name": "winter",
+            "id": "w",
+            "url": "https://github.com/Love-and-Tolerance/Winter-Addon.git"
+          }
+        ]
+      },
+      {
+        "name": "music",
+        "id_pos": 2,
+        "exclusive": true,
+        "variants": [
+          { "name": "none", "id": "x", "base": "remove" },
+          { "name": "a", "id": "a", "base": "keep" },
+          {
+            "name": "b",
+            "id": "b",
+            "base": "replace",
+            "url": "https://github.com/Love-and-Tolerance/Music-side-B.git"
+          }
+        ]
+      },
+      {
+        "name": "3d-models",
+        "id_pos": 3,
+        "exclusive": true,
+        "variants": [
+          { "name": "none", "id": "x", "base": "keep" },
+          {
+            "name": "simple",
+            "id": "s",
+            "base": "replace",
+            "branch": "simple",
+            "url": "https://github.com/Love-and-Tolerance/3d-Models-Addon.git"
+          },
+          {
+            "name": "complex",
+            "id": "c",
+            "base": "replace",
+            "branch": "complex",
+            "url": "https://github.com/Love-and-Tolerance/3d-Models-Addon.git"
+          }
+        ]
+      },
+      {
+        "name": "alt-textures",
+        "id_pos": [4, 5],
+        "exclusive": false,
+        "variants": [
+          { "name": "none", "id": "x", "base": "keep" },
+          {
+            "name": "classic",
+            "id": "c",
+            "base": "replace",
+            "url": "https://github.com/Love-and-Tolerance/Classic-Textures-Addon.git"
+          },
+          {
+            "name": "bronydog",
+            "id": "b",
+            "base": "replace",
+            "url": "https://github.com/Love-and-Tolerance/Bronydog-Textures-Addon.git"
+          }
+        ]
+      },
+      {
+        "name": "holiday",
+        "id_pos": 6,
+        "exclusive": true,
+        "variants": [
+          { "name": "none", "id": "x", "base": "keep" },
+          {
+            "name": "hearts",
+            "id": "h",
+            "base": "replace",
+            "url": "https://github.com/Love-and-Tolerance/Hearts-and-Hooves-Addon.git"
+          }
+        ]
+      }
+    ]
+  }
 }
