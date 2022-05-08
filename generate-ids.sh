@@ -17,12 +17,12 @@ for ((pone = 0 ; pone <= ponev - 1 ; pone++)); do
                 for ((pfive = 0 ; pfive <= pfivev - 1 ; pfive++)); do
                     for ((psix = 0 ; psix <= psixv - 1 ; psix++)); do
                         id[0]=$(jq .repos.addons[0].variants[$pone].id assets.json)
-                        id[1]=$(jq .repos.addons[0].variants[$ptwo].id assets.json)
-                        id[2]=$(jq .repos.addons[0].variants[$pthree].id assets.json)
-                        id[3]=$(jq .repos.addons[0].variants[$pfour].id assets.json)
-                        id[4]=$(jq .repos.addons[0].variants[$pfive].id assets.json)
-                        id[5]=$(jq .repos.addons[0].variants[$psix].id assets.json)
-                        echo ${id[*]}
+                        id[1]=$(jq .repos.addons[1].variants[$ptwo].id assets.json)
+                        id[2]=$(jq .repos.addons[2].variants[$pthree].id assets.json)
+                        id[3]=$(jq .repos.addons[3].variants[$pfour].id assets.json)
+                        id[4]=$(jq .repos.addons[4].variants[$pfive].id assets.json)
+                        id[5]=$(jq .repos.addons[5].variants[$psix].id assets.json)
+                        ./generate-pack.sh ${id[*]}
                     done
                 done
             done
