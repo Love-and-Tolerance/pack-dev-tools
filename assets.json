@@ -96,12 +96,12 @@
           }
         ]
       },
-       {
+      {
         "name": "bronydog",
         "id_pos": 6,
         "exclusive": true,
         "variants": [
-        { "name": "none", "id": "x", "base": "keep" },
+          { "name": "none", "id": "x", "base": "keep" },
           {
             "name": "bronydog",
             "id": "b",
