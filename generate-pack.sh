@@ -2,4 +2,8 @@
 
 filename=$(echo L_T-$1$2$3$4$5$6.zip | tr -d  '"')
 
-echo $filename
+cd /media/velvetremedy/Server-Backups/releases/tmp
+rm -rf *
+DATE=$(date +%Y-%m-%d-%k-%M-%S | tr -d ' ')
+cp -rt . /media/velvetremedy/Server-Backups/releases/repos/Love-and-Tolerance/{assets,LICENSE,pack.png,pack.mcmeta,README.md}
+echo "$DATE: Love & Tolerance base" > config.log
