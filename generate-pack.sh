@@ -42,8 +42,8 @@ if [[ "$pfive" == "c" ]]; then
         fi
     done < mc-names.txt 3< lt-names.txt
     rm ./{mc-names.txt,lt-names.txt}
-    rclone sync ../repos/Classic-Textures-Addon/assets/ ./assets --exclude=/minecraft/lang/**
-    echo "Bronydog textures addon" >> config.log
+    rclone copy ../repos/Classic-Textures-Addon/assets/ ./assets --exclude=/minecraft/lang/** &>/dev/null
+    echo "Classic textures addon" >> config.log
 fi
 
 if [[ "$pfour" == "h" ]]; then
@@ -65,6 +65,31 @@ if [[ "$pthree" == "c" ]]; then
     cd ../../tmp/
     cp -rt . /media/velvetremedy/Server-Backups/releases/repos/3d-Models-Addon/assets
     echo "Complex 3d Models addon" >> config.log
+fi
+
+if [[ "$ptwo" == "b" ]]; then
+    grep minecraft ../repos/Music-side-B/assets/minecraft/lang/eq_eq-full.json | awk -F ':' '{print $1}' > mc-names.txt
+    grep minecraft ../repos/Music-side-B/assets/minecraft/lang/eq_eq-full.json | awk -F ':' '{print $2}' > lt-names.txt
+    while IFS= read -r mc_name && IFS= read -r lt_name <&3; do
+        if [[ $lt_name == *","* ]]; then
+            sed -i "/$mc_name/c\\$mc_name:$lt_name" assets/minecraft/lang/eq_eq-full.json
+        else
+            sed -i "/$mc_name/c\\$mc_name:$lt_name," assets/minecraft/lang/eq_eq-full.json
+        fi
+    done < mc-names.txt 3< lt-names.txt
+    rm ./{mc-names.txt,lt-names.txt}
+    grep minecraft ../repos/Music-side-B/assets/minecraft/lang/eq_eq-min.json | awk -F ':' '{print $1}' > mc-names.txt
+    grep minecraft ../repos/Music-side-B/assets/minecraft/lang/eq_eq-min.json | awk -F ':' '{print $2}' > lt-names.txt
+    while IFS= read -r mc_name && IFS= read -r lt_name <&3; do
+        if [[ $lt_name == *","* ]]; then
+            sed -i "/$mc_name/c\\$mc_name:$lt_name" assets/minecraft/lang/eq_eq-min.json
+        else
+            sed -i "/$mc_name/c\\$mc_name:$lt_name," assets/minecraft/lang/eq_eq-min.json
+        fi
+    done < mc-names.txt 3< lt-names.txt
+    rm ./{mc-names.txt,lt-names.txt}
+    rclone copy ../repos/Music-side-B/assets/ ./assets --exclude=/minecraft/lang/** &>/dev/null
+    echo "Music side B" >> config.log
 fi
 
 if [[ "$pone" == "a" ]]; then
