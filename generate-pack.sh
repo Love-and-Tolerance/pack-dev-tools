@@ -67,6 +67,19 @@ if [[ "$pthree" == "c" ]]; then
     echo "Complex 3d Models addon" >> config.log
 fi
 
+if [[ "$ptwo" == "x" ]]; then
+    grep minecraft ../repos/Music-side-B/assets/minecraft/lang/eq_eq-full.json | awk -F ':' '{print $1}' > mc-names.txt
+    while IFS= read -r mc_name; do
+        sed -i "/$mc_name/d" assets/minecraft/lang/eq_eq-full.json
+    done < mc-names.txt
+    rm ./mc-names.txt
+    grep minecraft ../repos/Music-side-B/assets/minecraft/lang/eq_eq-min.json | awk -F ':' '{print $1}' > mc-names.txt
+    while IFS= read -r mc_name; do
+        sed -i "/$mc_name/d" assets/minecraft/lang/eq_eq-full.json
+    done < mc-names.txt
+    rm -r ./mc-names.txt ./assets/minecraft/sounds/records
+fi
+
 if [[ "$ptwo" == "b" ]]; then
     grep minecraft ../repos/Music-side-B/assets/minecraft/lang/eq_eq-full.json | awk -F ':' '{print $1}' > mc-names.txt
     grep minecraft ../repos/Music-side-B/assets/minecraft/lang/eq_eq-full.json | awk -F ':' '{print $2}' > lt-names.txt
