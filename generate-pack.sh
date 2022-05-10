@@ -22,7 +22,27 @@ if [[ "$psix" == "b" ]]; then
 fi
 
 if [[ "$pfive" == "c" ]]; then
-    cp -rt . /media/velvetremedy/Server-Backups/releases/repos/Classic-Textures-Addon/assets
+    grep minecraft ../repos/Classic-Textures-Addon/assets/minecraft/lang/eq_eq-full.json | awk -F ':' '{print $1}' > mc-names.txt
+    grep minecraft ../repos/Classic-Textures-Addon/assets/minecraft/lang/eq_eq-full.json | awk -F ':' '{print $2}' > lt-names.txt
+    while IFS= read -r mc_name && IFS= read -r lt_name <&3; do
+        if [[ $lt_name == *","* ]]; then
+            sed -i "/$mc_name/c\\$mc_name:$lt_name" assets/minecraft/lang/eq_eq-full.json
+        else
+            sed -i "/$mc_name/c\\$mc_name:$lt_name," assets/minecraft/lang/eq_eq-full.json
+        fi
+    done < mc-names.txt 3< lt-names.txt
+    rm ./{mc-names.txt,lt-names.txt}
+    grep minecraft ../repos/Classic-Textures-Addon/assets/minecraft/lang/eq_eq-min.json | awk -F ':' '{print $1}' > mc-names.txt
+    grep minecraft ../repos/Classic-Textures-Addon/assets/minecraft/lang/eq_eq-min.json | awk -F ':' '{print $2}' > lt-names.txt
+    while IFS= read -r mc_name && IFS= read -r lt_name <&3; do
+        if [[ $lt_name == *","* ]]; then
+            sed -i "/$mc_name/c\\$mc_name:$lt_name" assets/minecraft/lang/eq_eq-min.json
+        else
+            sed -i "/$mc_name/c\\$mc_name:$lt_name," assets/minecraft/lang/eq_eq-min.json
+        fi
+    done < mc-names.txt 3< lt-names.txt
+    rm ./{mc-names.txt,lt-names.txt}
+    rclone sync ../repos/Classic-Textures-Addon/assets/ ./assets --exclude=/minecraft/lang/**
     echo "Bronydog textures addon" >> config.log
 fi
 
