@@ -101,7 +101,8 @@ if [[ "$ptwo" == "b" ]]; then
         fi
     done < mc-names.txt 3< lt-names.txt
     rm ./{mc-names.txt,lt-names.txt}
-    rclone copy ../repos/Music-side-B/assets/ ./assets --exclude=/minecraft/lang/** &>/dev/null
+    rclone copy ../repos/Music-side-B/assets/ ./assets --exclude=/minecraft/lang/** --quiet
+    rclone copy ../repos/Music-side-B/LICENSE . --quiet
     echo "Music side B" >> config.log
 fi
 
