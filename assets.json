@@ -49,7 +49,7 @@
         ]
       },
       {
-        "name": "3d-models",
+        "name": "three-d-models",
         "id_pos": 3,
         "default": "s",
         "variants": [
