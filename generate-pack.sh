@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-lt_version=$(jq .repos.base.release_version assets.json)
+lt_version=$(jq .repos.base.version assets.json)
 filename=$(echo L-T_$lt_version-$1$2$3$4$5$6.zip | tr -d  '"')
 
 cd /media/velvetremedy/Server-Backups/releases/tmp
@@ -47,11 +47,6 @@ if [[ "$pfive" == "c" ]]; then
     echo "Classic textures addon" >> config.log
 fi
 
-if [[ "$pfour" == "h" ]]; then
-    cp -rt . /media/velvetremedy/Server-Backups/releases/repos/Hearts-and-Hooves-Addon/assets
-    echo "Hearts and Hooves addon" >> config.log
-fi
-
 if [[ "$pthree" == "s" ]]; then
     cd ../repos/3d-Models-Addon/
     git switch simple &>/dev/null
@@ -66,6 +61,22 @@ if [[ "$pthree" == "c" ]]; then
     cd ../../tmp/
     cp -rt . /media/velvetremedy/Server-Backups/releases/repos/3d-Models-Addon/assets
     echo "Complex 3d Models addon" >> config.log
+fi
+
+if [[ "$pfour" == "h" ]]; then
+    if [[ "$pthree" == "s" ]]; then
+        cd ../repos/Hearts-and-Hooves-Addon/
+        git switch simple-models &>/dev/null
+        cd ../../tmp/
+        cp -rt . /media/velvetremedy/Server-Backups/releases/repos/Hearts-and-Hooves-Addon/assets
+        echo "Hearts and Hooves addon with simple 3d models" >> config.log
+    else
+        cd ../repos/Hearts-and-Hooves-Addon/
+        git switch mane &>/dev/null
+        cd ../../tmp/
+        cp -rt . /media/velvetremedy/Server-Backups/releases/repos/Hearts-and-Hooves-Addon/assets
+        echo "Hearts and Hooves addon" >> config.log
+    fi
 fi
 
 if [[ "$ptwo" == "x" ]]; then
