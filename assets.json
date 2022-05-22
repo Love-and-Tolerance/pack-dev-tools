@@ -9,59 +9,59 @@
     },
     "addons": [
       {
-        "name": "seasonal",
+        "name": "Seasonal",
         "id_pos": 1,
         "default": "x",
         "variants": [
           {
-            "name": "none",
+            "name": "None",
             "id": "x"
           },
           {
-            "name": "autumn",
+            "name": "Autumn",
             "id": "a",
             "url": "https://github.com/Love-and-Tolerance/Autumn-Addon"
           },
           {
-            "name": "spring",
+            "name": "Spring",
             "id": "s",
             "url": "https://github.com/Love-and-Tolerance/Spring-Addon"
           },
           {
-            "name": "winter",
+            "name": "Winter",
             "id": "w",
             "url": "https://github.com/Love-and-Tolerance/Winter-Addon"
           }
         ]
       },
       {
-        "name": "music",
+        "name": "Music",
         "id_pos": 2,
         "default": "a",
         "variants": [
-          { "name": "none", "id": "x" },
-          { "name": "side-a", "id": "a" },
+          { "name": "None", "id": "x" },
+          { "name": "Side A", "id": "a" },
           {
-            "name": "side-b",
+            "name": "Side B",
             "id": "b",
             "url": "https://github.com/Love-and-Tolerance/Music-side-B"
           }
         ]
       },
       {
-        "name": "three-d-models",
+        "name": "3D models",
         "id_pos": 3,
         "default": "s",
         "variants": [
-          { "name": "none", "id": "x" },
+          { "name": "None", "id": "x" },
           {
-            "name": "simple",
+            "name": "Simple",
             "id": "s",
             "branch": "simple",
             "url": "https://github.com/Love-and-Tolerance/3d-Models-Addon"
           },
           {
-            "name": "complex",
+            "name": "Complex",
             "id": "c",
             "branch": "complex",
             "url": "https://github.com/Love-and-Tolerance/3d-Models-Addon"
@@ -69,39 +69,39 @@
         ]
       },
       {
-        "name": "holiday",
+        "name": "Holiday",
         "id_pos": 4,
         "default": "x",
         "variants": [
-          { "name": "none", "id": "x" },
+          { "name": "None", "id": "x" },
           {
-            "name": "hearts",
+            "name": "Hearts & Hooves",
             "id": "h",
             "url": "https://github.com/Love-and-Tolerance/Hearts-and-Hooves-Addon"
           }
         ]
       },
       {
-        "name": "classic",
+        "name": "Classic",
         "id_pos": 5,
         "default": "x",
         "variants": [
-          { "name": "none", "id": "x" },
+          { "name": "None", "id": "x" },
           {
-            "name": "classic",
+            "name": "Classic",
             "id": "c",
             "url": "https://github.com/Love-and-Tolerance/Classic-Textures-Addon"
           }
         ]
       },
       {
-        "name": "bronydog",
+        "name": "Bronydog",
         "id_pos": 6,
         "default": "x",
         "variants": [
-          { "name": "none", "id": "x" },
+          { "name": "None", "id": "x" },
           {
-            "name": "bronydog",
+            "name": "Bronydog",
             "id": "b",
             "url": "https://github.com/Love-and-Tolerance/Bronydog-Textures-Addon"
           }
