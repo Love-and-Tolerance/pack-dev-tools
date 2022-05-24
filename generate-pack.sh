@@ -22,7 +22,32 @@ if [[ "$psix" == "b" ]]; then
     echo "Bronydog textures addon" >> config.log
 fi
 
+if [[ "$pthree" == "s" ]]; then
+    cd ../repos/3d-Models-Addon/
+    git switch simple &>/dev/null
+    cd ../../tmp/
+    cp -rt . /media/velvetremedy/Server-Backups/releases/repos/3d-Models-Addon/assets
+    echo "Simple 3d Models addon" >> config.log
+fi
+
+if [[ "$pthree" == "c" ]]; then
+    cd ../repos/3d-Models-Addon/
+    git switch complex &>/dev/null
+    cd ../../tmp/
+    cp -rt . /media/velvetremedy/Server-Backups/releases/repos/3d-Models-Addon/assets
+    echo "Complex 3d Models addon" >> config.log
+fi
+
 if [[ "$pfive" == "c" ]]; then
+    if [[ "$pthree" == "c" ]]; then
+        cd ../repos/Classic-Textures-Addon/
+        git switch complex-models &>/dev/null
+        cd ../../tmp/
+    else
+        cd ../repos/Classic-Textures-Addon/
+        git switch mane &>/dev/null
+        cd ../../tmp/
+    fi
     grep minecraft ../repos/Classic-Textures-Addon/assets/minecraft/lang/eq_eq-full.json | awk -F ':' '{print $1}' > mc-names.txt
     grep minecraft ../repos/Classic-Textures-Addon/assets/minecraft/lang/eq_eq-full.json | awk -F ':' '{print $2}' > lt-names.txt
     while IFS= read -r mc_name && IFS= read -r lt_name <&3; do
@@ -45,22 +70,6 @@ if [[ "$pfive" == "c" ]]; then
     rm ./{mc-names.txt,lt-names.txt}
     rclone copy ../repos/Classic-Textures-Addon/assets/ ./assets --exclude=/minecraft/lang/** &>/dev/null
     echo "Classic textures addon" >> config.log
-fi
-
-if [[ "$pthree" == "s" ]]; then
-    cd ../repos/3d-Models-Addon/
-    git switch simple &>/dev/null
-    cd ../../tmp/
-    cp -rt . /media/velvetremedy/Server-Backups/releases/repos/3d-Models-Addon/assets
-    echo "Simple 3d Models addon" >> config.log
-fi
-
-if [[ "$pthree" == "c" ]]; then
-    cd ../repos/3d-Models-Addon/
-    git switch complex &>/dev/null
-    cd ../../tmp/
-    cp -rt . /media/velvetremedy/Server-Backups/releases/repos/3d-Models-Addon/assets
-    echo "Complex 3d Models addon" >> config.log
 fi
 
 if [[ "$pfour" == "h" ]]; then
