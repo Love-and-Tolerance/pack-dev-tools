@@ -40,7 +40,11 @@
         "default": "a",
         "variants": [
           { "name": "None", "id": "x" },
-          { "name": "Side A", "id": "a" },
+          {
+            "name": "Side A",
+            "id": "a",
+            "pack.png": "https://raw.githubusercontent.com/VelvetRemedy/pack-release-builder/mane/assets/pack-music-a.png"
+          },
           {
             "name": "Side B",
             "id": "b",
