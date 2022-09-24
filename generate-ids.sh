@@ -2,8 +2,6 @@
 
 id=("1" "2" "3" "4" "5" "6")
 
-rm -rf id.log
-
 ponev=$(jq '.repos.addons[0].variants | length' assets.json)
 ptwov=$(jq '.repos.addons[1].variants | length' assets.json)
 pthreev=$(jq '.repos.addons[2].variants | length' assets.json)
