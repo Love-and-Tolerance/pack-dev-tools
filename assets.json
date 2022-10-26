@@ -3,7 +3,7 @@
     "base": {
       "mc_versions": 1.19,
       "pack_format": 9,
-      "version": "1.1.0-format.9",
+      "version": "1.2.0-format.9",
       "filename": "L-T_{version}-{ids}.zip",
       "url": "https://github.com/Love-and-Tolerance/Love-and-Tolerance"
     },
@@ -76,13 +76,18 @@
       {
         "name": "Holiday",
         "id_pos": 4,
-        "default": "x",
+        "default": "n",
         "variants": [
           { "name": "None", "id": "x" },
           {
             "name": "Hearts & Hooves",
             "id": "h",
             "url": "https://github.com/Love-and-Tolerance/Hearts-and-Hooves-Addon"
+          },
+          {
+            "name": "Nightmare Night",
+            "id": "n",
+            "url": "https://github.com/Love-and-Tolerance/Nightmare-Night-Addon"
           }
         ]
       },

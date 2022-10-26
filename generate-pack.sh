@@ -88,6 +88,31 @@ if [[ "$pfour" == "h" ]]; then
     fi
 fi
 
+if [[ "$pfour" == "n" ]]; then
+    grep minecraft ../repos/Nightmare-Night-Addon/assets/minecraft/lang/eq_eq-full.json | awk -F ':' '{print $1}' > mc-names.txt
+    grep minecraft ../repos/Nightmare-Night-Addon/assets/minecraft/lang/eq_eq-full.json | awk -F ':' '{print $2}' > lt-names.txt
+    while IFS= read -r mc_name && IFS= read -r lt_name <&3; do
+        if [[ $lt_name == *","* ]]; then
+            sed -i "/$mc_name/c\\$mc_name:$lt_name" assets/minecraft/lang/eq_eq-full.json
+        else
+            sed -i "/$mc_name/c\\$mc_name:$lt_name," assets/minecraft/lang/eq_eq-full.json
+        fi
+    done < mc-names.txt 3< lt-names.txt
+    rm ./{mc-names.txt,lt-names.txt}
+    grep minecraft ../repos/Nightmare-Night-Addon/assets/minecraft/lang/eq_eq-min.json | awk -F ':' '{print $1}' > mc-names.txt
+    grep minecraft ../repos/Nightmare-Night-Addon/assets/minecraft/lang/eq_eq-min.json | awk -F ':' '{print $2}' > lt-names.txt
+    while IFS= read -r mc_name && IFS= read -r lt_name <&3; do
+        if [[ $lt_name == *","* ]]; then
+            sed -i "/$mc_name/c\\$mc_name:$lt_name" assets/minecraft/lang/eq_eq-min.json
+        else
+            sed -i "/$mc_name/c\\$mc_name:$lt_name," assets/minecraft/lang/eq_eq-min.json
+        fi
+    done < mc-names.txt 3< lt-names.txt
+    rm ./{mc-names.txt,lt-names.txt}
+    rclone copy ../repos/Nightmare-Night-Addon/assets/ ./assets --exclude=/minecraft/lang/** &>/dev/null
+    echo "Nightmare-Night addon" >> config.log
+fi
+
 if [[ "$ptwo" == "x" ]]; then
     grep minecraft ../repos/Music-side-B/assets/minecraft/lang/eq_eq-full.json | awk -F ':' '{print $1}' > mc-names.txt
     while IFS= read -r mc_name; do
