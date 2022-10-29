@@ -4,5 +4,5 @@ cd /media/velvetremedy/Server-Backups/releases/repos
 
 for file in `find -name '*.png'`
 do
-  optipng -o7 $file
+  oxipng -o 6 -i 1 --strip safe $file
 done
