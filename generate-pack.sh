@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-lt_version=$(jq .repos.base.version assets.json)
+lt_version=$(jq .repos.base.version ./assets/java.json)
 filename=$(echo L-T_$lt_version-$1$2$3$4$5$6.zip | tr -d  '"')
 
 cd /media/velvetremedy/Server-Backups/releases/tmp
