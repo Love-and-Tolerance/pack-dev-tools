@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-lt_version=$(jq .repos.base.version bedrock.json | tr -d '"')
+lt_version=$(jq .repos.base.version ./assets/bedrock.json | tr -d '"')
 
 cd /media/velvetremedy/Server-Backups/releases/tmp
 rm -rf *
