@@ -78,7 +78,7 @@
       {
         "name": "Holiday",
         "id_pos": 4,
-        "default": "n",
+        "default": "x",
         "variants": [
           { "name": "None", "id": "x" },
           {
