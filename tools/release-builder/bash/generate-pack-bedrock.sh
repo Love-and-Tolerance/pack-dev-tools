@@ -1,34 +1,57 @@
 #!/usr/bin/env bash
 
-lt_version=$(jq .repos.base.version ./assets/bedrock.json | tr -d '"')
+if [ -f ./bedrock.json ]; then
+    rm bedrock.json
+fi
 
-cd /media/velvetremedy/Server-Backups/releases/tmp
-rm -rf *
-cp -rt . /media/velvetremedy/Server-Backups/releases/repos/Love-and-Tolerance-Bedrock/*
-zip -rq9 ../zip-dir-bedrock/"L-T_$lt_version.mcpack" *
-echo "bedrock base pack"
+wget 'https://raw.githubusercontent.com/Love-and-Tolerance/pack-builder-assets/mane/assets/bedrock.json'
 
-rm -rf *
-cp -rt . /media/velvetremedy/Server-Backups/releases/repos/Seasonal-Textures-Addon-Bedrock/*
-zip -rq9 ../zip-dir-bedrock/"L-T_$lt_version-Seasons.mcpack" *
-echo "bedrock seasonal pack"
+lt_version=$(jq .repos.base.version ./bedrock.json | tr -d '"')
 
-rm -rf *
-cp -rt . /media/velvetremedy/Server-Backups/releases/repos/Holiday-Textures-Addon-Bedrock/*
-zip -rq9 ../zip-dir-bedrock/"L-T_$lt_version-Holiday.mcpack" *
-echo "bedrock holiday pack"
+mkdir ./{repos,zips}
 
+cd ./zips
 rm -rf *
-cp -rt . /media/velvetremedy/Server-Backups/releases/repos/Music-Addon-Bedrock/*
-zip -rq9 ../zip-dir-bedrock/"L-T_$lt_version-Music.mcpack" *
-echo "bedrock music pack"
+cd ../repos
+rm -rf *
 
-rm -rf *
-cp -rt . /media/velvetremedy/Server-Backups/releases/repos/Classic-Textures-Addon-Bedrock/*
-zip -rq9 ../zip-dir-bedrock/"L-T_$lt_version-Classic.mcpack" *
-echo "bedrock Classic pack"
+function make_pack() {
+    if [ $1 == "base" ]; then
+        echo $1
+        filename=$(jq .repos.$1.filename ../bedrock.json | tr -d '""' | sed s/{version}/$lt_version/g)
+        url=$(jq .repos.$1.url ../bedrock.json | tr -d '"')
+        folder=$(echo $url | awk -F '/' '{print  $NF}')
+        git clone $url
+        cd ./$folder
+        for file in `find -name '*.png'`
+        do
+            oxipng -o 6 -i 1 --strip safe $file --fix
+        done
+        zip -rq9 ../../zips/"$filename" *
+        cd ..
+    elif [ $1 == addons ]; then
+        echo $1 $2
+        filename=$(jq .repos.$1[$2].filename ../bedrock.json | tr -d '""' | sed s/{version}/$lt_version/g)
+        url=$(jq .repos.$1[$2].url ../bedrock.json | tr -d '"')
+        folder=$(echo $url | awk -F '/' '{print  $NF}')
+        git clone $url
+        cd ./$folder
+        for file in `find -name '*.png'`
+        do
+            oxipng -o 6 -i 1 --strip safe $file --fix
+        done
+        zip -rq9 ../../zips/"$filename" *
+        cd ..
+    fi
+}
 
-rm -rf *
-cp -rt . /media/velvetremedy/Server-Backups/releases/repos/Bronydog-Textures-Addon-Bedrock/*
-zip -rq9 ../zip-dir-bedrock/"L-T_$lt_version-Bronydog.mcpack" *
-echo "bedrock bronydog pack"
+make_pack "base"
+
+addon_count=$(jq '.repos.addons | length' ../bedrock.json)
+
+for ((addon = 0 ; addon <= addon_count - 1 ; addon++)); do
+    make_pack "addons" $addon
+done
+
+
+
