@@ -23,6 +23,8 @@ done
 cat urls.txt | uniq >> newurls.txt
 mv newurls.txt urls.txt
 
+mkdir ./{repos,zips}
+
 cd ./zips
 rm -rf *
 cd ../repos
@@ -48,6 +50,4 @@ while read url; do
     done
     cd ..
 done < ../urls.txt
-
-rm ../urls.txt
 

@@ -18,29 +18,31 @@ rm -rf *
 function make_pack() {
     if [ $1 == "base" ]; then
         echo $1
-        filename=$(jq .repos.$1.filename ../bedrock.json | tr -d '"' | sed s/{version}/$lt_version/g)
+        filename=$(jq .repos.$1.filename ../bedrock.json | tr -d '"' | sed s/{version}/$lt_version/g | sed s/.mcpack//g)
         url=$(jq .repos.$1.url ../bedrock.json | tr -d '"')
         folder=$(echo $url | awk -F '/' '{print  $NF}')
         git clone $url
         cd ./$folder
+        zip -rq9 ../../zips/"$filename-source.zip" *
         for file in `find -name '*.png'`
         do
             oxipng -o 6 -i 1 --strip safe $file --fix
         done
-        zip -rq9 ../../zips/"$filename" *
+        zip -rq9 ../../zips/"$filename.mcpack" *
         cd ..
     elif [ $1 == addons ]; then
         echo $1 $2
-        filename=$(jq .repos.$1[$2].filename ../bedrock.json | tr -d '"' | sed s/{version}/$lt_version/g)
+        filename=$(jq .repos.$1[$2].filename ../bedrock.json | tr -d '"' | sed s/{version}/$lt_version/g | sed s/.mcpack//g)
         url=$(jq .repos.$1[$2].url ../bedrock.json | tr -d '"')
         folder=$(echo $url | awk -F '/' '{print  $NF}')
         git clone $url
         cd ./$folder
+        zip -rq9 ../../zips/"$filename-source.zip" *
         for file in `find -name '*.png'`
         do
             oxipng -o 6 -i 1 --strip safe $file --fix
         done
-        zip -rq9 ../../zips/"$filename" *
+        zip -rq9 ../../zips/"$filename.mcpack" *
         cd ..
     fi
 }
