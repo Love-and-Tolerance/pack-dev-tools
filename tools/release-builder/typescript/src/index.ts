@@ -13,11 +13,10 @@ async function mane() {
   mkDirs();
   const javaUrls = getJavaUrls(java);
   const bedrockUrls = getBedrockUrls(bedrock);
-  const absolute = path.resolve("./");
-  await cloneRepos(absolute, javaUrls);
-  await cloneRepos(absolute, bedrockUrls);
-  const javaPacks = await getPackData(absolute, javaUrls);
-  const bedrockPacks = await getPackData(absolute, bedrockUrls);
+  await cloneRepos(javaUrls);
+  await cloneRepos(bedrockUrls);
+  const javaPacks = await getPackData(javaUrls);
+  const bedrockPacks = await getPackData(bedrockUrls);
   //optimizeImages(packs);
 }
 
@@ -84,15 +83,15 @@ function getBedrockUrls(bedrock: any): Set<string> {
   return urls;
 }
 
-async function cloneRepos(absolute: string, urls: Set<string>) {
+async function cloneRepos(urls: Set<string>) {
   let promises = [...urls].map((url) => {
     let name = url.split("/").pop();
-    return git().clone(url, absolute + "/builder/repos/" + name);
+    return git().clone(url, path.resolve("./builder/repos/" + name));
   });
   await Promise.all(promises);
 }
 
-async function getPackData(absolute: string, urls: Set<string>) {
+async function getPackData(urls: Set<string>) {
   let packs: Array<{
     name: string;
     defaultbranch: string;
@@ -100,8 +99,8 @@ async function getPackData(absolute: string, urls: Set<string>) {
   }> = [];
   for (let url of urls) {
     let name = url.split("/").pop()!;
-    let defaultbranch = await getDefaultBranch(absolute, name);
-    let branches = await getBranches(absolute, name);
+    let defaultbranch = await getDefaultBranch(name);
+    let branches = await getBranches(name);
     packs.push({
       name,
       defaultbranch,
@@ -111,13 +110,13 @@ async function getPackData(absolute: string, urls: Set<string>) {
   return packs;
 }
 
-async function getDefaultBranch(absolute: string, name: string) {
-  let result = await git(absolute + "/builder/repos/" + name).branch();
+async function getDefaultBranch(name: string) {
+  let result = await git(path.resolve("./builder/repos/" + name)).branch();
   return result.current;
 }
 
-async function getBranches(absolute: string, name: string) {
-  let result = await git(absolute + "/builder/repos/" + name).branch();
+async function getBranches(name: string) {
+  let result = await git(path.resolve("./builder/repos/" + name)).branch();
   let allbranches: string[] = [];
   for (let branch of result.all) {
     allbranches.push(branch.split("/").pop()!);
@@ -148,7 +147,7 @@ function findFilesInDir(startPath: any, filter: any) {
 
 function optimizeImages(packs: any[]) {
   packs.forEach(function (pack) {
-    process.chdir(absolute + "/builder/repos/" + pack.name);
+    process.chdir(path.resolve("./builder/repos/" + pack.name));
     if (pack.branches.length === 1) {
       optimize(pack.name);
       commitOptimizedImages();
@@ -164,12 +163,12 @@ function optimizeImages(packs: any[]) {
       }
       checkoutBranch(pack.defaultbranch);
     }
-    process.chdir(absolute);
+    process.chdir(process.cwd());
   });
 }
 
 function optimize(name: string) {
-  let images = findFilesInDir(absolute + "/builder/repos/" + name, ".png");
+  let images = findFilesInDir(path.resolve("./builder/repos/" + name), ".png");
   images.forEach(function (file) {
     if (file.endsWith(".png")) {
       try {
