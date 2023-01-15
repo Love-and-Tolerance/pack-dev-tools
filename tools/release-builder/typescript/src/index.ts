@@ -85,10 +85,11 @@ function getBedrockUrls(bedrock: any): Set<string> {
 }
 
 async function cloneRepos(absolute: string, urls: Set<string>) {
-  urls.forEach((url) => {
+  let promises = [...urls].map((url) => {
     let name = url.split("/").pop();
-    git().clone(url, absolute + "/builder/repos/" + name);
+    return git().clone(url, absolute + "/builder/repos/" + name);
   });
+  await Promise.all(promises);
 }
 
 async function getPackData(absolute: string, urls: Set<string>) {
