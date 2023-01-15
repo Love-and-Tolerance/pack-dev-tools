@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { simpleGit as git, CleanOptions } from "simple-git";
 import { execSync } from "child_process";
+import { exit } from "process";
 
 async function mane() {
   const java = await getJsonData("java");
@@ -9,6 +10,7 @@ async function mane() {
   git().clean(CleanOptions.FORCE);
   checkGit();
   checkOxipng();
+  checkDir();
   mkDirs();
   const javaUrls = getJavaUrls(java);
   const bedrockUrls = getBedrockUrls(bedrock);
@@ -41,8 +43,14 @@ function checkOxipng() {
   }
 }
 
+function checkDir() {
+  if (fs.existsSync("./builder")) {
+    fs.rmSync("./builder", { recursive: true, force: true });
+  }
+}
+
 function mkDirs() {
-  let dirs = ["repos", "tmp", "zip-dir", "zip-dir-bedrock"];
+  const dirs = ["repos", "tmp", "zip-dir", "zip-dir-bedrock"];
   for (let dir of dirs) {
     fs.mkdir(`./builder/${dir}`, { recursive: true }, (err) => {
       if (err) throw err;
