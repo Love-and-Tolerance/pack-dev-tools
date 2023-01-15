@@ -3,20 +3,18 @@ import path from "path";
 import { simpleGit as git, CleanOptions } from "simple-git";
 import { execSync } from "child_process";
 
-git().clean(CleanOptions.FORCE);
-
-let absolute = path.resolve("./");
-
 async function mane() {
   const java = await getJsonData("java");
   const bedrock = await getJsonData("bedrock");
+  git().clean(CleanOptions.FORCE);
   checkGit();
   checkOxipng();
   mkDirs();
   const javaUrls = getJavaUrls(java);
   const bedrockUrls = getBedrockUrls(bedrock);
-  console.log(bedrockUrls, javaUrls);
-  //cloneRepos();
+  const absolute = path.resolve("./");
+  cloneRepos(absolute, javaUrls);
+  cloneRepos(absolute, bedrockUrls);
   //let packIds = findIdentities(java);
   //let packs = await getPackData(urls);
   //optimizeImages(packs);
@@ -55,7 +53,7 @@ function mkDirs() {
 function getJavaUrls(java: any): Set<string> {
   let urls = new Set<string>();
   urls.add(java.repos.base.url);
-  let addonTypes = ["exclusive", "regular", "mods"]
+  let addonTypes = ["exclusive", "regular", "mods"];
   for (let type of addonTypes) {
     for (let addon of java.repos.addons[type]) {
       if (type == "exclusive") {
@@ -79,7 +77,7 @@ function getBedrockUrls(bedrock: any): Set<string> {
   return urls;
 }
 
-function cloneRepos() {
+function cloneRepos(absolute: string, urls: Set<string>) {
   urls.forEach((url) => {
     let name = url.split("/").pop();
     git().clone(url, absolute + "/builder/repos/" + name);
