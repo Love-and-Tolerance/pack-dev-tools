@@ -14,11 +14,10 @@ async function mane() {
   const javaUrls = getJavaUrls(java);
   const bedrockUrls = getBedrockUrls(bedrock);
   const absolute = path.resolve("./");
-  cloneRepos(absolute, javaUrls);
-  cloneRepos(absolute, bedrockUrls);
+  await cloneRepos(absolute, javaUrls);
+  await cloneRepos(absolute, bedrockUrls);
   const javaPacks = await getPackData(absolute, javaUrls);
   const bedrockPacks = await getPackData(absolute, bedrockUrls);
-  console.log(javaPacks, bedrockPacks);
   //optimizeImages(packs);
 }
 
@@ -85,7 +84,7 @@ function getBedrockUrls(bedrock: any): Set<string> {
   return urls;
 }
 
-function cloneRepos(absolute: string, urls: Set<string>) {
+async function cloneRepos(absolute: string, urls: Set<string>) {
   urls.forEach((url) => {
     let name = url.split("/").pop();
     git().clone(url, absolute + "/builder/repos/" + name);
@@ -100,7 +99,6 @@ async function getPackData(absolute: string, urls: Set<string>) {
   }> = [];
   for (let url of urls) {
     let name = url.split("/").pop()!;
-    console.log(name);
     let defaultbranch = await getDefaultBranch(absolute, name);
     let branches = await getBranches(absolute, name);
     packs.push({
