@@ -11,8 +11,8 @@ let absolute = path.resolve("./");
 async function mane() {
   const java = await getJsonData("java");
   const bedrock = await getJsonData("bedrock");
-  //checkGit();
-  //checkOptipng();
+  checkGit();
+  checkOxipng();
   //mkDirs();
   //getJavaUrls(urls);
   //getBedrockUrls(urls);
@@ -35,11 +35,11 @@ async function checkGit() {
   }
 }
 
-function checkOptipng() {
+function checkOxipng() {
   try {
-    execSync('which "optipng"');
+    execSync('which "oxipng"');
   } catch (err) {
-    throw new Error(`Exit: "optipng" is not installed.`);
+    throw new Error(`Exit: "oxipng" is not installed.`);
   }
 }
 
@@ -189,7 +189,7 @@ function optimize(name: string) {
   images.forEach(function (file) {
     if (file.endsWith(".png")) {
       try {
-        execSync(`optipng -o7 -fix ${file}`);
+        execSync(`oxipng -o 6 -i 1 --strip safe ${file} --fix`);
       } catch (err) {
         throw new Error(`Failed to optimize image.`);
       }
