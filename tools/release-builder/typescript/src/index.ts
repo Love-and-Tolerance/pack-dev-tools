@@ -3,6 +3,8 @@ import path from "path";
 import { simpleGit as git, CleanOptions } from "simple-git";
 import { execSync } from "child_process";
 
+let reposDir = "./builder/repos";
+
 async function mane() {
   const java = await getJsonData("java");
   const bedrock = await getJsonData("bedrock");
@@ -85,8 +87,8 @@ function getBedrockUrls(bedrock: any): Set<string> {
 
 async function cloneRepos(urls: Set<string>) {
   let promises = [...urls].map((url) => {
-    let name = url.split("/").pop();
-    return git().clone(url, path.resolve("./builder/repos/" + name));
+    let name = url.split("/").pop()!;
+    return git().clone(url, path.resolve(reposDir, name));
   });
   await Promise.all(promises);
 }
@@ -111,12 +113,12 @@ async function getPackData(urls: Set<string>) {
 }
 
 async function getDefaultBranch(name: string) {
-  let result = await git(path.resolve("./builder/repos/" + name)).branch();
+  let result = await git(path.resolve(reposDir, name)).branch();
   return result.current;
 }
 
 async function getBranches(name: string) {
-  let result = await git(path.resolve("./builder/repos/" + name)).branch();
+  let result = await git(path.resolve(reposDir, name)).branch();
   let allbranches: string[] = [];
   for (let branch of result.all) {
     allbranches.push(branch.split("/").pop()!);
@@ -147,7 +149,7 @@ function findFilesInDir(startPath: any, filter: any) {
 
 function optimizeImages(packs: any[]) {
   packs.forEach(function (pack) {
-    process.chdir(path.resolve("./builder/repos/" + pack.name));
+    process.chdir(path.resolve(reposDir, pack.name));
     if (pack.branches.length === 1) {
       optimize(pack.name);
       commitOptimizedImages();
@@ -168,7 +170,7 @@ function optimizeImages(packs: any[]) {
 }
 
 function optimize(name: string) {
-  let images = findFilesInDir(path.resolve("./builder/repos/" + name), ".png");
+  let images = findFilesInDir(path.resolve(reposDir, name), ".png");
   images.forEach(function (file) {
     if (file.endsWith(".png")) {
       try {
