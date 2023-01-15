@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import { simpleGit as git, CleanOptions } from "simple-git";
 import { execSync } from "child_process";
-import { exit } from "process";
 
 async function mane() {
   const java = await getJsonData("java");
@@ -17,8 +16,9 @@ async function mane() {
   const absolute = path.resolve("./");
   cloneRepos(absolute, javaUrls);
   cloneRepos(absolute, bedrockUrls);
-  //let packIds = findIdentities(java);
-  //let packs = await getPackData(urls);
+  const javaPacks = await getPackData(absolute, javaUrls);
+  const bedrockPacks = await getPackData(absolute, bedrockUrls);
+  console.log(javaPacks, bedrockPacks);
   //optimizeImages(packs);
 }
 
@@ -92,62 +92,32 @@ function cloneRepos(absolute: string, urls: Set<string>) {
   });
 }
 
-function findIdentities(java: any): string[][] {
-  let ids = new Array<Array<string>>();
-  for (let addon of java.repos.addons) {
-    let subId: string[] = [];
-    let id: string;
-    addon.variants.forEach(function (variant: any) {
-      id = variant.id;
-      subId.push(id);
-    });
-    ids.push(subId);
-  }
-  return generateIdentities(ids);
-}
-
-function generateIdentities(args: string[][]) {
-  var indentities: string[][] = [],
-    max = args.length - 1;
-  function helper(arr: string[], i: number) {
-    for (var j = 0, l = args[i].length; j < l; j++) {
-      var id = arr.slice(0);
-      id.push(args[i][j]);
-      if (i == max) indentities.push(id);
-      else helper(id, i + 1);
-    }
-  }
-  helper([], 0);
-  return indentities;
-}
-
-async function getPackData(urls: Set<string>) {
+async function getPackData(absolute: string, urls: Set<string>) {
   let packs: Array<{
     name: string;
     defaultbranch: string;
     branches: string[];
   }> = [];
-
   for (let url of urls) {
     let name = url.split("/").pop()!;
-    let defaultbranch = await getDefaultBranch(name);
-    let branches = await getBranches(name);
+    console.log(name);
+    let defaultbranch = await getDefaultBranch(absolute, name);
+    let branches = await getBranches(absolute, name);
     packs.push({
       name,
       defaultbranch,
       branches,
     });
   }
-
   return packs;
 }
 
-async function getDefaultBranch(name: string) {
+async function getDefaultBranch(absolute: string, name: string) {
   let result = await git(absolute + "/builder/repos/" + name).branch();
   return result.current;
 }
 
-async function getBranches(name: string) {
+async function getBranches(absolute: string, name: string) {
   let result = await git(absolute + "/builder/repos/" + name).branch();
   let allbranches: string[] = [];
   for (let branch of result.all) {
