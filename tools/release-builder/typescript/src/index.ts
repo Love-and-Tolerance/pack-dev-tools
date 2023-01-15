@@ -5,24 +5,27 @@ import { execSync } from "child_process";
 
 git().clean(CleanOptions.FORCE);
 
-const javaAssets = fs.readFileSync("./assets/java.json", "utf8");
-const java = JSON.parse(javaAssets);
-const bedrockAssets = fs.readFileSync("./assets/bedrock.json", "utf8");
-const bedrock = JSON.parse(bedrockAssets);
-
 let urls = new Set<string>();
 let absolute = path.resolve("./");
 
 async function mane() {
-  checkGit();
-  checkOptipng();
-  mkDirs();
-  getJavaUrls(urls);
-  getBedrockUrls(urls);
-  cloneRepos();
-  let packIds = findIdentities(java);
-  let packs = await getPackData(urls);
-  optimizeImages(packs);
+  const java = await getJsonData("java");
+  const bedrock = await getJsonData("bedrock");
+  //checkGit();
+  //checkOptipng();
+  //mkDirs();
+  //getJavaUrls(urls);
+  //getBedrockUrls(urls);
+  //cloneRepos();
+  //let packIds = findIdentities(java);
+  //let packs = await getPackData(urls);
+  //optimizeImages(packs);
+}
+
+async function getJsonData(version: string) {
+  return await fetch(
+    `https://raw.githubusercontent.com/Love-and-Tolerance/pack-builder-assets/mane/assets/${version}.json`
+  ).then((res) => res.json());
 }
 
 async function checkGit() {
@@ -41,7 +44,7 @@ function checkOptipng() {
 }
 
 function cloneRepos() {
-  urls.forEach(url => {
+  urls.forEach((url) => {
     let name = url.split("/").pop();
     git().clone(url, absolute + "/builder/repos/" + name);
   });
@@ -52,7 +55,7 @@ function findIdentities(java: any): string[][] {
   for (let addon of java.repos.addons) {
     let subId: string[] = [];
     let id: string;
-    addon.variants.forEach(function(variant: any) {
+    addon.variants.forEach(function (variant: any) {
       id = variant.id;
       subId.push(id);
     });
@@ -79,7 +82,7 @@ function generateIdentities(args: string[][]) {
 function getJavaUrls(urls: Set<string>): Set<string> {
   urls.add(java.repos.base.url);
   for (let addon of java.repos.addons) {
-    addon.variants.forEach((variant: { url: string; }) => {
+    addon.variants.forEach((variant: { url: string }) => {
       if (variant.url) urls.add(variant.url);
     });
   }
@@ -159,7 +162,7 @@ function findFilesInDir(startPath: any, filter: any) {
   return results;
 }
 
-function optimizeImages(packs: any[]) {  
+function optimizeImages(packs: any[]) {
   packs.forEach(function (pack) {
     process.chdir(absolute + "/builder/repos/" + pack.name);
     if (pack.branches.length === 1) {
@@ -174,15 +177,15 @@ function optimizeImages(packs: any[]) {
           optimize(pack.name);
           commitOptimizedImages();
         }
-      };
+      }
       checkoutBranch(pack.defaultbranch);
     }
     process.chdir(absolute);
-  })
+  });
 }
 
 function optimize(name: string) {
-  let images = findFilesInDir(absolute + "/builder/repos/" + name, ".png")
+  let images = findFilesInDir(absolute + "/builder/repos/" + name, ".png");
   images.forEach(function (file) {
     if (file.endsWith(".png")) {
       try {
@@ -191,14 +194,14 @@ function optimize(name: string) {
         throw new Error(`Failed to optimize image.`);
       }
     }
-  })
+  });
 }
 
 async function checkoutBranch(branch: string) {
   try {
     execSync(`git checkout ${branch}`);
   } catch (error) {
-    throw new Error(`Failed to checkout branch.`)
+    throw new Error(`Failed to checkout branch.`);
   }
 }
 
