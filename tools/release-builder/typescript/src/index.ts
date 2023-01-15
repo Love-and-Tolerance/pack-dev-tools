@@ -5,7 +5,6 @@ import { execSync } from "child_process";
 
 git().clean(CleanOptions.FORCE);
 
-let urls = new Set<string>();
 let absolute = path.resolve("./");
 
 async function mane() {
@@ -13,9 +12,10 @@ async function mane() {
   const bedrock = await getJsonData("bedrock");
   checkGit();
   checkOxipng();
-  //mkDirs();
-  //getJavaUrls(urls);
-  //getBedrockUrls(urls);
+  mkDirs();
+  const javaUrls = getJavaUrls(java);
+  const bedrockUrls = getBedrockUrls(bedrock);
+  console.log(bedrockUrls, javaUrls);
   //cloneRepos();
   //let packIds = findIdentities(java);
   //let packs = await getPackData(urls);
@@ -41,6 +41,42 @@ function checkOxipng() {
   } catch (err) {
     throw new Error(`Exit: "oxipng" is not installed.`);
   }
+}
+
+function mkDirs() {
+  let dirs = ["repos", "tmp", "zip-dir", "zip-dir-bedrock"];
+  for (let dir of dirs) {
+    fs.mkdir(`./builder/${dir}`, { recursive: true }, (err) => {
+      if (err) throw err;
+    });
+  }
+}
+
+function getJavaUrls(java: any): Set<string> {
+  let urls = new Set<string>();
+  urls.add(java.repos.base.url);
+  let addonTypes = ["exclusive", "regular", "mods"]
+  for (let type of addonTypes) {
+    for (let addon of java.repos.addons[type]) {
+      if (type == "exclusive") {
+        addon.variants.forEach((variant: { url: string }) => {
+          if (variant.url) urls.add(variant.url);
+        });
+      } else {
+        if (addon.url) urls.add(addon.url);
+      }
+    }
+  }
+  return urls;
+}
+
+function getBedrockUrls(bedrock: any): Set<string> {
+  let urls = new Set<string>();
+  urls.add(bedrock.repos.base.url);
+  bedrock.repos.addons.forEach((_: any, num: number) => {
+    urls.add(bedrock.repos.addons[num].url);
+  });
+  return urls;
 }
 
 function cloneRepos() {
@@ -77,33 +113,6 @@ function generateIdentities(args: string[][]) {
   }
   helper([], 0);
   return indentities;
-}
-
-function getJavaUrls(urls: Set<string>): Set<string> {
-  urls.add(java.repos.base.url);
-  for (let addon of java.repos.addons) {
-    addon.variants.forEach((variant: { url: string }) => {
-      if (variant.url) urls.add(variant.url);
-    });
-  }
-  return urls;
-}
-
-function getBedrockUrls(urls: Set<string>): Set<string> {
-  urls.add(bedrock.repos.base.url);
-  bedrock.repos.addons.forEach((_: any, num: number) => {
-    urls.add(bedrock.repos.addons[num].url);
-  });
-  return urls;
-}
-
-function mkDirs() {
-  let dirs = ["repos", "tmp", "zip-dir", "zip-dir-bedrock"];
-  for (let dir of dirs) {
-    fs.mkdir(`./builder/${dir}`, { recursive: true }, (err) => {
-      if (err) throw err;
-    });
-  }
 }
 
 async function getPackData(urls: Set<string>) {
