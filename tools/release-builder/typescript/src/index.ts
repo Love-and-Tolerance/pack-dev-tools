@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import { simpleGit as git, CleanOptions } from "simple-git";
 import { execSync } from "child_process";
-import { version } from "os";
 
 let reposDir = "./builder/repos";
 
