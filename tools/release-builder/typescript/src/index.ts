@@ -149,7 +149,7 @@ function generatePacks(
 ) {
   packs.forEach(function (pack) {
     process.chdir(path.resolve(reposDir, pack.name));
-    for (var i = 0; i < pack.branches.length; i++) {
+    for (let i = 0; i < pack.branches.length; i++) {
       let branch: string;
       if (pack.branches[i] != pack.defaultbranch) {
         checkoutBranch(pack.branches[i]);
@@ -221,16 +221,16 @@ function optimizeImages(name: string) {
   });
 }
 
-function findFilesInDir(startPath: any, filter: any) {
-  var results: string[] = [];
+function findFilesInDir(startPath: string, filter: string) {
+  let results: string[] = [];
   if (!fs.existsSync(startPath)) {
     console.log("no dir ", startPath);
     throw Error;
   }
-  var files = fs.readdirSync(startPath);
-  for (var i = 0; i < files.length; i++) {
-    var filename = path.join(startPath, files[i]);
-    var stat = fs.lstatSync(filename);
+  let files = fs.readdirSync(startPath);
+  for (let i = 0; i < files.length; i++) {
+    let filename = path.join(startPath, files[i]);
+    let stat = fs.lstatSync(filename);
     if (stat.isDirectory()) {
       results = results.concat(findFilesInDir(filename, filter));
     } else if (filename.indexOf(filter) >= 0) {
