@@ -2,15 +2,20 @@ import fs from "fs";
 import path from "path";
 import { simpleGit as git, CleanOptions } from "simple-git";
 import { execSync } from "child_process";
+import { version } from "os";
 
 let reposDir = "./builder/repos";
 
 async function mane() {
   const java = await getJsonData("java");
   const bedrock = await getJsonData("bedrock");
+  const javaVersion = java.repos.base.version;
+  const javaFormat = java.repos.base.pack_format;
+  const bedrockVersion = bedrock.repos.base.version;
   git().clean(CleanOptions.FORCE);
   checkGit();
   checkOxipng();
+  checkZip();
   checkDir();
   mkDirs();
   const javaUrls = getJavaUrls(java);
@@ -19,7 +24,18 @@ async function mane() {
   await cloneRepos(bedrockUrls);
   const javaPacks = await getPackData(javaUrls);
   const bedrockPacks = await getPackData(bedrockUrls);
-  //optimizeImages(packs);
+  generatePacks(javaPacks, javaVersion, "zip", "java", javaFormat);
+  generatePacks(bedrockPacks, bedrockVersion, "mcpack", "bedrock");
+  const optimize = true;
+  generatePacks(javaPacks, javaVersion, "zip", "java", javaFormat, optimize);
+  generatePacks(
+    bedrockPacks,
+    bedrockVersion,
+    "mcpack",
+    "bedrock",
+    undefined,
+    optimize
+  );
 }
 
 async function getJsonData(version: string) {
@@ -43,6 +59,14 @@ function checkOxipng() {
   }
 }
 
+function checkZip() {
+  try {
+    execSync('which "zip"');
+  } catch (err) {
+    throw new Error(`Exit: "zip" is not installed.`);
+  }
+}
+
 function checkDir() {
   if (fs.existsSync("./builder")) {
     fs.rmSync("./builder", { recursive: true, force: true });
@@ -50,7 +74,7 @@ function checkDir() {
 }
 
 function mkDirs() {
-  const dirs = ["repos", "tmp", "zip-dir", "zip-dir-bedrock"];
+  const dirs = ["repos", "zip-dir"];
   for (let dir of dirs) {
     fs.mkdir(`./builder/${dir}`, { recursive: true }, (err) => {
       if (err) throw err;
@@ -126,51 +150,105 @@ async function getBranches(name: string) {
   return [...new Set(allbranches)];
 }
 
-function findFilesInDir(startPath: any, filter: any) {
-  var results: string[] = [];
-
-  if (!fs.existsSync(startPath)) {
-    console.log("no dir ", startPath);
-    throw Error;
-  }
-
-  var files = fs.readdirSync(startPath);
-  for (var i = 0; i < files.length; i++) {
-    var filename = path.join(startPath, files[i]);
-    var stat = fs.lstatSync(filename);
-    if (stat.isDirectory()) {
-      results = results.concat(findFilesInDir(filename, filter)); //recurse
-    } else if (filename.indexOf(filter) >= 0) {
-      results.push(filename);
-    }
-  }
-  return results;
-}
-
-function optimizeImages(packs: any[]) {
+function generatePacks(
+  packs: Array<{
+    name: string;
+    defaultbranch: string;
+    branches: string[];
+  }>,
+  version: string,
+  extension: string,
+  platform: string,
+  format?: string,
+  optimize?: boolean
+) {
   packs.forEach(function (pack) {
     process.chdir(path.resolve(reposDir, pack.name));
     if (pack.branches.length === 1) {
-      optimize(pack.name);
-      commitOptimizedImages();
+      if (optimize) {
+        optimizeImages(pack.name);
+      }
+      generateZip(
+        pack.name,
+        version,
+        pack.defaultbranch,
+        extension,
+        platform,
+        format,
+        !optimize
+      );
     } else {
-      optimize(pack.name);
-      commitOptimizedImages();
       for (var i = 0; i < pack.branches.length; i++) {
         if (pack.branches[i] != pack.defaultbranch) {
           checkoutBranch(pack.branches[i]);
-          optimize(pack.name);
-          commitOptimizedImages();
+          if (optimize) {
+            optimizeImages(pack.name);
+          }
+          generateZip(
+            pack.name,
+            version,
+            pack.branches[i],
+            extension,
+            platform,
+            format,
+            !optimize
+          );
+        } else {
+          if (optimize) {
+            optimizeImages(pack.name);
+          }
+          generateZip(
+            pack.name,
+            version,
+            pack.defaultbranch,
+            extension,
+            platform,
+            format,
+            !optimize
+          );
         }
       }
       checkoutBranch(pack.defaultbranch);
     }
-    process.chdir(process.cwd());
+    process.chdir("../../..");
   });
 }
 
-function optimize(name: string) {
-  let images = findFilesInDir(path.resolve(reposDir, name), ".png");
+function generateZip(
+  name: string,
+  version: string,
+  branch: string,
+  extension: string,
+  platform: string,
+  format?: string,
+  source?: boolean
+) {
+  if (!source && platform == "java") {
+    const filename = `L_T-${version}-format.${format}-${name}-${branch}.${extension}`;
+    zipPack(filename);
+  } else if (source && platform == "java") {
+    const filename = `L_T-${version}-format.${format}-${name}-${branch}-source.${extension}`;
+    zipPack(filename);
+  } else if (!source && platform == "bedrock") {
+    const filename = `L_T-${version}-${name}-${branch}.${extension}`;
+    zipPack(filename);
+  } else if (source && platform == "bedrock") {
+    const filename = `L_T-${version}-${name}-${branch}-source.${extension}`;
+    zipPack(filename);
+  }
+}
+
+function zipPack(filename: string) {
+  try {
+    execSync(`zip -rq9 ../../zip-dir/${filename} *`);
+  } catch (error) {
+    throw new Error(`Failed to zip pack.`);
+  }
+  console.log(filename);
+}
+
+function optimizeImages(name: string) {
+  let images = findFilesInDir(`./`, ".png");
   images.forEach(function (file) {
     if (file.endsWith(".png")) {
       try {
@@ -182,19 +260,30 @@ function optimize(name: string) {
   });
 }
 
-async function checkoutBranch(branch: string) {
-  try {
-    execSync(`git checkout ${branch}`);
-  } catch (error) {
-    throw new Error(`Failed to checkout branch.`);
+function findFilesInDir(startPath: any, filter: any) {
+  var results: string[] = [];
+  if (!fs.existsSync(startPath)) {
+    console.log("no dir ", startPath);
+    throw Error;
   }
+  var files = fs.readdirSync(startPath);
+  for (var i = 0; i < files.length; i++) {
+    var filename = path.join(startPath, files[i]);
+    var stat = fs.lstatSync(filename);
+    if (stat.isDirectory()) {
+      results = results.concat(findFilesInDir(filename, filter));
+    } else if (filename.indexOf(filter) >= 0) {
+      results.push(filename);
+    }
+  }
+  return results;
 }
 
-function commitOptimizedImages() {
+async function checkoutBranch(branch: string) {
   try {
-    execSync(`git add * && git commit -m "optimize images"`);
-  } catch (err) {
-    throw new Error("Failed to commit changes.");
+    execSync(`git switch ${branch} --discard-changes`);
+  } catch (error) {
+    throw new Error(`Failed to checkout branch.`);
   }
 }
 
