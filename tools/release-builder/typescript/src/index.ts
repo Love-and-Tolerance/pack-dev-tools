@@ -164,52 +164,28 @@ function generatePacks(
 ) {
   packs.forEach(function (pack) {
     process.chdir(path.resolve(reposDir, pack.name));
-    if (pack.branches.length === 1) {
+    for (var i = 0; i < pack.branches.length; i++) {
+      let branch: string;
+      if (pack.branches[i] != pack.defaultbranch) {
+        checkoutBranch(pack.branches[i]);
+        branch = pack.branches[i];
+      } else {
+        branch = pack.defaultbranch;
+      }
       if (optimize) {
         optimizeImages(pack.name);
       }
       generateZip(
         pack.name,
         version,
-        pack.defaultbranch,
+        branch,
         extension,
         platform,
         format,
         !optimize
       );
-    } else {
-      for (var i = 0; i < pack.branches.length; i++) {
-        if (pack.branches[i] != pack.defaultbranch) {
-          checkoutBranch(pack.branches[i]);
-          if (optimize) {
-            optimizeImages(pack.name);
-          }
-          generateZip(
-            pack.name,
-            version,
-            pack.branches[i],
-            extension,
-            platform,
-            format,
-            !optimize
-          );
-        } else {
-          if (optimize) {
-            optimizeImages(pack.name);
-          }
-          generateZip(
-            pack.name,
-            version,
-            pack.defaultbranch,
-            extension,
-            platform,
-            format,
-            !optimize
-          );
-        }
-      }
-      checkoutBranch(pack.defaultbranch);
     }
+    checkoutBranch(pack.defaultbranch);
     process.chdir("../../..");
   });
 }
