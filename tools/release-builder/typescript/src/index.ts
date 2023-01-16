@@ -13,9 +13,8 @@ async function mane() {
   const javaFormat = java.repos.base.pack_format;
   const bedrockVersion = bedrock.repos.base.version;
   git().clean(CleanOptions.FORCE);
-  checkGit();
-  checkOxipng();
-  checkZip();
+  const programs = ["git", "zip", "oxipng"];
+  checkInstalled(programs);
   checkDir();
   mkDirs();
   const javaUrls = getJavaUrls(java);
@@ -44,26 +43,13 @@ async function getJsonData(version: string) {
   ).then((res) => res.json());
 }
 
-async function checkGit() {
-  const { installed } = await git().version();
-  if (!installed) {
-    throw new Error(`Exit: "git" not available.`);
-  }
-}
-
-function checkOxipng() {
-  try {
-    execSync('which "oxipng"');
-  } catch (err) {
-    throw new Error(`Exit: "oxipng" is not installed.`);
-  }
-}
-
-function checkZip() {
-  try {
-    execSync('which "zip"');
-  } catch (err) {
-    throw new Error(`Exit: "zip" is not installed.`);
+function checkInstalled(programs: string[]) {
+  for (let program of programs) {
+    try {
+      execSync(`which "${program}"`);
+    } catch (err) {
+      throw new Error(`Exit: "${program}" is not installed.`);
+    }
   }
 }
 
