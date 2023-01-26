@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
-import { chdir } from "process";
+import process from "process";
 
 let minecraft_directory =
   "/home/velvetremedy/.minecraft/versions/1.19.3/1.19.3/assets/";
@@ -51,10 +51,10 @@ function comparator(images: string[]) {
 }
 
 function get_hash(file: string) {
-  const fileBuffer = fs.readFileSync(file);
-  const hashSum = crypto.createHash("sha256");
-  hashSum.update(fileBuffer);
-  return hashSum.digest("hex");
+  const file_buffer = fs.readFileSync(file);
+  const hash_sum = crypto.createHash("sha256");
+  hash_sum.update(file_buffer);
+  return hash_sum.digest("hex");
 }
 
 mane();
