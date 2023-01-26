@@ -9,7 +9,6 @@ async function mane() {
   process.chdir(zip_directory);
   let zips = find_files_in_dir(`./`, ".zip");
   let duplicates = comparator(zips);
-  duplicates.sort();
   console.log(duplicates);
 }
 
@@ -32,14 +31,22 @@ function find_files_in_dir(startPath: string, filter: string) {
   return results;
 }
 
-function comparator(images: string[]) {
+function comparator(zips: string[]) {
   let results: string[][] = [];
-  for (let image of images) {
-    let zip_hash = get_hash(zip_directory + image);
-    let zip = [zip_hash, image]
-    results.push(zip);
+  let duplicates: string[][] = [];
+  for (let zip of zips) {
+    let zip_hash = get_hash(zip_directory + zip);
+    let file = [zip_hash, zip]
+    results.push(file);
   }
-  return results;
+  results.sort();
+  for (let i = 1; i < results.length; i++) {
+    if (results[i][0] === results[i - 1][0]) {
+      duplicates.push(results[i - 1]);
+      duplicates.push(results[i]);
+    }
+  }
+  return duplicates;
 }
 
 function get_hash(file: string) {
