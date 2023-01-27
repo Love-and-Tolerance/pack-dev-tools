@@ -46,7 +46,7 @@ function comparator(zips: string[]) {
       duplicates.push(results[i]);
     }
   }
-  return duplicates;
+  return new Set(duplicates);
 }
 
 function get_hash(file: string) {
