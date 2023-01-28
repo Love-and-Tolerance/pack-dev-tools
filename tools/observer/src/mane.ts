@@ -46,9 +46,12 @@ function comparator(old_files: string[], new_files: string[]) {
   for (let i in old_files) {
     if (
       new_files.includes(old_files[i]) &&
-      new_hashes.includes(old_hashes[i])
+      new_hashes.includes(old_hashes[i]) &&
+      new_files.indexOf(old_files[i]) === new_hashes.indexOf(old_hashes[i])
     ) {
       unchanged.push(old_files[i]);
+      new_files.splice(new_files.indexOf(old_files[i]), 1);
+      new_hashes.splice(new_hashes.indexOf(old_hashes[i]), 1);
     } else if (
       !new_files.includes(old_files[i]) &&
       !new_hashes.includes(old_hashes[i])
@@ -72,6 +75,7 @@ function comparator(old_files: string[], new_files: string[]) {
       );
     }
   }
+  console.log(new_files, new_hashes);
   return [added, changed, removed];
 }
 
