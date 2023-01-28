@@ -66,6 +66,12 @@ function comparator(old_files: string[], new_files: string[]) {
     ) {
       added.push(new_files[i]);
     } else if (
+      !old_hashes.includes(new_hashes[i]) &&
+      old_files.includes(new_files[i]) &&
+      new_hashes.filter((x) => x == new_hashes[i]).length == 1
+    ) {
+      changed.push(new_files[i]);
+    } else if (
       old_hashes.includes(new_hashes[i]) &&
       !old_files.includes(new_files[i]) &&
       new_hashes.filter((x) => x == new_hashes[i]).length > 1
