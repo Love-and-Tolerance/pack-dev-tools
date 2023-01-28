@@ -50,8 +50,8 @@ function comparator(old_files: string[], new_files: string[]) {
       new_files.indexOf(old_files[i]) === new_hashes.indexOf(old_hashes[i])
     ) {
       unchanged.push(old_files[i]);
-      new_files.splice(new_files.indexOf(old_files[i]), 1);
-      new_hashes.splice(new_hashes.indexOf(old_hashes[i]), 1);
+      //new_files.splice(new_files.indexOf(old_files[i]), 1);
+      //new_hashes.splice(new_hashes.indexOf(old_hashes[i]), 1);
     } else if (
       !new_files.includes(old_files[i]) &&
       !new_hashes.includes(old_hashes[i])
@@ -65,6 +65,15 @@ function comparator(old_files: string[], new_files: string[]) {
       !old_files.includes(new_files[i])
     ) {
       added.push(new_files[i]);
+    } else if (
+      old_hashes.includes(new_hashes[i]) &&
+      !old_files.includes(new_files[i]) &&
+      new_hashes.filter((x) => x == new_hashes[i]).length > 1
+    ) {
+      let new_index = old_hashes.indexOf(new_hashes[i]);
+      changed.push(
+        old_files[new_index] + " has been copied to " + new_files[i]
+      );
     } else if (
       old_hashes.includes(new_hashes[i]) &&
       !old_files.includes(new_files[i])
