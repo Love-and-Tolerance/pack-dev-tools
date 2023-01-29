@@ -77,8 +77,13 @@ function comparator(old_files: string[], new_files: string[]) {
       new_hashes.filter((x) => x == new_hashes[i]).length > 1
     ) {
       let new_index = old_hashes.indexOf(new_hashes[i]);
+      let new_locations = new_files.filter(
+        (file) =>
+          file != new_files[i] &&
+          new_hashes[i] == new_hashes[new_files.indexOf(file)]
+      );
       changed.push(
-        old_files[new_index] + " has been copied to " + new_files[i]
+        old_files[new_index] + " has been copied to " + new_locations.join(", ")
       );
     } else if (
       old_hashes.includes(new_hashes[i]) &&
