@@ -90,11 +90,23 @@ function comparator(old_files: string[], new_files: string[]) {
       copied.push(old_files[new_index]);
     } else if (
       old_hashes.includes(new_hashes[i]) &&
-      !old_files.includes(new_files[i])
+      !old_files.includes(new_files[i]) &&
+      !fs.existsSync(new_release + old_files[old_hashes.indexOf(new_hashes[i])]) &&
+      !copied.includes(old_files[old_hashes.indexOf(new_hashes[i])])
     ) {
       let new_index = old_hashes.indexOf(new_hashes[i]);
       changed.push(
         old_files[new_index] + " has been renamed to " + new_files[i]
+      );
+    } else if (
+      old_hashes.includes(new_hashes[i]) &&
+      !old_files.includes(new_files[i]) &&
+      fs.existsSync(new_release + old_files[old_hashes.indexOf(new_hashes[i])]) &&
+      !copied.includes(old_files[old_hashes.indexOf(new_hashes[i])])
+    ) {
+      let new_index = old_hashes.indexOf(new_hashes[i]);
+      changed.push(
+        old_files[new_index] + " has been moved to " + new_files[i]
       );
     }
   }
