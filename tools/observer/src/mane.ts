@@ -81,7 +81,7 @@ function comparator(old_files: string[], new_files: string[]) {
       let new_index = old_hashes.indexOf(new_hashes[i]);
       let new_locations = new_files.filter(
         (file) =>
-          file != new_files[i] &&
+          file != old_files[new_index] &&
           new_hashes[i] == new_hashes[new_files.indexOf(file)]
       );
       changed.push(
