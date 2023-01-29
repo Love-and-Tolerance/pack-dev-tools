@@ -41,7 +41,7 @@ function comparator(old_files: string[], new_files: string[]) {
   let changed: string[] = [];
   let removed: string[] = [];
   let unchanged: string[] = [];
-  let copied: string[] = [];
+  let indexed: string[] = [];
   let old_hashes = get_hashes(old_release, old_files);
   let new_hashes = get_hashes(new_release, new_files);
   for (let i in old_files) {
@@ -51,8 +51,6 @@ function comparator(old_files: string[], new_files: string[]) {
       new_files.indexOf(old_files[i]) === new_hashes.indexOf(old_hashes[i])
     ) {
       unchanged.push(old_files[i]);
-      //new_files.splice(new_files.indexOf(old_files[i]), 1);
-      //new_hashes.splice(new_hashes.indexOf(old_hashes[i]), 1);
     } else if (
       !new_files.includes(old_files[i]) &&
       !new_hashes.includes(old_hashes[i])
@@ -76,7 +74,7 @@ function comparator(old_files: string[], new_files: string[]) {
       old_hashes.includes(new_hashes[i]) &&
       !old_files.includes(new_files[i]) &&
       new_hashes.filter((x) => x == new_hashes[i]).length > 1 &&
-      !copied.includes(old_files[old_hashes.indexOf(new_hashes[i])])
+      !indexed.includes(old_files[old_hashes.indexOf(new_hashes[i])])
     ) {
       let new_index = old_hashes.indexOf(new_hashes[i]);
       let new_locations = new_files.filter(
@@ -87,12 +85,12 @@ function comparator(old_files: string[], new_files: string[]) {
       changed.push(
         old_files[new_index] + " has been copied to " + new_locations.join(", ")
       );
-      copied.push(old_files[new_index]);
+      indexed.push(old_files[new_index]);
     } else if (
       old_hashes.includes(new_hashes[i]) &&
       !old_files.includes(new_files[i]) &&
       !fs.existsSync(new_release + old_files[old_hashes.indexOf(new_hashes[i])]) &&
-      !copied.includes(old_files[old_hashes.indexOf(new_hashes[i])])
+      !indexed.includes(old_files[old_hashes.indexOf(new_hashes[i])])
     ) {
       let new_index = old_hashes.indexOf(new_hashes[i]);
       changed.push(
@@ -102,7 +100,7 @@ function comparator(old_files: string[], new_files: string[]) {
       old_hashes.includes(new_hashes[i]) &&
       !old_files.includes(new_files[i]) &&
       fs.existsSync(new_release + old_files[old_hashes.indexOf(new_hashes[i])]) &&
-      !copied.includes(old_files[old_hashes.indexOf(new_hashes[i])])
+      !indexed.includes(old_files[old_hashes.indexOf(new_hashes[i])])
     ) {
       let new_index = old_hashes.indexOf(new_hashes[i]);
       changed.push(
@@ -110,7 +108,7 @@ function comparator(old_files: string[], new_files: string[]) {
       );
     }
   }
-  console.log(new_files, new_hashes);
+  console.log(unchanged);
   return [added, changed, removed];
 }
 
