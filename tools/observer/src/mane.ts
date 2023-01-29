@@ -41,6 +41,7 @@ function comparator(old_files: string[], new_files: string[]) {
   let changed: string[] = [];
   let removed: string[] = [];
   let unchanged: string[] = [];
+  let copied: string[] = [];
   let old_hashes = get_hashes(old_release, old_files);
   let new_hashes = get_hashes(new_release, new_files);
   for (let i in old_files) {
@@ -74,7 +75,8 @@ function comparator(old_files: string[], new_files: string[]) {
     } else if (
       old_hashes.includes(new_hashes[i]) &&
       !old_files.includes(new_files[i]) &&
-      new_hashes.filter((x) => x == new_hashes[i]).length > 1
+      new_hashes.filter((x) => x == new_hashes[i]).length > 1 &&
+      !copied.includes(old_files[old_hashes.indexOf(new_hashes[i])])
     ) {
       let new_index = old_hashes.indexOf(new_hashes[i]);
       let new_locations = new_files.filter(
@@ -85,6 +87,7 @@ function comparator(old_files: string[], new_files: string[]) {
       changed.push(
         old_files[new_index] + " has been copied to " + new_locations.join(", ")
       );
+      copied.push(old_files[new_index]);
     } else if (
       old_hashes.includes(new_hashes[i]) &&
       !old_files.includes(new_files[i])
