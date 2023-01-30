@@ -1,10 +1,11 @@
 import { execSync } from "child_process";
+import { existsSync } from "fs";
 import process from "process";
 
 const old_release =
-  "/home/velvetremedy/Stuff/lat_zips/resource-packs/beta-versions/Arekuzu-test-1/";
+  "/home/velvetremedy/Stuff/previous-release/";
 const new_release =
-  "/home/velvetremedy/Stuff/lat_zips/resource-packs/beta-versions/Arekuzu-test-2/";
+  "/home/velvetremedy/Stuff/new-release/";
 
 let added: string[]  = [];
 let renamed: string[]  = [];
@@ -12,6 +13,8 @@ let changed: string[]  = [];
 let deleted: string[] = [];
 
 async function mane() {
+  check_dir(old_release);
+  check_dir(new_release);
   const programs = ["git", "rsync"];
   check_installed(programs);
   execute_command(`rm -rf ./pack; mkdir pack`);
@@ -25,6 +28,13 @@ async function mane() {
   let changes = get_changes() as string;
   separate_changes(changes);
   console.log(added, renamed, changed, deleted);
+}
+
+function check_dir(dir: string) {
+    if (!existsSync(dir)) {
+      console.error(`Failed to find directory: ${dir}, please make sure you entered a valid path.`);
+      process.exit(1);
+    }
 }
 
 function check_installed(programs: string[]) {
