@@ -1,6 +1,5 @@
 import fs from "fs";
 import fse from "fs-extra";
-import path from "path";
 import { simpleGit as git, CleanOptions } from "simple-git";
 import { execSync } from "child_process";
 
@@ -16,6 +15,9 @@ async function mane() {
   await remove_pack_dir();
   fs.mkdirSync("./pack");
   await copy_files(old_release, false);
+  process.chdir("./pack");
+  await git_int();
+  git_commit();
 }
 
 function check_installed(programs: string[]) {
@@ -41,6 +43,22 @@ async function remove_pack_dir() {
 async function copy_files(source: string, overwrite: boolean) {
   try {
     fse.copySync(source, "./pack/", { overwrite });
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function git_int() {
+  try {
+    await git().init();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function git_commit() {
+  try {
+    execSync(`git add * && git commit -m "previous release"`);
   } catch (err) {
     console.error(err);
   }
