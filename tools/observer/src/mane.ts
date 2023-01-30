@@ -1,5 +1,5 @@
 import { execSync } from "child_process";
-import { existsSync } from "fs";
+import fs from "fs";
 import process from "process";
 
 const old_release = "/home/velvetremedy/Stuff/previous-release/";
@@ -25,11 +25,12 @@ async function mane() {
   execute_command(`git add -A`);
   let changes = get_changes() as string;
   separate_changes(changes);
-  console.log(added, renamed, changed, deleted);
+  execute_command(`rm -rf ./*`);
+  generate_changelog();
 }
 
 function check_dir(dir: string) {
-  if (!existsSync(dir)) {
+  if (!fs.existsSync(dir)) {
     console.error(
       `Failed to find directory: ${dir}, please make sure you entered a valid path.`
     );
@@ -76,6 +77,41 @@ function separate_changes(changes: string) {
       deleted.push(change.slice(3, change.length));
     }
   }
+}
+
+function generate_changelog() {
+  let file_data: string[] = [];
+  file_data.push("## Changelog");
+  file_data.push("");
+  if (added[0] != undefined) {
+    file_data.push("### Added");
+    for (let change of added) {
+      file_data.push("- " + change);
+    }
+    file_data.push("");
+  }
+  if (renamed[0] != undefined) {
+    file_data.push("### Renamed / Moved");
+    for (let change of renamed) {
+      file_data.push("- " + change);
+    }
+    file_data.push("");
+  }
+  if (changed[0] != undefined) {
+    file_data.push("### Modified");
+    for (let change of changed) {
+      file_data.push("- " + change);
+    }
+    file_data.push("");
+  }
+  if (deleted[0] != undefined) {
+    file_data.push("### Removed");
+    for (let change of deleted) {
+      file_data.push("- " + change);
+    }
+    file_data.push("");
+  }
+  fs.writeFileSync("./changelog.md", file_data.join("\n"));
 }
 
 mane();
