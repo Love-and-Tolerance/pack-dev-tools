@@ -14,6 +14,8 @@ async function mane() {
   execute_command(`rsync -avP ${old_release} ./`);
   execute_command(`git init`);
   execute_command(`git add * && git commit -m "previous release"`);
+  execute_command('rm -r `ls | grep -v "./.git"`');
+  execute_command(`rsync -avP ${new_release} ./`);
 }
 
 function check_installed(programs: string[]) {
