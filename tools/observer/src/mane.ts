@@ -86,28 +86,30 @@ function generate_changelog() {
   if (added[0] != undefined) {
     file_data.push("### Added");
     for (let change of added) {
-      file_data.push("- " + change);
+      file_data.push("- `" + change + "`");
     }
     file_data.push("");
   }
   if (renamed[0] != undefined) {
     file_data.push("### Renamed / Moved");
     for (let change of renamed) {
-      file_data.push("- " + change);
+      let before = change.split("->")[0].trim();
+      let after = change.split("->")[1].trim();
+      file_data.push("- `" + before + "` -> `" + after + "`");
     }
     file_data.push("");
   }
   if (changed[0] != undefined) {
     file_data.push("### Modified");
     for (let change of changed) {
-      file_data.push("- " + change);
+      file_data.push("- `" + change + "`");
     }
     file_data.push("");
   }
   if (deleted[0] != undefined) {
     file_data.push("### Removed");
     for (let change of deleted) {
-      file_data.push("- " + change);
+      file_data.push("- `" + change + "`");
     }
     file_data.push("");
   }
