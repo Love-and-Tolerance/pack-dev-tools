@@ -2,14 +2,12 @@ import { execSync } from "child_process";
 import { existsSync } from "fs";
 import process from "process";
 
-const old_release =
-  "/home/velvetremedy/Stuff/previous-release/";
-const new_release =
-  "/home/velvetremedy/Stuff/new-release/";
+const old_release = "/home/velvetremedy/Stuff/previous-release/";
+const new_release = "/home/velvetremedy/Stuff/new-release/";
 
-let added: string[]  = [];
-let renamed: string[]  = [];
-let changed: string[]  = [];
+let added: string[] = [];
+let renamed: string[] = [];
+let changed: string[] = [];
 let deleted: string[] = [];
 
 async function mane() {
@@ -31,10 +29,12 @@ async function mane() {
 }
 
 function check_dir(dir: string) {
-    if (!existsSync(dir)) {
-      console.error(`Failed to find directory: ${dir}, please make sure you entered a valid path.`);
-      process.exit(1);
-    }
+  if (!existsSync(dir)) {
+    console.error(
+      `Failed to find directory: ${dir}, please make sure you entered a valid path.`
+    );
+    process.exit(1);
+  }
 }
 
 function check_installed(programs: string[]) {
