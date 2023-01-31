@@ -12,11 +12,23 @@ let fmt_args = ["-fmt", "-f", "-format"];
 let mini_args = ["-min", "-m", "-minify", "-mini"];
 
 async function mane() {
+  let process_type = parse_arg();
   check_dir(pack_directory);
   process.chdir(pack_directory);
   let json_files = find_files_in_dir(`./`, ".json");
   let mcmeta_files = find_files_in_dir(`./`, ".mcmeta");
   console.log(json_files, mcmeta_files);
+}
+
+function parse_arg() {
+  let arg = process.argv[2];
+  if (arg == undefined) {
+    return "format";
+  } else if (fmt_args.includes(arg.toLocaleLowerCase())) {
+    return "format";
+  } else if (mini_args.includes(arg.toLocaleLowerCase())) {
+    return "minify";
+  }
 }
 
 function check_dir(dir: string) {
