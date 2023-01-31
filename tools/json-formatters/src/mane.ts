@@ -72,7 +72,7 @@ function process_files(type: string, files: string[]) {
   }
 }
 
-function format_file(format: Function, file: string) {
+function format_file(format: (json: string) => string, file: string) {
   let json = fs.readFileSync(file, { encoding: "utf-8" });
   let formatted_json = format(json);
   fs.writeFileSync(file, formatted_json, { encoding: "utf-8" });
