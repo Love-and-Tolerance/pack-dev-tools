@@ -6,8 +6,8 @@ use std::path::Path;
 fn main() {
     let args: Vec<String> = env::args().collect();
     let filename = args[1].to_string();
-    let name = filename.split(".").collect::<Vec<&str>>()[0].to_string();
-    let filetype = filename.split(".").collect::<Vec<&str>>()[1].to_string();
+    let name = filename.split('.').collect::<Vec<&str>>()[0].to_string();
+    let filetype = filename.split('.').collect::<Vec<&str>>()[1].to_string();
     let width = args[2].to_string().parse::<u32>().unwrap();
     let height = args[3].to_string().parse::<u32>().unwrap();
     let mut img = image::open(filename).unwrap();
