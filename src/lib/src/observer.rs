@@ -19,6 +19,10 @@ pub fn observe(old_release: String, new_release: String) {
     options.content_only = true;
     copy(old_release, "./pack/", &options).expect("Failed to copy old release to pack directory.");
 
+    if Path::new("./pack/.git").is_dir() {
+        fs::remove_dir_all("./pack/.git").expect("Failed to remove old .git directory.");
+    }
+
     let repo = match Repository::init("./pack") {
         Ok(repo) => repo,
         Err(e) => panic!("failed to init: {}", e),
@@ -45,4 +49,19 @@ pub fn observe(old_release: String, new_release: String) {
 
     repo.commit(Some("HEAD"), &sig, &sig, "Initial commit", &tree, &[])
         .expect("Failed to commit.");
+
+    let paths = fs::read_dir("./pack").unwrap();
+
+    for path in paths {
+        let path = path.as_ref().unwrap().path().display().to_string();
+        if "./pack/.git" != path {
+            if Path::new(&path).is_dir() {
+                fs::remove_dir_all(&path).expect(&format!("Failed to remove {} directory.", &path));
+            } else if Path::new(&path).is_file() {
+                fs::remove_file(&path).expect(&format!("Failed to remove {} file.", &path));
+            }
+        }
+    }
+
+    copy(new_release, "./pack/", &options).expect("Failed to copy old release to pack directory.");
 }
