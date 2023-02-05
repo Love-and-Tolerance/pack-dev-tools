@@ -1,15 +1,10 @@
 use image::{imageops, GenericImageView};
-use std::env;
 use std::fs;
 use std::path::Path;
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    let filename = args[1].to_string();
+pub fn unstitch_texture(filename: String, width: u32, height: u32) {
     let name = filename.split('.').collect::<Vec<&str>>()[0].to_string();
     let filetype = filename.split('.').collect::<Vec<&str>>()[1].to_string();
-    let width = args[2].to_string().parse::<u32>().unwrap();
-    let height = args[3].to_string().parse::<u32>().unwrap();
     let mut img = image::open(filename).unwrap();
     let image_width = img.dimensions().0;
     let image_height = img.dimensions().1;

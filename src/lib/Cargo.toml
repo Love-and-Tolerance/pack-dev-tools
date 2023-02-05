@@ -1,7 +1,6 @@
 [package]
-name = "texture-unstitcher"
+name = "pdtlib"
 version = "0.1.0"
-authors = ["Silk Rose"]
 edition = "2021"
 
 [dependencies]
