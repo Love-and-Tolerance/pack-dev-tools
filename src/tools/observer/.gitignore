@@ -1,3 +1,5 @@
-/dist
-/node_modules
-/pack
+pack/
+debug/
+target/
+output/
+Cargo.lock
