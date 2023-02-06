@@ -1,7 +1,7 @@
 use fs_extra::dir::{copy, CopyOptions};
-use git2::{IndexAddOption, Repository};
-use std::fs;
 use std::path::Path;
+use std::process::Command;
+use std::{env, fs};
 
 pub fn observe(old_release: String, new_release: String) {
     if !Path::new(&old_release).is_dir() {
@@ -23,38 +23,32 @@ pub fn observe(old_release: String, new_release: String) {
         fs::remove_dir_all("./pack/.git").expect("Failed to remove old .git directory.");
     }
 
-    let repo = match Repository::init("./pack") {
-        Ok(repo) => repo,
-        Err(e) => panic!("failed to init: {}", e),
-    };
+    #[cfg(target_os = "windows")]
+    let dir = Path::new(r".\pack");
+    
+    #[cfg(not(target_os = "windows"))]
+    let dir = Path::new("./pack");
 
-    let mut index = repo.index().expect("Failed to get index");
+    assert!(env::set_current_dir(&dir).is_ok());
 
-    index
-        .add_all(["*"].iter(), IndexAddOption::FORCE, None)
-        .expect("Failed to add files to git.");
+    #[cfg(target_os = "windows")]
+    Command::new("cmd")
+        .args(["/C", "git init"])
+        .output()
+        .expect("failed to initialize git repo.");
 
-    index
-        .write()
-        .expect("Failed to write all files to the index.");
+    #[cfg(not(target_os = "windows"))]
+    Command::new("sh")
+        .arg("-c")
+        .arg("git init")
+        .output()
+        .expect("failed to initialize git repo.");
 
-    let sig = repo.signature().expect("Failed to get signature.");
-
-    let tree_id = {
-        let mut index = repo.index().expect("Failed to get index.");
-        index.write_tree().expect("Failed to write tree.")
-    };
-
-    let tree = repo.find_tree(tree_id).expect("Failed to get tree.");
-
-    repo.commit(Some("HEAD"), &sig, &sig, "Initial commit", &tree, &[])
-        .expect("Failed to commit.");
-
-    let paths = fs::read_dir("./pack").unwrap();
+    let paths = fs::read_dir("./").unwrap();
 
     for path in paths {
         let path = path.as_ref().unwrap().path().display().to_string();
-        if "./pack/.git" != path {
+        if "./.git" != path {
             if Path::new(&path).is_dir() {
                 fs::remove_dir_all(&path).expect(&format!("Failed to remove {} directory.", &path));
             } else if Path::new(&path).is_file() {
@@ -63,5 +57,5 @@ pub fn observe(old_release: String, new_release: String) {
         }
     }
 
-    copy(new_release, "./pack/", &options).expect("Failed to copy old release to pack directory.");
+    copy(new_release, "./", &options).expect("Failed to copy new release to pack directory.");
 }
