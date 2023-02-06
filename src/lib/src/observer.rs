@@ -25,7 +25,7 @@ pub fn observe(old_release: String, new_release: String) {
 
     #[cfg(target_os = "windows")]
     let dir = Path::new(r".\pack");
-    
+
     #[cfg(not(target_os = "windows"))]
     let dir = Path::new("./pack");
 
@@ -37,10 +37,22 @@ pub fn observe(old_release: String, new_release: String) {
         .output()
         .expect("failed to initialize git repo.");
 
+    #[cfg(target_os = "windows")]
+    Command::new("cmd")
+        .args(["/C", "git add -A"])
+        .output()
+        .expect("failed to add files.");
+
+    #[cfg(target_os = "windows")]
+    Command::new("cmd")
+        .args(["/C", "git commit -m \"Initial commit\""])
+        .output()
+        .expect("failed to commit files.");
+
     #[cfg(not(target_os = "windows"))]
     Command::new("sh")
         .arg("-c")
-        .arg("git init")
+        .arg("git init; git add -A; git commit -m \"Initial commit\"")
         .output()
         .expect("failed to initialize git repo.");
 
@@ -58,4 +70,42 @@ pub fn observe(old_release: String, new_release: String) {
     }
 
     copy(new_release, "./", &options).expect("Failed to copy new release to pack directory.");
+
+    #[cfg(target_os = "windows")]
+    Command::new("cmd")
+        .arg("/C")
+        .arg("git add -A")
+        .output()
+        .expect("failed to add new release.");
+
+    #[cfg(not(target_os = "windows"))]
+    Command::new("sh")
+        .arg("-c")
+        .arg("git add -A")
+        .output()
+        .expect("failed to add new release.");
+
+    #[cfg(target_os = "windows")]
+    let changes = Command::new("cmd")
+        .arg("/C")
+        .arg("git status -s")
+        .output()
+        .expect("failed to get changes.");
+
+    #[cfg(not(target_os = "windows"))]
+    let changes = Command::new("sh")
+        .arg("-c")
+        .arg("git status -s")
+        .output()
+        .expect("failed to get changes.");
+
+    let added: Vec<String>;
+    let changed: Vec<String>;
+    let renamed: Vec<String>;
+    let removed: Vec<String>;
+
+    let changes = String::from_utf8(changes.stdout).expect("Failed to get changes.");
+    for change in changes.lines() {
+        println!("{change}");
+    }
 }
