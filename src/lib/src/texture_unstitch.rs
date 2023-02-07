@@ -1,6 +1,6 @@
+use super::pdtfs;
 use image::{imageops, GenericImageView};
 use std::fs;
-use std::path::Path;
 
 pub fn unstitch_texture(filename: String, width: u32, height: u32) {
     let name = filename.split('.').collect::<Vec<&str>>()[0].to_string();
@@ -16,10 +16,15 @@ pub fn unstitch_texture(filename: String, width: u32, height: u32) {
     let sprite_width = image_width / width;
     let sprite_height = image_height / height;
 
-    if Path::new("./output").is_dir() {
-        fs::remove_dir_all("./output").expect("Failed to remove directory output.");
-    }
-    fs::create_dir("./output").expect("Failed to create output directory.");
+    #[cfg(target_os = "windows")]
+    let slash = r"\";
+    #[cfg(not(target_os = "windows"))]
+    let slash = "/";
+
+    let output_dir = format!(".{}output_dir", &slash);
+
+    pdtfs::if_dir_exists_remove_it(&output_dir);
+    fs::create_dir(&output_dir).unwrap_or_else(|_| panic!("Failed to create {} directory.", &output_dir));
 
     for y in 0..width as usize {
         for x in 0..height as usize {
@@ -33,7 +38,7 @@ pub fn unstitch_texture(filename: String, width: u32, height: u32) {
             );
             subimg
                 .to_image()
-                .save(format!("./output/{name}-{x}-{y}.{filetype}"))
+                .save(format!("{output_dir}{slash}{name}-{x}-{y}.{filetype}"))
                 .unwrap();
         }
     }
