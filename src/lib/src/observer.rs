@@ -16,20 +16,14 @@ pub fn observe(old_release: String, new_release: String) {
 
     let observer_dir = format!(".{}observer_dir", &slash);
 
-    pdtfs::if_dir_exists_remove_it(&observer_dir);
-
-    fs::create_dir(&observer_dir)
-        .unwrap_or_else(|_| panic!("Failed to create {} directory", &observer_dir));
+    pdtfs::if_dir_exists_remove_and_remake_it(&observer_dir);
 
     let mut options = CopyOptions::new();
     options.content_only = true;
     copy(old_release, &observer_dir, &options)
         .unwrap_or_else(|_| panic!("Failed to copy old release to {} directory.", &observer_dir));
 
-    #[cfg(target_os = "windows")]
-    pdtfs::if_dir_exists_remove_it(&format!(r"{}\.git", &observer_dir));
-    #[cfg(not(target_os = "windows"))]
-    pdtfs::if_dir_exists_remove_it(&format!("{}/.git", &observer_dir));
+    pdtfs::if_dir_exists_remove_it(&format!("{}{}.git", &observer_dir, &slash));
 
     assert!(env::set_current_dir(&observer_dir).is_ok());
 
