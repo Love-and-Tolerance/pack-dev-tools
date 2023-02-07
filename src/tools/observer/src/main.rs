@@ -7,10 +7,3 @@ fn main() {
     let new_release = args[2].to_string();
     observe(old_release, new_release);
 }
-
-#[test]
-fn test_observer() {
-    let old_release = "/home/velvetremedy/Stuff/previous-release/".to_string();
-    let new_release = "/home/velvetremedy/Stuff/new-release/".to_string();
-    observe(old_release, new_release);
-}

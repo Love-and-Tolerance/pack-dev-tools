@@ -1,8 +1,7 @@
-use super::pdtfs;
+use super::{pdtcmd, pdtfs};
 use fs_extra::dir::{copy, CopyOptions};
 use std::io::Write;
 use std::path::Path;
-use std::process::Command;
 use std::{env, fs};
 
 pub fn observe(old_release: String, new_release: String) {
@@ -28,29 +27,14 @@ pub fn observe(old_release: String, new_release: String) {
     assert!(env::set_current_dir(&observer_dir).is_ok());
 
     #[cfg(target_os = "windows")]
-    Command::new("cmd")
-        .args(["/C", "git init"])
-        .output()
-        .expect("failed to initialize git repo.");
-
+    pdtcmd::execute_windows_command("git init");
     #[cfg(target_os = "windows")]
-    Command::new("cmd")
-        .args(["/C", "git add -A"])
-        .output()
-        .expect("failed to add files.");
-
+    pdtcmd::execute_windows_command("git add -A");
     #[cfg(target_os = "windows")]
-    Command::new("cmd")
-        .args(["/C", "git commit -m \"Initial commit\""])
-        .output()
-        .expect("failed to commit files.");
+    pdtcmd::execute_windows_command("git commit -m \"Initial commit\"");
 
     #[cfg(not(target_os = "windows"))]
-    Command::new("sh")
-        .arg("-c")
-        .arg("git init; git add -A; git commit -m \"Initial commit\"")
-        .output()
-        .expect("failed to initialize git repo.");
+    pdtcmd::execute_unix_command("git init; git add -A; git commit -m \"Initial commit\"");
 
     let paths = fs::read_dir(format!(".{}", &slash)).unwrap();
 
@@ -71,32 +55,16 @@ pub fn observe(old_release: String, new_release: String) {
         .unwrap_or_else(|_| panic!("Failed to copy new release to {} directory.", &observer_dir));
 
     #[cfg(target_os = "windows")]
-    Command::new("cmd")
-        .arg("/C")
-        .arg("git add -A")
-        .output()
-        .expect("failed to add new release.");
+    pdtcmd::execute_windows_command("git add -A");
 
     #[cfg(not(target_os = "windows"))]
-    Command::new("sh")
-        .arg("-c")
-        .arg("git add -A")
-        .output()
-        .expect("failed to add new release.");
+    pdtcmd::execute_unix_command("git add -A");
 
     #[cfg(target_os = "windows")]
-    let changes = Command::new("cmd")
-        .arg("/C")
-        .arg("git status -s")
-        .output()
-        .expect("failed to get changes.");
+    let changes = pdtcmd::execute_windows_command_with_return("git status -s");
 
     #[cfg(not(target_os = "windows"))]
-    let changes = Command::new("sh")
-        .arg("-c")
-        .arg("git status -s")
-        .output()
-        .expect("failed to get changes.");
+    let changes = pdtcmd::execute_unix_command_with_return("git status -s");
 
     let mut added: Vec<String> = vec![];
     let mut changed: Vec<String> = vec![];
