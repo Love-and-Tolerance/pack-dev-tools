@@ -1,4 +1,5 @@
 use fs_extra::dir::{copy, CopyOptions};
+use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 use std::{env, fs};
@@ -99,13 +100,70 @@ pub fn observe(old_release: String, new_release: String) {
         .output()
         .expect("failed to get changes.");
 
-    let added: Vec<String>;
-    let changed: Vec<String>;
-    let renamed: Vec<String>;
-    let removed: Vec<String>;
+    let mut added: Vec<String> = vec![];
+    let mut changed: Vec<String> = vec![];
+    let mut renamed: Vec<String> = vec![];
+    let mut removed: Vec<String> = vec![];
 
     let changes = String::from_utf8(changes.stdout).expect("Failed to get changes.");
     for change in changes.lines() {
-        println!("{change}");
+        if &change[..1] == "A" {
+            added.push(change[3..].to_string());
+        } else if &change[..1] == "M" {
+            changed.push(change[3..].to_string());
+        } else if &change[..1] == "R" {
+            renamed.push(change[3..].to_string());
+        } else if &change[..1] == "D" {
+            removed.push(change[3..].to_string());
+        }
     }
+
+    let mut changelog: Vec<String> = vec![];
+
+    changelog.push("## Changelog".to_string());
+    changelog.push("".to_string());
+    if added.len() > 0 {
+        changelog.push("### Added".to_string());
+        changelog.push("".to_string());
+        for change in added {
+            changelog.push(format!("- `{change}`"));
+        }
+        changelog.push("".to_string());
+    }
+    if changed.len() > 0 {
+        changelog.push("### Changed".to_string());
+        changelog.push("".to_string());
+        for change in changed {
+            changelog.push(format!("- `{change}`"));
+        }
+        changelog.push("".to_string());
+    }
+    if renamed.len() > 0 {
+        changelog.push("### Renamed / Moved".to_string());
+        changelog.push("".to_string());
+        for change in renamed {
+            let old_name = change.split("->").collect::<Vec<&str>>()[0]
+                .trim()
+                .to_string();
+            let new_name = change.split("->").collect::<Vec<&str>>()[0]
+                .trim()
+                .to_string();
+            changelog.push(format!("- `{old_name}` -> `{new_name}`"));
+        }
+        changelog.push("".to_string());
+    }
+    if removed.len() > 0 {
+        changelog.push("### Removed".to_string());
+        changelog.push("".to_string());
+        for change in removed {
+            changelog.push(format!("- `{change}`"));
+        }
+        changelog.push("".to_string());
+    }
+    changelog.push("".to_string());
+
+    let mut file = fs::File::create("./changelog.md").expect("Failed to create changelog file.");
+
+    file.write_all(&changelog.join("\n").to_string().as_bytes())
+        .expect("Failed to write changelog file.");
 }
