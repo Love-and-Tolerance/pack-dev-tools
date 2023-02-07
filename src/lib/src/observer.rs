@@ -1,3 +1,4 @@
+use super::pdtfs;
 use fs_extra::dir::{copy, CopyOptions};
 use std::io::Write;
 use std::path::Path;
@@ -5,32 +6,32 @@ use std::process::Command;
 use std::{env, fs};
 
 pub fn observe(old_release: String, new_release: String) {
-    if !Path::new(&old_release).is_dir() {
-        panic!("Old release directory not found!")
-    }
-    if !Path::new(&new_release).is_dir() {
-        panic!("New release directory not found!")
-    }
-    if Path::new("./pack").is_dir() {
-        fs::remove_dir_all("./pack").expect("Failed to remove pack directory.");
-    }
-    fs::create_dir("./pack").expect("Failed to create pack directory.");
+    pdtfs::check_if_dir_exists(&old_release);
+    pdtfs::check_if_dir_exists(&new_release);
+
+    #[cfg(target_os = "windows")]
+    let slash = r"\";
+    #[cfg(not(target_os = "windows"))]
+    let slash = "/";
+
+    let observer_dir = format!(".{}observer_dir", &slash);
+
+    pdtfs::if_dir_exists_remove_it(&observer_dir);
+
+    fs::create_dir(&observer_dir)
+        .unwrap_or_else(|_| panic!("Failed to create {} directory", &observer_dir));
 
     let mut options = CopyOptions::new();
     options.content_only = true;
-    copy(old_release, "./pack/", &options).expect("Failed to copy old release to pack directory.");
-
-    if Path::new("./pack/.git").is_dir() {
-        fs::remove_dir_all("./pack/.git").expect("Failed to remove old .git directory.");
-    }
+    copy(old_release, &observer_dir, &options)
+        .unwrap_or_else(|_| panic!("Failed to copy old release to {} directory.", &observer_dir));
 
     #[cfg(target_os = "windows")]
-    let dir = Path::new(r".\pack");
-
+    pdtfs::if_dir_exists_remove_it(&format!(r"{}\.git", &observer_dir));
     #[cfg(not(target_os = "windows"))]
-    let dir = Path::new("./pack");
+    pdtfs::if_dir_exists_remove_it(&format!("{}/.git", &observer_dir));
 
-    assert!(env::set_current_dir(&dir).is_ok());
+    assert!(env::set_current_dir(&observer_dir).is_ok());
 
     #[cfg(target_os = "windows")]
     Command::new("cmd")
@@ -57,20 +58,23 @@ pub fn observe(old_release: String, new_release: String) {
         .output()
         .expect("failed to initialize git repo.");
 
-    let paths = fs::read_dir("./").unwrap();
+    let paths = fs::read_dir(format!(".{}", &slash)).unwrap();
 
     for path in paths {
         let path = path.as_ref().unwrap().path().display().to_string();
-        if "./.git" != path {
+        if format!(".{}.git", &slash) != path {
             if Path::new(&path).is_dir() {
-                fs::remove_dir_all(&path).expect(&format!("Failed to remove {} directory.", &path));
+                fs::remove_dir_all(&path)
+                    .unwrap_or_else(|_| panic!("Failed to remove {} directory.", &path));
             } else if Path::new(&path).is_file() {
-                fs::remove_file(&path).expect(&format!("Failed to remove {} file.", &path));
+                fs::remove_file(&path)
+                    .unwrap_or_else(|_| panic!("Failed to remove {} file.", &path));
             }
         }
     }
 
-    copy(new_release, "./", &options).expect("Failed to copy new release to pack directory.");
+    copy(new_release, ".", &options)
+        .unwrap_or_else(|_| panic!("Failed to copy new release to {} directory.", &observer_dir));
 
     #[cfg(target_os = "windows")]
     Command::new("cmd")
@@ -122,7 +126,7 @@ pub fn observe(old_release: String, new_release: String) {
 
     changelog.push("## Changelog".to_string());
     changelog.push("".to_string());
-    if added.len() > 0 {
+    if !added.is_empty() {
         changelog.push("### Added".to_string());
         changelog.push("".to_string());
         for change in added {
@@ -130,7 +134,7 @@ pub fn observe(old_release: String, new_release: String) {
         }
         changelog.push("".to_string());
     }
-    if changed.len() > 0 {
+    if !changed.is_empty() {
         changelog.push("### Changed".to_string());
         changelog.push("".to_string());
         for change in changed {
@@ -138,7 +142,7 @@ pub fn observe(old_release: String, new_release: String) {
         }
         changelog.push("".to_string());
     }
-    if renamed.len() > 0 {
+    if !renamed.is_empty() {
         changelog.push("### Renamed / Moved".to_string());
         changelog.push("".to_string());
         for change in renamed {
@@ -152,7 +156,7 @@ pub fn observe(old_release: String, new_release: String) {
         }
         changelog.push("".to_string());
     }
-    if removed.len() > 0 {
+    if !removed.is_empty() {
         changelog.push("### Removed".to_string());
         changelog.push("".to_string());
         for change in removed {
@@ -162,8 +166,9 @@ pub fn observe(old_release: String, new_release: String) {
     }
     changelog.push("".to_string());
 
-    let mut file = fs::File::create("./changelog.md").expect("Failed to create changelog file.");
+    let mut file = fs::File::create(format!(".{}changelog.md", &slash))
+        .expect("Failed to create changelog file.");
 
-    file.write_all(&changelog.join("\n").to_string().as_bytes())
+    file.write_all(changelog.join("\n").as_bytes())
         .expect("Failed to write changelog file.");
 }
