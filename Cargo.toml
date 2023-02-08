@@ -15,5 +15,6 @@ codegen-units = 1
 members = [
 	"src/lib",
     "src/tools/texture-unstitcher",
-    "src/tools/observer"
+    "src/tools/observer",
+    "src/tools/json-formatters"
 ]
