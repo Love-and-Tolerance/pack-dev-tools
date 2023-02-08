@@ -56,8 +56,25 @@ pub fn observe(old_release: String, new_release: String) {
         }
     }
 
+    if Path::new(&format!("{}{}.git", &new_release, &slash)).is_dir()
+        || Path::new(&format!("{}.git", &new_release)).is_dir()
+    {
+        pdtfs::rename(
+            &format!(".{}.git", &slash),
+            &format!(".{}.git_temp", &slash),
+        );
+    }
+
     copy(new_release, ".", &options)
         .unwrap_or_else(|_| panic!("Failed to copy new release to {} directory.", &observer_dir));
+
+    if Path::new(&format!(".{}.git_temp", &slash)).is_dir() {
+        pdtfs::if_dir_exists_remove_it(&format!(".{}.git", &slash));
+        pdtfs::rename(
+            &format!(".{}.git_temp", &slash),
+            &format!(".{}.git", &slash),
+        );
+    }
 
     let changes: Output;
 
