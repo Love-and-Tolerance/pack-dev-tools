@@ -9,10 +9,19 @@ pub fn observe(old_release: String, new_release: String) {
     pdtfs::check_if_dir_exists(&old_release);
     pdtfs::check_if_dir_exists(&new_release);
 
+    let slash: &str;
+
     #[cfg(target_os = "windows")]
-    let slash = r"\";
+    {
+        slash = r"\";
+        pdtcmd::execute_windows_command_with_fail_msg("git --version", "git not installed!");
+    }
+
     #[cfg(not(target_os = "windows"))]
-    let slash = "/";
+    {
+        slash = "/";
+        pdtcmd::execute_unix_command_with_fail_msg("git --version", "git not installed!");
+    }
 
     let observer_dir = format!(".{}observer_dir", &slash);
 
