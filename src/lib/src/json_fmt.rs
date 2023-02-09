@@ -1,7 +1,7 @@
 use super::pdtfs::find_files_in_dir;
 use serde::ser::Serialize;
 use serde_json::{ser::PrettyFormatter, Serializer, Value};
-use std::fs;
+use std::{fs, path::Path};
 
 pub enum Json {
     Format,
@@ -10,27 +10,28 @@ pub enum Json {
 
 pub enum Indent {
     Tab,
-    Space
+    Space(u8)
 }
 
 pub fn json_formatter(
-    dir: String,
+    dir_or_file: String,
     fmt_type: Json,
-    indentifier: Indent,
-    indent_number: usize,
+    indent: Indent,
 ) {
     let recursive = true;
     let extensions = Some(vec![".json", ".mcmeta"]);
-    let files = find_files_in_dir(&dir, recursive, &extensions);
-    let indent = match indentifier {
-        Indent::Tab => {
-            "\t".repeat(indent_number)
+    let mut files = vec![];
+    if Path::new(&dir_or_file).is_dir() {
+        files = find_files_in_dir(&dir_or_file, recursive, &extensions);
+    } else if Path::new(&dir_or_file).is_file() {
+        files.push(dir_or_file);
+    }
+    let indent: String = match indent {
+        Indent::Tab => { "\t".to_string() },
+        Indent::Space(indent_number) => {
+            " ".repeat(indent_number as usize)
         },
-        Indent::Space => {
-            " ".repeat(indent_number)
-        }
     };
-    println!("{indent}");
     for file in files {
         let mut json_data = fs::read_to_string(&file).expect("Failed to read file to string.");
         match fmt_type {
