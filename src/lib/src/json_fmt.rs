@@ -3,11 +3,13 @@ use serde::ser::Serialize;
 use serde_json::{ser::PrettyFormatter, Serializer, Value};
 use std::{fs, path::Path};
 
+#[derive(Copy, Clone)]
 pub enum Json {
     Format,
     Minify,
 }
 
+#[derive(Copy, Clone)]
 pub enum Indent {
     Tab,
     Space(u8)
