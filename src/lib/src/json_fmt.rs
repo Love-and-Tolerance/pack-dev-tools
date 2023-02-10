@@ -12,14 +12,10 @@ pub enum Json {
 #[derive(Copy, Clone)]
 pub enum Indent {
     Tab,
-    Space(u8)
+    Space(u8),
 }
 
-pub fn json_formatter(
-    dir_or_file: String,
-    fmt_type: Json,
-    indent: Indent,
-) {
+pub fn json_formatter(dir_or_file: String, fmt_type: Json, indent: Indent) {
     let recursive = true;
     let extensions = Some(vec![".json", ".mcmeta"]);
     let mut files = vec![];
@@ -29,10 +25,8 @@ pub fn json_formatter(
         files.push(dir_or_file);
     }
     let indent: String = match indent {
-        Indent::Tab => { "\t".to_string() },
-        Indent::Space(indent_number) => {
-            " ".repeat(indent_number as usize)
-        },
+        Indent::Tab => "\t".to_string(),
+        Indent::Space(indent_number) => " ".repeat(indent_number as usize),
     };
     for file in files {
         let mut json_data = fs::read_to_string(&file).expect("Failed to read file to string.");

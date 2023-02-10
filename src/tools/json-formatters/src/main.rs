@@ -1,7 +1,7 @@
-use pdtlib::json_fmt::{json_formatter, Json, Indent};
+use pdtlib::json_fmt::{json_formatter, Indent, Json};
+use std::any::{Any, TypeId};
 use std::env;
 use std::path::Path;
-use std::any::{Any, TypeId};
 
 fn main() {
     let mut fmt_type = Json::Format;
