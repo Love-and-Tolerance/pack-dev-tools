@@ -1,6 +1,6 @@
 [package]
-name = "observer"
-description = "CLI tool for generating changelogs."
+name = "json-format"
+description = "CLI json mass formatting tool."
 repository = "https://github.com/Love-and-Tolerance/pack-dev-tools"
 version = "0.1.0"
 authors = ["Silk Rose", "Meadowsys"]

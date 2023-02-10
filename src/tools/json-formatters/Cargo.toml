@@ -1,9 +1,0 @@
-[package]
-name = "json-formatters"
-version = "0.1.0"
-authors = ["Silk Rose"]
-edition = "2021"
-publish = false
-
-[dependencies]
-pdtlib = { path = "../../lib" }

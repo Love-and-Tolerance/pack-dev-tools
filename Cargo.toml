@@ -1,12 +1,12 @@
 [profile.dev]
-opt-level = 0 # none
+opt-level = 0
 debug-assertions = true
 debug = true
 incremental = true
 
 [profile.release]
 strip = true
-opt-level = 3 # all
+opt-level = 3
 debug-assertions = false
 lto = true
 codegen-units = 1
@@ -14,7 +14,7 @@ codegen-units = 1
 [workspace]
 members = [
 	"src/lib",
-    "src/tools/texture-unstitcher",
+    "src/tools/texture-unstitch",
     "src/tools/observer",
-    "src/tools/json-formatters"
+    "src/tools/json-format"
 ]

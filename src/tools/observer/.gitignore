@@ -1,5 +1,4 @@
 debug/
 target/
-output/
 observer_dir/
 Cargo.lock

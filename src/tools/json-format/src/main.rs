@@ -1,4 +1,4 @@
-use pdtlib::json_fmt::{json_formatter, Indent, Json};
+use pdtlib::json_format::{json_formatter, Indent, Json};
 use std::any::{Any, TypeId};
 use std::env;
 use std::path::Path;

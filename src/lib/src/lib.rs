@@ -1,4 +1,4 @@
-pub mod json_fmt;
+pub mod json_format;
 pub mod observer;
 pub mod texture_unstitch;
 

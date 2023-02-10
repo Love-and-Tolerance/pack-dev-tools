@@ -1,6 +1,6 @@
 [package]
-name = "observer"
-description = "CLI tool for generating changelogs."
+name = "texture-unstitch"
+description = "CLI tool to unstitch spritemaps."
 repository = "https://github.com/Love-and-Tolerance/pack-dev-tools"
 version = "0.1.0"
 authors = ["Silk Rose", "Meadowsys"]
@@ -10,3 +10,4 @@ publish = false
 
 [dependencies]
 pdtlib = { path = "../../lib" }
+image = "0.24.5"
