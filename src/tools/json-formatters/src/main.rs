@@ -20,26 +20,35 @@ fn main() {
             if tab_indent_args.contains(&args[i + 1].to_lowercase().as_str()) {
                 indent = Indent::Tab;
             } else if space_indent_args.contains(&args[i + 1].to_lowercase().as_str()) {
-                if args[i + 2].parse::<usize>().is_ok()
-                    && args[i + 2].parse::<usize>().unwrap().type_id() == TypeId::of::<usize>()
-                {
-                    indent = Indent::Space(args[i + 2].parse::<u8>().unwrap_or_else(|_| {
-                        panic!("Failed to parse to u8."); // help go here.
-                    }));
-                    if let Indent::Space(num) = indent {
-                        if !(1..=16).contains(&num) {
-                            panic!("Num of spaces out of bounds."); // help go here.
-                        }
-                    }
-                    i += 3;
-                    continue;
-                } else {
-                    indent = Indent::Space(2);
-                }
+                (i, indent) = parse_space_indent(i, args.clone(), 2);
             }
         } else if minify_args.contains(&args[i].to_lowercase().as_str()) {
             fmt_type = Json::Minify;
+        } else if tab_indent_args.contains(&args[i].to_lowercase().as_str()) {
+            indent = Indent::Tab;
+        } else if space_indent_args.contains(&args[i].to_lowercase().as_str()) {
+            (i, indent) = parse_space_indent(i, args.clone(), 1);
         }
         i += 1;
     }
+}
+
+fn parse_space_indent(mut i: usize, args: Vec<String>, num: usize) -> (usize, Indent) {
+    let indent: Indent;
+    if args[i + 1].parse::<usize>().is_ok()
+        && args[i + num].parse::<usize>().unwrap().type_id() == TypeId::of::<usize>()
+    {
+        indent = Indent::Space(args[i + num].parse::<u8>().unwrap_or_else(|_| {
+            panic!("Failed to parse to u8."); // help go here.
+        }));
+        if let Indent::Space(num) = indent {
+            if !(1..=16).contains(&num) {
+                panic!("Num of spaces out of bounds."); // help go here.
+            }
+        }
+        i += num;
+    } else {
+        indent = Indent::Space(2);
+    }
+    (i, indent)
 }
