@@ -12,16 +12,19 @@ pub fn dedupe(dir: String) {
         records.push((hash, file));
     }
     records.sort();
-    let mut dupes: Vec<Vec<(String, String)>> = vec![];
+    let mut dupes: Vec<Vec<String>> = vec![];
     let mut i = 0;
     while i < records.len() {
-        let dupe: Vec<_> = records.clone().into_iter().filter(|x| records[i].0 == x.0).collect();
+        let dupe: Vec<String> = records
+            .iter()
+            .filter(|x| records[i].0 == x.0)
+            .map(|x| x.1.to_string())
+            .collect();
         if dupe.len() > 1 {
             dupes.push(dupe.clone());
         }
         i += dupe.len();
     }
     dupes.sort();
-    dupes.dedup();
     println!("{:#?}", dupes);
 }
