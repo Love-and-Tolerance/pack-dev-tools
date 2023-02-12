@@ -14,9 +14,5 @@ codegen-units = 1
 [workspace]
 members = [
 	"src/lib",
-    "src/tools/texture-unstitch",
-    "src/tools/observer",
-    "src/tools/json-format",
-    "src/tools/dedupe",
-    "src/tools/optimize-images"
+    "src/tools/*"
 ]
