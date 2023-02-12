@@ -1,4 +1,5 @@
-use std::{fs, path::Path};
+use std::path::{Path, MAIN_SEPARATOR as SLASH};
+use std::fs;
 
 pub fn check_if_dir_exists(dir: &str) {
     if !Path::new(dir).is_dir() {
@@ -48,4 +49,12 @@ pub fn find_files_in_dir(
         }
     }
     files
+}
+
+pub fn check_dir_ends_with_slash(dir: String) -> String {
+    if dir.ends_with(SLASH) {
+        dir
+    } else {
+        format!("{dir}{SLASH}")
+    }
 }
