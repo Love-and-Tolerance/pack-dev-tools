@@ -1,7 +1,7 @@
 use super::pdtfs::{check_if_dir_exists, find_files_in_dir};
 use super::pdthash::get_hash;
 
-pub fn dedupe(dir: String) {
+pub fn dedupe(dir: String) -> Vec<Vec<String>> {
     check_if_dir_exists(&dir);
     let recursive = true;
     let extensions = Some(vec![".zip"]);
@@ -26,5 +26,5 @@ pub fn dedupe(dir: String) {
         i += dupe.len();
     }
     dupes.sort();
-    println!("{:#?}", dupes);
+    dupes
 }
