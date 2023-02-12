@@ -17,5 +17,6 @@ members = [
     "src/tools/texture-unstitch",
     "src/tools/observer",
     "src/tools/json-format",
-    "src/tools/dedupe"
+    "src/tools/dedupe",
+    "src/tools/optimize-images"
 ]
