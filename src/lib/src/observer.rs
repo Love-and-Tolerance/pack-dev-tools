@@ -1,7 +1,7 @@
-use super::{pdtcmd, pdtfs, pdtos::SLASH};
+use super::{pdtcmd, pdtfs};
 use fs_extra::dir::{copy, CopyOptions};
 use std::io::Write;
-use std::path::Path;
+use std::path::{Path, MAIN_SEPARATOR as SLASH};
 use std::process::Output;
 use std::{env, fs};
 

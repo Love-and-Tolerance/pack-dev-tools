@@ -1,4 +1,5 @@
-use pdtlib::{dedupe, pdtos::SLASH};
+use pdtlib::dedupe;
+use std::path::MAIN_SEPARATOR as SLASH;
 use std::time::SystemTime;
 use std::{env, fs, io::Write};
 

@@ -1,5 +1,6 @@
-use super::{pdtfs, pdtos::SLASH};
+use super::pdtfs;
 use image::{imageops, GenericImageView};
+use std::path::MAIN_SEPARATOR as SLASH;
 
 pub fn unstitch_texture(filename: String, width: u32, height: u32) {
     let name = filename.split('.').collect::<Vec<&str>>()[0].to_string();
