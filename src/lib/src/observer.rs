@@ -1,4 +1,4 @@
-use super::{pdtcmd, pdtfs, pdtos};
+use super::{pdtcmd, pdtfs, pdtos::SLASH};
 use fs_extra::dir::{copy, CopyOptions};
 use std::io::Write;
 use std::path::Path;
@@ -9,15 +9,13 @@ pub fn observe(old_release: String, new_release: String) {
     pdtfs::check_if_dir_exists(&old_release);
     pdtfs::check_if_dir_exists(&new_release);
 
-    let slash = pdtos::get_os_slash();
-
     #[cfg(target_os = "windows")]
     pdtcmd::execute_windows_command_with_fail_msg("git --version", "git not installed!");
 
     #[cfg(not(target_os = "windows"))]
     pdtcmd::execute_unix_command_with_fail_msg("git --version", "git not installed!");
 
-    let observer_dir = format!(".{}observer_dir", &slash);
+    let observer_dir = format!(".{SLASH}observer_dir");
 
     pdtfs::if_dir_exists_remove_and_remake_it(&observer_dir);
 
@@ -26,7 +24,7 @@ pub fn observe(old_release: String, new_release: String) {
     copy(old_release, &observer_dir, &options)
         .unwrap_or_else(|_| panic!("Failed to copy old release to {} directory.", &observer_dir));
 
-    pdtfs::if_dir_exists_remove_it(&format!("{}{}.git", &observer_dir, &slash));
+    pdtfs::if_dir_exists_remove_it(&format!("{}{}.git", &observer_dir, SLASH));
 
     assert!(env::set_current_dir(&observer_dir).is_ok());
 
@@ -44,11 +42,11 @@ pub fn observe(old_release: String, new_release: String) {
         pdtcmd::execute_unix_command("git commit -m \"Initial commit\"");
     }
 
-    let paths = fs::read_dir(format!(".{}", &slash)).unwrap();
+    let paths = fs::read_dir(format!(".{SLASH}")).unwrap();
 
     for path in paths {
         let path = path.as_ref().unwrap().path().display().to_string();
-        if format!(".{}.git", &slash) != path {
+        if format!(".{SLASH}.git") != path {
             if Path::new(&path).is_dir() {
                 fs::remove_dir_all(&path)
                     .unwrap_or_else(|_| panic!("Failed to remove {} directory.", &path));
@@ -59,24 +57,18 @@ pub fn observe(old_release: String, new_release: String) {
         }
     }
 
-    if Path::new(&format!("{}{}.git", &new_release, &slash)).is_dir()
+    if Path::new(&format!("{}{}.git", &new_release, SLASH)).is_dir()
         || Path::new(&format!("{}.git", &new_release)).is_dir()
     {
-        pdtfs::rename(
-            &format!(".{}.git", &slash),
-            &format!(".{}.git_temp", &slash),
-        );
+        pdtfs::rename(&format!(".{SLASH}.git"), &format!(".{SLASH}.git_temp"));
     }
 
     copy(new_release, ".", &options)
         .unwrap_or_else(|_| panic!("Failed to copy new release to {} directory.", &observer_dir));
 
-    if Path::new(&format!(".{}.git_temp", &slash)).is_dir() {
-        pdtfs::if_dir_exists_remove_it(&format!(".{}.git", &slash));
-        pdtfs::rename(
-            &format!(".{}.git_temp", &slash),
-            &format!(".{}.git", &slash),
-        );
+    if Path::new(&format!(".{SLASH}.git_temp")).is_dir() {
+        pdtfs::if_dir_exists_remove_it(&format!(".{SLASH}.git"));
+        pdtfs::rename(&format!(".{SLASH}.git_temp"), &format!(".{SLASH}.git"));
     }
 
     let changes: Output;
@@ -155,7 +147,7 @@ pub fn observe(old_release: String, new_release: String) {
     }
     changelog.push("".to_string());
 
-    let mut file = fs::File::create(format!(".{}changelog.md", &slash))
+    let mut file = fs::File::create(format!(".{SLASH}changelog.md"))
         .expect("Failed to create changelog file.");
 
     file.write_all(changelog.join("\n").as_bytes())

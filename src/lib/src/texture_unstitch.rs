@@ -1,4 +1,4 @@
-use super::{pdtfs, pdtos};
+use super::{pdtfs, pdtos::SLASH};
 use image::{imageops, GenericImageView};
 
 pub fn unstitch_texture(filename: String, width: u32, height: u32) {
@@ -15,9 +15,7 @@ pub fn unstitch_texture(filename: String, width: u32, height: u32) {
     let sprite_width = image_width / width;
     let sprite_height = image_height / height;
 
-    let slash = pdtos::get_os_slash();
-
-    let output_dir = format!(".{}output_dir", &slash);
+    let output_dir = format!(".{SLASH}output_dir");
 
     pdtfs::if_dir_exists_remove_and_remake_it(&output_dir);
 
@@ -33,7 +31,7 @@ pub fn unstitch_texture(filename: String, width: u32, height: u32) {
             );
             subimg
                 .to_image()
-                .save(format!("{output_dir}{slash}{name}-{x}-{y}.{filetype}"))
+                .save(format!("{output_dir}{SLASH}{name}-{x}-{y}.{filetype}"))
                 .unwrap();
         }
     }

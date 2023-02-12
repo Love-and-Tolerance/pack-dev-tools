@@ -1,9 +1,3 @@
-#[cfg(target_os = "windows")]
-pub fn get_os_slash() -> String {
-    r"\".to_string()
-}
+use std::path;
 
-#[cfg(not(target_os = "windows"))]
-pub fn get_os_slash() -> String {
-    "/".to_string()
-}
+pub const SLASH: char = path::MAIN_SEPARATOR;

@@ -1,4 +1,4 @@
-use pdtlib::{dedupe, pdtos};
+use pdtlib::{dedupe, pdtos::SLASH};
 use std::time::SystemTime;
 use std::{env, fs, io::Write};
 
@@ -16,15 +16,13 @@ fn main() {
         file_data.push("".to_string());
     }
 
-    let slash = pdtos::get_os_slash();
-
     let timestamp = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .expect("Failed to get timestamp.");
 
     let timestamp = format!("{timestamp:?}").split('.').collect::<Vec<&str>>()[0].to_string();
 
-    let mut file = fs::File::create(format!(".{}duplicate_files_{}.txt", &slash, timestamp))
+    let mut file = fs::File::create(format!(".{SLASH}duplicate_files_{timestamp}.txt"))
         .expect("Failed to create duplicates file.");
 
     file.write_all(file_data.join("\n").as_bytes())
