@@ -1,4 +1,4 @@
-use super::pdtfs;
+use super::{pdtfs, pdtos};
 use image::{imageops, GenericImageView};
 
 pub fn unstitch_texture(filename: String, width: u32, height: u32) {
@@ -15,10 +15,7 @@ pub fn unstitch_texture(filename: String, width: u32, height: u32) {
     let sprite_width = image_width / width;
     let sprite_height = image_height / height;
 
-    #[cfg(target_os = "windows")]
-    let slash = r"\";
-    #[cfg(not(target_os = "windows"))]
-    let slash = "/";
+    let slash = pdtos::get_os_slash();
 
     let output_dir = format!(".{}output_dir", &slash);
 

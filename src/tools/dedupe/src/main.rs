@@ -1,11 +1,11 @@
-use pdtlib::dedupe::dedupe;
+use pdtlib::{dedupe, pdtos};
 use std::time::SystemTime;
 use std::{env, fs, io::Write};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     let dir = args[1].to_string();
-    let dupes = dedupe(dir.clone());
+    let dupes = dedupe::dedupe(dir.clone());
     let mut file_data: Vec<String> = vec![];
     file_data.push(format!("duplicate files in {dir}"));
     file_data.push("".to_string());
@@ -16,11 +16,7 @@ fn main() {
         file_data.push("".to_string());
     }
 
-    #[cfg(target_os = "windows")]
-    let slash = r"\";
-
-    #[cfg(not(target_os = "windows"))]
-    let slash = "/";
+    let slash = pdtos::get_os_slash();
 
     let timestamp = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)

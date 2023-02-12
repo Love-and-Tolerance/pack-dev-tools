@@ -1,14 +1,13 @@
-use super::pdtfs::{check_if_dir_exists, find_files_in_dir};
-use super::pdthash::get_hash;
+use super::{pdtfs, pdthash};
 
 pub fn dedupe(dir: String) -> Vec<Vec<String>> {
-    check_if_dir_exists(&dir);
+    pdtfs::check_if_dir_exists(&dir);
     let recursive = true;
     let extensions = Some(vec![".zip"]);
-    let files = find_files_in_dir(&dir, recursive, &extensions);
+    let files = pdtfs::find_files_in_dir(&dir, recursive, &extensions);
     let mut records: Vec<(String, String)> = vec![];
     for file in files {
-        let hash = get_hash(&file);
+        let hash = pdthash::get_hash(&file);
         records.push((hash, file));
     }
     records.sort();

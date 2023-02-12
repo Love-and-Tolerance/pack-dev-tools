@@ -1,4 +1,4 @@
-use super::{pdtcmd, pdtfs};
+use super::{pdtcmd, pdtfs, pdtos};
 use fs_extra::dir::{copy, CopyOptions};
 use std::io::Write;
 use std::path::Path;
@@ -9,19 +9,13 @@ pub fn observe(old_release: String, new_release: String) {
     pdtfs::check_if_dir_exists(&old_release);
     pdtfs::check_if_dir_exists(&new_release);
 
-    let slash: &str;
+    let slash = pdtos::get_os_slash();
 
     #[cfg(target_os = "windows")]
-    {
-        slash = r"\";
-        pdtcmd::execute_windows_command_with_fail_msg("git --version", "git not installed!");
-    }
+    pdtcmd::execute_windows_command_with_fail_msg("git --version", "git not installed!");
 
     #[cfg(not(target_os = "windows"))]
-    {
-        slash = "/";
-        pdtcmd::execute_unix_command_with_fail_msg("git --version", "git not installed!");
-    }
+    pdtcmd::execute_unix_command_with_fail_msg("git --version", "git not installed!");
 
     let observer_dir = format!(".{}observer_dir", &slash);
 

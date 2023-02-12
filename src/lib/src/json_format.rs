@@ -1,4 +1,4 @@
-use super::pdtfs::find_files_in_dir;
+use super::pdtfs;
 use serde::ser::Serialize;
 use serde_json::{ser::PrettyFormatter, Serializer, Value};
 use std::{fs, path::Path};
@@ -20,7 +20,7 @@ pub fn json_formatter(dir_or_file: String, fmt_type: Json, indent: Indent) {
     let extensions = Some(vec![".json", ".mcmeta"]);
     let mut files = vec![];
     if Path::new(&dir_or_file).is_dir() {
-        files = find_files_in_dir(&dir_or_file, recursive, &extensions);
+        files = pdtfs::find_files_in_dir(&dir_or_file, recursive, &extensions);
     } else if Path::new(&dir_or_file).is_file() {
         files.push(dir_or_file);
     }

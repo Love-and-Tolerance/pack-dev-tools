@@ -6,3 +6,4 @@ pub mod texture_unstitch;
 pub mod pdtcmd;
 pub mod pdtfs;
 pub mod pdthash;
+pub mod pdtos;
