@@ -1,5 +1,5 @@
-use std::path::{Path, MAIN_SEPARATOR as SLASH};
 use std::fs;
+use std::path::{Path, MAIN_SEPARATOR as SLASH};
 
 pub fn check_if_dir_exists(dir: &str) {
     if !Path::new(dir).is_dir() {
