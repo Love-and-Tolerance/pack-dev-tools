@@ -1,5 +1,4 @@
 pub mod json_format;
-pub mod observer;
 pub mod optimize_images;
 pub mod texture_unstitch;
 
