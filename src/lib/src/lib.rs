@@ -1,4 +1,3 @@
-pub mod comparator;
 pub mod dedupe;
 pub mod json_format;
 pub mod observer;
