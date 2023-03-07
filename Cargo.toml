@@ -14,5 +14,6 @@ codegen-units = 1
 [workspace]
 members = [
 	"src/lib",
-    "src/tools/*"
+    "src/tools/*",
+    "src/love-and-tolerance-tools/blockify"
 ]

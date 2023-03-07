@@ -1,3 +1,4 @@
+pub mod blockify;
 pub mod json_format;
 pub mod optimize_images;
 pub mod texture_unstitch;
