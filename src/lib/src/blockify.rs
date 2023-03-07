@@ -26,6 +26,9 @@ fn get_average_colors(blocks: Vec<String>) {
         let mut distances: Vec<Distance> = vec![];
         let mut delta: f64 = 0.0;
         for pixel in img.pixels() {
+            if pixel.2 .0[3] != 255 {
+                continue;
+            }
             let lab = get_lab(pixel);
             let mut distance: f64 = 0.0;
             for sub_pixel in img.pixels() {
@@ -37,7 +40,9 @@ fn get_average_colors(blocks: Vec<String>) {
             distances.push((distance, pixel));
         }
         distances.sort_by(compare_distances);
-        println!("{:?}, {}", distances[0], image);
+        if distances.len() > 0 {
+            println!("{:?}, {}, {}", distances[0], distances.len(), image);
+        }
     }
 }
 
