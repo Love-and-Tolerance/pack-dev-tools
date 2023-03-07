@@ -17,6 +17,9 @@ fn get_average_colors(blocks: Vec<String>) {
     let mut averages: Vec<(i8, String)>;
     for image in blocks {
         let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
+        if img.dimensions().0 != img.dimensions().1 {
+            continue;
+        }
         for pixel in img.pixels() {
             let rgb = [[pixel.2 .0[0], pixel.2 .0[1], pixel.2 .0[2]]];
             let lab = lab::rgbs_to_labs(&rgb)[0];
