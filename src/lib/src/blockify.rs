@@ -1,7 +1,7 @@
 use super::pdtfs;
 use deltae::*;
 use image::{imageops, GenericImageView, Rgba};
-use lab::Lab;
+use lab;
 use std::{cmp::Ordering, path::MAIN_SEPARATOR as SLASH};
 
 type Distance = (f64, (u32, u32, Rgba<u8>));
@@ -17,7 +17,7 @@ pub fn blockify(block: String, pack: String) {
 
 fn get_average_colors(blocks: Vec<String>) {
     let mut averages: Vec<(Rgba<u8>, String)>;
-    for image in blocks {
+    'block: for image in blocks {
         let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
         if img.dimensions().0 != img.dimensions().1 {
             continue;
@@ -26,12 +26,12 @@ fn get_average_colors(blocks: Vec<String>) {
         let mut distances: Vec<Distance> = vec![];
         let mut delta: f64 = 0.0;
         for pixel in img.pixels() {
-            if pixel.2 .0[3] != 255 {
-                continue;
-            }
             let lab = get_lab(pixel);
             let mut distance: f64 = 0.0;
             for sub_pixel in img.pixels() {
+                if sub_pixel.2 .0[3] < 255 {
+                    continue 'block;
+                }
                 let sub_lab = get_lab(sub_pixel);
                 delta = DeltaE::new(lab, sub_lab, DE2000).value().to_owned().into();
                 distance += delta;
