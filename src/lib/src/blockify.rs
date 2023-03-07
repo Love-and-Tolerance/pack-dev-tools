@@ -1,6 +1,6 @@
 use super::pdtfs;
 use deltae::*;
-use image::{imageops, GenericImageView};
+use image::{imageops, GenericImageView, Rgba};
 use lab::Lab;
 use std::path::MAIN_SEPARATOR as SLASH;
 
@@ -21,26 +21,21 @@ fn get_average_colors(blocks: Vec<String>) {
             continue;
         }
         for pixel in img.pixels() {
-            let rgb = [[pixel.2 .0[0], pixel.2 .0[1], pixel.2 .0[2]]];
-            let lab = lab::rgbs_to_labs(&rgb)[0];
-            let lab = LabValue {
-                l: lab.l,
-                a: lab.a,
-                b: lab.b,
-            };
+            let lab = get_lab(pixel);
             for sub_pixel in img.pixels() {
-                let sub_rgb = [[sub_pixel.2 .0[0], sub_pixel.2 .0[1], sub_pixel.2 .0[2]]];
-                let sub_lab = lab::rgbs_to_labs(&sub_rgb)[0];
-                let sub_lab = LabValue {
-                    l: sub_lab.l,
-                    a: sub_lab.a,
-                    b: sub_lab.b,
-                };
+                let sub_lab = get_lab(sub_pixel);
                 let de0 = DeltaE::new(&lab, &sub_lab, DE2000);
-                let de1 = lab.delta(&sub_lab, DE2000);
-                assert_eq!(de0, de1);
-                println!("{de0} {de1} {pixel:?} {sub_pixel:?} {image}");
             }
         }
+    }
+}
+
+fn get_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
+    let rgb = [[pixel.2 .0[0], pixel.2 .0[1], pixel.2 .0[2]]];
+    let lab = lab::rgbs_to_labs(&rgb)[0];
+    LabValue {
+        l: lab.l,
+        a: lab.a,
+        b: lab.b,
     }
 }
