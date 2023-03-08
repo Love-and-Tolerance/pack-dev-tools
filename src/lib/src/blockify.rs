@@ -36,6 +36,7 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
         .collect();
 
     multithread(blocks, None, |(image, averages)| {
+        println!("starting averaging {image}");
         let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
         if img.dimensions().0 != 16 || img.dimensions().1 != 16 {
             return;
@@ -58,8 +59,9 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
         }
         distances.sort_by(compare_distances);
         if !distances.is_empty() {
-            averages.lock().unwrap().push((distances[0].2, image));
+            averages.lock().unwrap().push((distances[0].2, image.clone()));
         }
+        println!("ending averaging {image}");
     });
 
     Arc::try_unwrap(averages).unwrap().into_inner().unwrap()
