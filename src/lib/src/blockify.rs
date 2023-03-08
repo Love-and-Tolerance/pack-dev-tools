@@ -101,11 +101,11 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
         let mut new_texture: RgbaImage =
             ImageBuffer::from_fn(width * 16, height * 16, |_, _| image::Rgba([0, 0, 0, 0]));
         for pixel in img.pixels() {
-            if pixel.2 .0[3] == 0 {
+            let alpha = pixel.2.0[3];
+            if alpha == 0 {
                 continue;
             }
             let (x, y) = (pixel.0, pixel.1);
-            let alpha = pixel.2 .0[3];
             let mut distances: Vec<(f64, String)> = vec![];
             let lab = get_lab(pixel);
             for block in blocks.iter() {

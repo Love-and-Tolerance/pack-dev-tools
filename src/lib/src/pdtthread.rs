@@ -1,5 +1,5 @@
 use std::sync::{Arc, Mutex};
-use std::thread::spawn;
+use std::thread::Builder;
 
 pub fn multithread<F, I, O>(tasks: Vec<I>, num_threads: Option<usize>, task_fn: F) -> Vec<O>
 where
@@ -12,11 +12,14 @@ where
     let num_threads = num_threads.unwrap_or_else(num_cpus::get);
     let mut join_handles = Vec::with_capacity(num_threads);
 
-    for _ in 0..num_threads {
+    for i in 0..num_threads {
         let wrapped_tasks = Arc::clone(&wrapped_tasks);
         let task_fn = task_fn.clone();
 
-        let join_handle = spawn(move || {
+        let builder = Builder::new()
+            .name(format!("multithread thread {i}"));
+
+        let join_handle = builder.spawn(move || {
             let mut results = vec![];
 
             loop {
@@ -37,7 +40,7 @@ where
             }
 
             results
-        });
+        }).unwrap();
 
         join_handles.push(join_handle);
     }
