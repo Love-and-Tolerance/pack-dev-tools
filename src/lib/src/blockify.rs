@@ -1,7 +1,7 @@
 use super::pdtfs;
 use deltae::*;
 use fs_extra::dir::{copy, CopyOptions};
-use image::{imageops, GenericImageView, ImageBuffer, Rgba, RgbaImage};
+use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use lab;
 use rand::seq::SliceRandom;
 use std::{cmp::Ordering, path::MAIN_SEPARATOR as SLASH};
@@ -56,7 +56,7 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
             distances.push((distance, pixel, lab));
         }
         distances.sort_by(compare_distances);
-        if distances.len() > 0 {
+        if !distances.is_empty() {
             averages.lock().unwrap().push((distances[0].2, image));
         }
     });
@@ -79,11 +79,11 @@ fn get_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
 
 fn compare_distances(a: &Distance, b: &Distance) -> Ordering {
     if a.0 < b.0 {
-        return Ordering::Less;
+        Ordering::Less
     } else if a.0 > b.0 {
-        return Ordering::Greater;
+        Ordering::Greater
     } else {
-        return Ordering::Equal;
+        Ordering::Equal
     }
 }
 
@@ -118,16 +118,15 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
                 .iter()
                 .filter(|item| item.0 == distances[0].0)
                 .collect::<Vec<&(f64, String)>>();
-            let mut selected: String;
-            if matches.len() == 1 {
-                selected = matches[0].1.to_owned();
+            let selected = if matches.len() == 1 {
+                matches[0].1.to_owned()
             } else {
-                selected = matches
+                matches
                     .choose(&mut rand::thread_rng())
                     .unwrap()
                     .1
-                    .to_owned();
-            }
+                    .to_owned()
+            };
             let block_img = image::open(&selected)
                 .unwrap_or_else(|_| panic!("Failed to load image: {selected}"));
             for sub_pixel in block_img.pixels() {
@@ -154,10 +153,10 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
 
 fn compare_block_distances(a: &(f64, String), b: &(f64, String)) -> Ordering {
     if a.0 < b.0 {
-        return Ordering::Less;
+        Ordering::Less
     } else if a.0 > b.0 {
-        return Ordering::Greater;
+        Ordering::Greater
     } else {
-        return Ordering::Equal;
+        Ordering::Equal
     }
 }
