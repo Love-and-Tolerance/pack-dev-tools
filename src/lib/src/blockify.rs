@@ -37,7 +37,7 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
 
     multithread(blocks, None, |(image, averages)| {
         let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
-        if img.dimensions().0 != 16 && img.dimensions().1 != 16 {
+        if img.dimensions().0 != 16 || img.dimensions().1 != 16 {
             return;
         }
         let pixel_count: f64 = (img.dimensions().0 * img.dimensions().1).into();
