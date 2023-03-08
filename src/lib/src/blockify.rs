@@ -1,7 +1,7 @@
 use super::pdtfs;
 use deltae::*;
-use fs_extra::dir::{CopyOptions, copy};
-use image::{imageops, GenericImageView, Rgba};
+use fs_extra::dir::{copy, CopyOptions};
+use image::{imageops, GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use lab;
 use std::{cmp::Ordering, path::MAIN_SEPARATOR as SLASH};
 
@@ -28,7 +28,7 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
     let mut averages: Vec<Average> = vec![];
     'block: for image in blocks {
         let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
-        if img.dimensions().0 != img.dimensions().1 {
+        if img.dimensions().0 != 16 && img.dimensions().1 != 16 {
             continue;
         }
         let pixel_count: f64 = (img.dimensions().0 * img.dimensions().1).into();
@@ -70,10 +70,42 @@ fn compare_distances(a: &Distance, b: &Distance) -> Ordering {
         return Ordering::Less;
     } else if a.0 > b.0 {
         return Ordering::Greater;
+    } else {
+        return Ordering::Equal;
     }
-    return Ordering::Equal;
 }
 
 fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
+    let mut pixels: u128 = 0;
+    for texture in images {
+        let img =
+            image::open(&texture).unwrap_or_else(|_| panic!("Failed to load image: {texture}"));
+        let (width, height) = img.dimensions();
+        let new_texture: RgbaImage =
+            ImageBuffer::from_fn(width * 16, height * 16, |_, _| image::Rgba([0, 0, 0, 0]));
+        for pixel in img.pixels() {
+            if pixel.2 .0[3] == 0 {
+                continue;
+            }
+            let mut distances: Vec<(f64, String)> = vec![];
+            let lab = get_lab(pixel);
+            for block in &blocks {
+                let delta: f64 = DeltaE::new(lab, block.0, DE2000).value().to_owned().into();
+                distances.push((delta, block.1.to_owned()));
+            }
+            distances.sort_by(compare_block_distances);
+        }
+        pixels += u128::from(width * height);
+        println!("{pixels}");
+    }
+}
 
+fn compare_block_distances(a: &(f64, String), b: &(f64, String)) -> Ordering {
+    if a.0 < b.0 {
+        return Ordering::Less;
+    } else if a.0 > b.0 {
+        return Ordering::Greater;
+    } else {
+        return Ordering::Equal;
+    }
 }
