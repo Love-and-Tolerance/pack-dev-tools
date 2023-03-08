@@ -1,12 +1,12 @@
 use super::pdtfs;
+use super::pdtthread::multithread;
 use deltae::*;
 use fs_extra::dir::{copy, CopyOptions};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use lab;
 use rand::seq::SliceRandom;
+use std::sync::{Arc, Mutex};
 use std::{cmp::Ordering, path::MAIN_SEPARATOR as SLASH};
-use super::pdtthread::multithread;
-use std::sync::{ Arc, Mutex };
 
 type Average = (LabValue, String);
 type Distance = (f64, (u32, u32, Rgba<u8>), LabValue);
@@ -30,7 +30,8 @@ pub fn blockify(block: String, pack: String) {
 fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
     let averages = Arc::new(Mutex::new(Vec::new()));
 
-    let blocks = blocks.into_iter()
+    let blocks = blocks
+        .into_iter()
         .map(|b| (b, Arc::clone(&averages)))
         .collect();
 
@@ -61,10 +62,7 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
         }
     });
 
-    Arc::try_unwrap(averages)
-        .unwrap()
-        .into_inner()
-        .unwrap()
+    Arc::try_unwrap(averages).unwrap().into_inner().unwrap()
 }
 
 fn get_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
@@ -90,7 +88,8 @@ fn compare_distances(a: &Distance, b: &Distance) -> Ordering {
 fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
     let pixels = Arc::new(Mutex::new(0u128));
     let blocks = Arc::new(blocks);
-    let images = images.into_iter()
+    let images = images
+        .into_iter()
         .map(|i| (i, Arc::clone(&pixels), Arc::clone(&blocks)))
         .collect();
 

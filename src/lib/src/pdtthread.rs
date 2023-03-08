@@ -1,11 +1,11 @@
-use std::sync::{ Arc, Mutex };
+use std::sync::{Arc, Mutex};
 use std::thread::spawn;
 
 pub fn multithread<F, I, O>(tasks: Vec<I>, num_threads: Option<usize>, task_fn: F) -> Vec<O>
 where
     F: Fn(I) -> O + Send + Clone + 'static,
     I: Send + 'static,
-    O: Send + 'static
+    O: Send + 'static,
 {
     let num_tasks = tasks.len();
     let wrapped_tasks = Arc::new(Mutex::new(tasks.into_iter().enumerate()));
@@ -32,7 +32,7 @@ where
                         let res = task_fn(task);
                         results.push((i, res));
                     }
-                    None => { break }
+                    None => break,
                 }
             }
 
@@ -50,7 +50,5 @@ where
     }
 
     thread_results.sort_unstable_by_key(|e| e.0);
-    thread_results.into_iter()
-        .map(|e| e.1)
-        .collect()
+    thread_results.into_iter().map(|e| e.1).collect()
 }
