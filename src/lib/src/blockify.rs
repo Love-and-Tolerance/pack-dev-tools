@@ -5,6 +5,8 @@ use image::{imageops, GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use lab;
 use rand::seq::SliceRandom;
 use std::{cmp::Ordering, path::MAIN_SEPARATOR as SLASH};
+use super::pdtthread::multithread;
+use std::sync::{ Arc, Mutex };
 
 type Average = (LabValue, String);
 type Distance = (f64, (u32, u32, Rgba<u8>), LabValue);
@@ -26,11 +28,16 @@ pub fn blockify(block: String, pack: String) {
 }
 
 fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
-    let mut averages: Vec<Average> = vec![];
-    'block: for image in blocks {
+    let averages = Arc::new(Mutex::new(Vec::new()));
+
+    let blocks = blocks.into_iter()
+        .map(|b| (b, Arc::clone(&averages)))
+        .collect();
+
+    multithread(blocks, None, |(image, averages)| {
         let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
         if img.dimensions().0 != 16 && img.dimensions().1 != 16 {
-            continue;
+            return;
         }
         let pixel_count: f64 = (img.dimensions().0 * img.dimensions().1).into();
         let mut distances: Vec<Distance> = vec![];
@@ -39,7 +46,7 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
             let mut distance: f64 = 0.0;
             for sub_pixel in img.pixels() {
                 if sub_pixel.2 .0[3] < 255 {
-                    continue 'block;
+                    return;
                 }
                 let sub_lab = get_lab(sub_pixel);
                 let delta: f64 = DeltaE::new(lab, sub_lab, DE2000).value().to_owned().into();
@@ -50,10 +57,14 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
         }
         distances.sort_by(compare_distances);
         if distances.len() > 0 {
-            averages.push((distances[0].2, image));
+            averages.lock().unwrap().push((distances[0].2, image));
         }
-    }
-    averages
+    });
+
+    Arc::try_unwrap(averages)
+        .unwrap()
+        .into_inner()
+        .unwrap()
 }
 
 fn get_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
@@ -77,8 +88,14 @@ fn compare_distances(a: &Distance, b: &Distance) -> Ordering {
 }
 
 fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
-    for texture in images {
-        println!("{}", &texture);
+    let pixels = Arc::new(Mutex::new(0u128));
+    let blocks = Arc::new(blocks);
+    let images = images.into_iter()
+        .map(|i| (i, Arc::clone(&pixels), Arc::clone(&blocks)))
+        .collect();
+
+    multithread(images, None, |(texture, pixels, blocks)| {
+        println!("starting {texture}");
         let img =
             image::open(&texture).unwrap_or_else(|_| panic!("Failed to load image: {texture}"));
         let (width, height) = img.dimensions();
@@ -92,7 +109,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
             let alpha = pixel.2 .0[3];
             let mut distances: Vec<(f64, String)> = vec![];
             let lab = get_lab(pixel);
-            for block in &blocks {
+            for block in blocks.iter() {
                 let delta: f64 = DeltaE::new(lab, block.0, DE2000).value().to_owned().into();
                 distances.push((delta, block.1.to_owned()));
             }
@@ -125,8 +142,14 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
                 new_texture.put_pixel(sub_x, sub_y, rgba);
             }
         }
-        new_texture.save(texture).unwrap();
-    }
+
+        new_texture.save(&texture).unwrap();
+
+        let mut pixels = pixels.lock().unwrap();
+        *pixels += u128::from(width * height);
+        println!("ending {texture}, pixel count: {}", *pixels);
+        drop(pixels);
+    });
 }
 
 fn compare_block_distances(a: &(f64, String), b: &(f64, String)) -> Ordering {
