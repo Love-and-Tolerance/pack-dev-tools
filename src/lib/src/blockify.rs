@@ -101,7 +101,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
         let mut new_texture: RgbaImage =
             ImageBuffer::from_fn(width * 16, height * 16, |_, _| image::Rgba([0, 0, 0, 0]));
         for pixel in img.pixels() {
-            let alpha = pixel.2.0[3];
+            let alpha = pixel.2 .0[3];
             if alpha == 0 {
                 continue;
             }

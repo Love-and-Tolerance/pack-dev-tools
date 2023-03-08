@@ -16,31 +16,32 @@ where
         let wrapped_tasks = Arc::clone(&wrapped_tasks);
         let task_fn = task_fn.clone();
 
-        let builder = Builder::new()
-            .name(format!("multithread thread {i}"));
+        let builder = Builder::new().name(format!("multithread thread {i}"));
 
-        let join_handle = builder.spawn(move || {
-            let mut results = vec![];
+        let join_handle = builder
+            .spawn(move || {
+                let mut results = vec![];
 
-            loop {
-                let mut unlocked_wrapped_tasks = wrapped_tasks.lock().unwrap();
-                let task = unlocked_wrapped_tasks.next();
+                loop {
+                    let mut unlocked_wrapped_tasks = wrapped_tasks.lock().unwrap();
+                    let task = unlocked_wrapped_tasks.next();
 
-                // unlock as quickly as possible,
-                // let other threads get at the data
-                drop(unlocked_wrapped_tasks);
+                    // unlock as quickly as possible,
+                    // let other threads get at the data
+                    drop(unlocked_wrapped_tasks);
 
-                match task {
-                    Some((i, task)) => {
-                        let res = task_fn(task);
-                        results.push((i, res));
+                    match task {
+                        Some((i, task)) => {
+                            let res = task_fn(task);
+                            results.push((i, res));
+                        }
+                        None => break,
                     }
-                    None => break,
                 }
-            }
 
-            results
-        }).unwrap();
+                results
+            })
+            .unwrap();
 
         join_handles.push(join_handle);
     }
