@@ -4,7 +4,6 @@ use deltae::*;
 use fs_extra::dir::{copy, CopyOptions};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use lab;
-use rand::seq::SliceRandom;
 use std::sync::{Arc, Mutex};
 use std::{cmp::Ordering, path::MAIN_SEPARATOR as SLASH};
 
@@ -122,11 +121,16 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
             let selected = if matches.len() == 1 {
                 matches[0].1.to_owned()
             } else {
-                matches
-                    .choose(&mut rand::thread_rng())
-                    .unwrap()
-                    .1
-                    .to_owned()
+                let num = matches.iter()
+                    .flat_map(|m| {
+                        let hash = blake3::hash(m.1.as_bytes());
+                        let bytes = hash.as_bytes();
+
+                        Vec::from_iter(bytes.iter().copied())
+                    })
+                    .fold(0u128, |acc, item| acc + item as u128);
+                let num = num % matches.len() as u128;
+                matches[num as usize].1.to_owned()
             };
             let block_img = image::open(&selected)
                 .unwrap_or_else(|_| panic!("Failed to load image: {selected}"));
