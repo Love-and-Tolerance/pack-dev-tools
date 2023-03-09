@@ -11,6 +11,8 @@ pub fn optimize_images(dir: String) {
     options.fix_errors = true;
     options.interlace = Some(oxipng::Interlacing::Adam7);
     options.strip = oxipng::Headers::Safe;
+
+    // no multithread, L&T panos eat 10g ram each
     for image in images {
         println!("optimizing image: {}", &image);
         let input = InFile::Path(PathBuf::from(&image));

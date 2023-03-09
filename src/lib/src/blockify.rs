@@ -1,9 +1,10 @@
 use super::pdtfs;
 use super::pdtthread;
+use crate::json_format::{json_formatter, Indent, Json};
+use crate::optimize_images::optimize_images;
 use deltae::*;
 use fs_extra::dir::{copy, CopyOptions};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
-use lab;
 use rand::seq::SliceRandom;
 use std::sync::{Arc, Mutex};
 use std::{
@@ -14,7 +15,7 @@ use std::{
 type Average = (LabValue, String);
 type Distance = (f64, (u32, u32, Rgba<u8>), LabValue);
 
-pub fn blockify(block: String, pack: String) {
+pub fn blockify(block: String, pack: String, optimise: bool) {
     pdtfs::check_if_dir_exists(&block);
     pdtfs::check_if_dir_exists(&pack);
     let output = format!(".{SLASH}output");
@@ -28,6 +29,10 @@ pub fn blockify(block: String, pack: String) {
     let texture_files = pdtfs::find_files_in_dir(&output, true, &extensions);
     let average_block_colors = get_average_colors(block_files);
     blockify_images(texture_files, average_block_colors);
+    if optimise {
+        json_formatter(output.clone(), Json::Minify, Indent::Tab);
+        optimize_images(output);
+    }
 }
 
 fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
