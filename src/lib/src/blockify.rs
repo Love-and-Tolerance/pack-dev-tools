@@ -106,7 +106,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
                 let delta: f64 = DeltaE::new(lab, block.0, DE2000).value().to_owned().into();
                 distances.push((delta, block.1.to_owned()));
             }
-            let selected = get_closest_match(lab, distances, 0);
+            let selected = get_closest_match(lab, distances, 1, texture.clone());
             let block_img = image::open(&selected)
                 .unwrap_or_else(|_| panic!("Failed to load image: {selected}"));
             for sub_pixel in block_img.pixels() {
@@ -130,33 +130,14 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
     });
 }
 
-fn get_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
-    let rgb = [[pixel.2 .0[0], pixel.2 .0[1], pixel.2 .0[2]]];
-    let lab = lab::rgbs_to_labs(&rgb)[0];
-    LabValue {
-        l: lab.l,
-        a: lab.a,
-        b: lab.b,
-    }
-}
-
-fn compare<T: PartialOrd>(a: &T, b: &T) -> Ordering {
-    if a < b {
-        Ordering::Less
-    } else if a > b {
-        Ordering::Greater
-    } else {
-        Ordering::Equal
-    }
-}
-
-fn get_closest_match(lab: LabValue, mut distances: Vec<(f64, String)>, index: usize) -> String {
+fn get_closest_match(lab: LabValue, mut distances: Vec<(f64, String)>, index: usize, texture: String) -> String {
     distances.sort_by(|a, b| compare(&a.0, &b.0));
     let matches = distances
         .iter()
         .filter(|item| item.0 == distances[0].0)
         .collect::<Vec<&(f64, String)>>();
     if matches.len() == 1 {
+        println!("{index} - Found a block for a pixel in {}", texture);
         matches[0].1.to_owned()
     } else {
         let mut averages: Vec<(LabValue, String)> = vec![];
@@ -177,7 +158,8 @@ fn get_closest_match(lab: LabValue, mut distances: Vec<(f64, String)>, index: us
                 sub_distances.push((distance, pixel, lab));
             }
             sub_distances.sort_by(|a, b| compare(&a.0, &b.0));
-            if !sub_distances.is_empty() {
+            sub_distances.dedup_by_key(|a| a.0);
+            if index < sub_distances.len() {
                 averages.push((sub_distances[index].2, image.to_string()));
             }
         }
@@ -186,6 +168,33 @@ fn get_closest_match(lab: LabValue, mut distances: Vec<(f64, String)>, index: us
             let delta: f64 = DeltaE::new(lab, block.0, DE2000).value().to_owned().into();
             new_distances.push((delta, block.1.to_owned()));
         }
-        get_closest_match(lab, new_distances, index + 1)
+        if index < 5 {
+            println!("trying again to find a block for a pixel in {}", texture);
+            get_closest_match(lab, new_distances, index + 1, texture)
+        } else {
+            new_distances.sort_by_key(|k| k.1.clone());
+            println!("Found a block {} for a pixel in {} by brute force", new_distances[0].1, texture);
+            new_distances[0].1.to_owned()
+        }
+    }
+}
+
+fn get_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
+    let rgb = [[pixel.2 .0[0], pixel.2 .0[1], pixel.2 .0[2]]];
+    let lab = lab::rgbs_to_labs(&rgb)[0];
+    LabValue {
+        l: lab.l,
+        a: lab.a,
+        b: lab.b,
+    }
+}
+
+fn compare<T: PartialOrd>(a: &T, b: &T) -> Ordering {
+    if a < b {
+        Ordering::Less
+    } else if a > b {
+        Ordering::Greater
+    } else {
+        Ordering::Equal
     }
 }
