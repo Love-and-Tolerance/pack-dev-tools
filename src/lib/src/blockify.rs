@@ -11,8 +11,8 @@ use std::{
     path::MAIN_SEPARATOR as SLASH,
 };
 
-type Average = (LabValue, String);
-type Distance = (f64, (u32, u32, Rgba<u8>), LabValue);
+type Pixel = (f64, Rgba<u8>, LabValue);
+type Block = (String, Vec<Pixel>);
 
 pub fn blockify(block: String, pack: String, optimize: bool) {
     pdtfs::check_if_dir_exists(&block);
@@ -26,7 +26,7 @@ pub fn blockify(block: String, pack: String, optimize: bool) {
     let extensions = Some(vec![".png"]);
     let block_files = pdtfs::find_files_in_dir(&block, false, &extensions);
     let texture_files = pdtfs::find_files_in_dir(&output, true, &extensions);
-    let average_block_colors = get_average_colors(block_files);
+    let average_block_colors: Vec<Block> = get_average_colors(block_files);
     blockify_images(texture_files, average_block_colors);
     if optimize {
         json_formatter(output.clone(), Json::Minify, Indent::Tab);
@@ -34,7 +34,7 @@ pub fn blockify(block: String, pack: String, optimize: bool) {
     }
 }
 
-fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
+fn get_average_colors(blocks: Vec<String>) -> Vec<Block> {
     let averages = Arc::new(Mutex::new(Vec::new()));
 
     let blocks = blocks
@@ -49,7 +49,7 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
             return;
         }
         let pixel_count: f64 = (img.dimensions().0 * img.dimensions().1).into();
-        let mut distances: Vec<Distance> = vec![];
+        let mut distances: Vec<Pixel> = vec![];
         for pixel in img.pixels() {
             let lab = get_lab(pixel);
             let mut distance: f64 = 0.0;
@@ -62,18 +62,19 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
                 distance += delta;
             }
             distance /= pixel_count;
-            distances.push((distance, pixel, lab));
+            distances.push((distance, pixel.2, lab));
         }
         distances.sort_by(|a, b| compare(&a.0, &b.0));
+        distances.dedup();
         if !distances.is_empty() {
-            averages.lock().unwrap().push((distances[0].2, image));
+            averages.lock().unwrap().push((image, distances));
         }
     });
 
     Arc::try_unwrap(averages).unwrap().into_inner().unwrap()
 }
 
-fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
+fn blockify_images(images: Vec<String>, blocks: Vec<Block>) {
     let pixels = Arc::new(Mutex::new(0u128));
     let blocks = Arc::new(blocks);
     let images = images
@@ -100,13 +101,8 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
                 continue;
             }
             let (x, y) = (pixel.0, pixel.1);
-            let mut distances: Vec<(f64, String)> = vec![];
             let lab = get_lab(pixel);
-            for block in blocks.iter() {
-                let delta: f64 = DeltaE::new(lab, block.0, DE2000).value().to_owned().into();
-                distances.push((delta, block.1.to_owned()));
-            }
-            let selected = get_closest_match(lab, distances, 1);
+            let selected = get_closest_match(lab, blocks.to_vec());
             let block_img = image::open(&selected)
                 .unwrap_or_else(|_| panic!("Failed to load image: {selected}"));
             for sub_pixel in block_img.pixels() {
@@ -130,48 +126,35 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
     });
 }
 
-fn get_closest_match(lab: LabValue, mut distances: Vec<(f64, String)>, index: usize) -> String {
-    distances.sort_by(|a, b| compare(&a.0, &b.0));
-    let matches = distances
+fn get_closest_match(lab: LabValue, blocks: Vec<Block>) -> String {
+    let mut new_blocks: Vec<(f64, Block)> = vec![];
+    for block in blocks.iter() {
+        let delta: f64 = DeltaE::new(lab, block.1[0].2, DE2000)
+            .value()
+            .to_owned()
+            .into();
+        new_blocks.push((delta, block.to_owned()));
+    }
+    new_blocks.sort_by(|a, b| compare(&a.0, &b.0));
+    let matches = new_blocks
         .iter()
-        .filter(|item| item.0 == distances[0].0)
-        .collect::<Vec<&(f64, String)>>();
+        .filter(|item| item.0 == new_blocks[0].0)
+        .collect::<Vec<&(f64, Block)>>();
     if matches.len() == 1 {
-        matches[0].1.to_owned()
+        matches[0].1 .0.to_owned()
     } else {
-        let mut averages: Vec<(LabValue, String)> = vec![];
-        for (_, image) in matches.iter() {
-            let img =
-                image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
-            let pixel_count: f64 = (img.dimensions().0 * img.dimensions().1).into();
-            let mut sub_distances: Vec<Distance> = vec![];
-            for pixel in img.pixels() {
-                let lab = get_lab(pixel);
-                let mut distance: f64 = 0.0;
-                for sub_pixel in img.pixels() {
-                    let sub_lab = get_lab(sub_pixel);
-                    let delta: f64 = DeltaE::new(lab, sub_lab, DE2000).value().to_owned().into();
-                    distance += delta;
-                }
-                distance /= pixel_count;
-                sub_distances.push((distance, pixel, lab));
-            }
-            sub_distances.sort_by(|a, b| compare(&a.0, &b.0));
-            sub_distances.dedup_by_key(|a| a.0);
-            if index < sub_distances.len() {
-                averages.push((sub_distances[index].2, image.to_string()));
-            }
+        let mut next_blocks: Vec<Block> = vec![];
+        for block in new_blocks.iter() {
+            let new_pixels: Vec<Pixel> = block.1 .1[1..].to_vec();
+            let pixels: Block = (block.1 .0.to_string(), new_pixels);
+            next_blocks.push(pixels);
         }
-        let mut new_distances = vec![];
-        for block in averages.iter() {
-            let delta: f64 = DeltaE::new(lab, block.0, DE2000).value().to_owned().into();
-            new_distances.push((delta, block.1.to_owned()));
-        }
-        if new_distances.len() != 0 {
-            get_closest_match(lab, new_distances, index + 1)
+
+        if !next_blocks.is_empty() {
+            get_closest_match(lab, next_blocks)
         } else {
-            distances.sort_by_key(|k| k.1.clone());
-            distances[0].1.to_owned()
+            next_blocks.sort_by_key(|k| k.0.to_string());
+            next_blocks[0].0.to_owned()
         }
     }
 }
