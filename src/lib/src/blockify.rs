@@ -57,33 +57,13 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
             distance /= pixel_count;
             distances.push((distance, pixel, lab));
         }
-        distances.sort_by(compare_distances);
+        distances.sort_by(|a, b| compare(&a.0, &b.0));
         if !distances.is_empty() {
             averages.lock().unwrap().push((distances[0].2, image));
         }
     });
 
     Arc::try_unwrap(averages).unwrap().into_inner().unwrap()
-}
-
-fn get_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
-    let rgb = [[pixel.2 .0[0], pixel.2 .0[1], pixel.2 .0[2]]];
-    let lab = lab::rgbs_to_labs(&rgb)[0];
-    LabValue {
-        l: lab.l,
-        a: lab.a,
-        b: lab.b,
-    }
-}
-
-fn compare_distances(a: &Distance, b: &Distance) -> Ordering {
-    if a.0 < b.0 {
-        Ordering::Less
-    } else if a.0 > b.0 {
-        Ordering::Greater
-    } else {
-        Ordering::Equal
-    }
 }
 
 fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
@@ -96,7 +76,10 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
 
     multithread(images, None, |thread_num, (texture, pixels, blocks)| {
         let p = pixels.lock().unwrap();
-        println!("[thread {thread_num} blockify_images] [{} output pixels] starting {texture}", *p);
+        println!(
+            "[thread {thread_num} blockify_images] [{} output pixels] starting {texture}",
+            *p
+        );
         drop(p);
 
         let img =
@@ -116,7 +99,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
                 let delta: f64 = DeltaE::new(lab, block.0, DE2000).value().to_owned().into();
                 distances.push((delta, block.1.to_owned()));
             }
-            distances.sort_by(compare_block_distances);
+            distances.sort_by(|a, b| compare(&a.0, &b.0));
             let matches = distances
                 .iter()
                 .filter(|item| item.0 == distances[0].0)
@@ -153,10 +136,20 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
     });
 }
 
-fn compare_block_distances(a: &(f64, String), b: &(f64, String)) -> Ordering {
-    if a.0 < b.0 {
+fn get_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
+    let rgb = [[pixel.2 .0[0], pixel.2 .0[1], pixel.2 .0[2]]];
+    let lab = lab::rgbs_to_labs(&rgb)[0];
+    LabValue {
+        l: lab.l,
+        a: lab.a,
+        b: lab.b,
+    }
+}
+
+fn compare<T: std::cmp::PartialOrd>(a: &T, b: &T) -> Ordering {
+    if a < b {
         Ordering::Less
-    } else if a.0 > b.0 {
+    } else if a > b {
         Ordering::Greater
     } else {
         Ordering::Equal
