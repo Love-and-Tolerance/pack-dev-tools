@@ -1,12 +1,15 @@
 use super::pdtfs;
-use super::pdtthread::multithread;
+use super::pdtthread;
 use deltae::*;
 use fs_extra::dir::{copy, CopyOptions};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use lab;
 use rand::seq::SliceRandom;
 use std::sync::{Arc, Mutex};
-use std::{cmp::Ordering, path::MAIN_SEPARATOR as SLASH};
+use std::{
+    cmp::{Ordering, PartialOrd},
+    path::MAIN_SEPARATOR as SLASH,
+};
 
 type Average = (LabValue, String);
 type Distance = (f64, (u32, u32, Rgba<u8>), LabValue);
@@ -35,7 +38,7 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
         .map(|b| (b, Arc::clone(&averages)))
         .collect();
 
-    multithread(blocks, None, |thread_num, (image, averages)| {
+    pdtthread::multithread(blocks, None, |thread_num, (image, averages)| {
         println!("[thread {thread_num} get_average_colors] averaging {image}");
         let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
         if img.dimensions().0 != 16 || img.dimensions().1 != 16 {
@@ -74,7 +77,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
         .map(|i| (i, Arc::clone(&pixels), Arc::clone(&blocks)))
         .collect();
 
-    multithread(images, None, |thread_num, (texture, pixels, blocks)| {
+    pdtthread::multithread(images, None, |thread_num, (texture, pixels, blocks)| {
         let p = pixels.lock().unwrap();
         println!(
             "[thread {thread_num} blockify_images] [{} output pixels] starting {texture}",
@@ -146,7 +149,7 @@ fn get_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
     }
 }
 
-fn compare<T: std::cmp::PartialOrd>(a: &T, b: &T) -> Ordering {
+fn compare<T: PartialOrd>(a: &T, b: &T) -> Ordering {
     if a < b {
         Ordering::Less
     } else if a > b {
