@@ -127,21 +127,22 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>) {
 }
 
 fn get_closest_match(lab: LabValue, blocks: Vec<Block>) -> String {
-    let mut new_blocks: Vec<(f64, Block)> = vec![];
-    for block in blocks.iter() {
-        let delta: f64 = DeltaE::new(lab, block.1[0].2, DE2000)
-            .value()
-            .to_owned()
-            .into();
-        new_blocks.push((delta, block.to_owned()));
-    }
+    let mut new_blocks = blocks.into_iter()
+        .map(|block| {
+            let delta = *DeltaE::new(lab, block.1[0].2, DE2000).value() as f64;
+            (delta, block)
+        })
+        .collect::<Vec<_>>();
     new_blocks.sort_by(|a, b| compare(&a.0, &b.0));
+
+    let first_match = new_blocks[0].clone();
     let matches = new_blocks
         .iter()
-        .filter(|item| item.0 == new_blocks[0].0)
-        .collect::<Vec<&(f64, Block)>>();
+        .filter(|item| item.0 == first_match.0)
+        .collect::<Vec<_>>();
+
     if matches.len() == 1 {
-        matches[0].1 .0.to_owned()
+        matches[0].1.0.clone()
     } else {
         let mut next_blocks: Vec<Block> = vec![];
         for block in new_blocks.iter() {
