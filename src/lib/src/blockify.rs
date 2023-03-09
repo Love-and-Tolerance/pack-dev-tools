@@ -5,7 +5,6 @@ use crate::optimize_images::optimize_images;
 use deltae::*;
 use fs_extra::dir::{copy, CopyOptions};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
-use rand::seq::SliceRandom;
 use std::sync::{Arc, Mutex};
 use std::{
     cmp::{Ordering, PartialOrd},
@@ -15,7 +14,7 @@ use std::{
 type Average = (LabValue, String);
 type Distance = (f64, (u32, u32, Rgba<u8>), LabValue);
 
-pub fn blockify(block: String, pack: String, optimise: bool) {
+pub fn blockify(block: String, pack: String, optimize: bool) {
     pdtfs::check_if_dir_exists(&block);
     pdtfs::check_if_dir_exists(&pack);
     let output = format!(".{SLASH}output");
@@ -29,7 +28,7 @@ pub fn blockify(block: String, pack: String, optimise: bool) {
     let texture_files = pdtfs::find_files_in_dir(&output, true, &extensions);
     let average_block_colors = get_average_colors(block_files);
     blockify_images(texture_files, average_block_colors);
-    if optimise {
+    if optimize {
         json_formatter(output.clone(), Json::Minify, Indent::Tab);
         optimize_images(output);
     }
@@ -107,20 +106,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
                 let delta: f64 = DeltaE::new(lab, block.0, DE2000).value().to_owned().into();
                 distances.push((delta, block.1.to_owned()));
             }
-            distances.sort_by(|a, b| compare(&a.0, &b.0));
-            let matches = distances
-                .iter()
-                .filter(|item| item.0 == distances[0].0)
-                .collect::<Vec<&(f64, String)>>();
-            let selected = if matches.len() == 1 {
-                matches[0].1.to_owned()
-            } else {
-                matches
-                    .choose(&mut rand::thread_rng())
-                    .unwrap()
-                    .1
-                    .to_owned()
-            };
+            let selected = get_closest_match(lab, distances, 0);
             let block_img = image::open(&selected)
                 .unwrap_or_else(|_| panic!("Failed to load image: {selected}"));
             for sub_pixel in block_img.pixels() {
@@ -161,5 +147,45 @@ fn compare<T: PartialOrd>(a: &T, b: &T) -> Ordering {
         Ordering::Greater
     } else {
         Ordering::Equal
+    }
+}
+
+fn get_closest_match(lab: LabValue, mut distances: Vec<(f64, String)>, index: usize) -> String {
+    distances.sort_by(|a, b| compare(&a.0, &b.0));
+    let matches = distances
+        .iter()
+        .filter(|item| item.0 == distances[0].0)
+        .collect::<Vec<&(f64, String)>>();
+    if matches.len() == 1 {
+        matches[0].1.to_owned()
+    } else {
+        let mut averages: Vec<(LabValue, String)> = vec![];
+        for (_, image) in matches.iter() {
+            let img =
+                image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
+            let pixel_count: f64 = (img.dimensions().0 * img.dimensions().1).into();
+            let mut sub_distances: Vec<Distance> = vec![];
+            for pixel in img.pixels() {
+                let lab = get_lab(pixel);
+                let mut distance: f64 = 0.0;
+                for sub_pixel in img.pixels() {
+                    let sub_lab = get_lab(sub_pixel);
+                    let delta: f64 = DeltaE::new(lab, sub_lab, DE2000).value().to_owned().into();
+                    distance += delta;
+                }
+                distance /= pixel_count;
+                sub_distances.push((distance, pixel, lab));
+            }
+            sub_distances.sort_by(|a, b| compare(&a.0, &b.0));
+            if !sub_distances.is_empty() {
+                averages.push((sub_distances[index].2, image.to_string()));
+            }
+        }
+        let mut new_distances = vec![];
+        for block in averages.iter() {
+            let delta: f64 = DeltaE::new(lab, block.0, DE2000).value().to_owned().into();
+            new_distances.push((delta, block.1.to_owned()));
+        }
+        get_closest_match(lab, new_distances, index + 1)
     }
 }
