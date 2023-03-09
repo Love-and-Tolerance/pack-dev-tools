@@ -3,7 +3,7 @@ use std::thread::Builder;
 
 pub fn multithread<F, I, O>(tasks: Vec<I>, num_threads: Option<usize>, task_fn: F) -> Vec<O>
 where
-    F: Fn(I) -> O + Send + Clone + 'static,
+    F: Fn(usize, I) -> O + Send + Clone + 'static,
     I: Send + 'static,
     O: Send + 'static,
 {
@@ -12,11 +12,11 @@ where
     let num_threads = num_threads.unwrap_or_else(num_cpus::get);
     let mut join_handles = Vec::with_capacity(num_threads);
 
-    for i in 0..num_threads {
+    for thread_num in 0..num_threads {
         let wrapped_tasks = Arc::clone(&wrapped_tasks);
         let task_fn = task_fn.clone();
 
-        let builder = Builder::new().name(format!("multithread thread {i}"));
+        let builder = Builder::new().name(format!("pdtthread::multithread thread {thread_num}"));
 
         let join_handle = builder
             .spawn(move || {
@@ -32,7 +32,7 @@ where
 
                     match task {
                         Some((i, task)) => {
-                            let res = task_fn(task);
+                            let res = task_fn(thread_num, task);
                             results.push((i, res));
                         }
                         None => break,

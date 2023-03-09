@@ -35,8 +35,8 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
         .map(|b| (b, Arc::clone(&averages)))
         .collect();
 
-    multithread(blocks, None, |(image, averages)| {
-        println!("starting averaging {image}");
+    multithread(blocks, None, |thread_num, (image, averages)| {
+        println!("[thread {thread_num} get_average_colors] averaging {image}");
         let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
         if img.dimensions().0 != 16 || img.dimensions().1 != 16 {
             return;
@@ -59,9 +59,8 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Average> {
         }
         distances.sort_by(compare_distances);
         if !distances.is_empty() {
-            averages.lock().unwrap().push((distances[0].2, image.clone()));
+            averages.lock().unwrap().push((distances[0].2, image));
         }
-        println!("ending averaging {image}");
     });
 
     Arc::try_unwrap(averages).unwrap().into_inner().unwrap()
@@ -95,8 +94,11 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
         .map(|i| (i, Arc::clone(&pixels), Arc::clone(&blocks)))
         .collect();
 
-    multithread(images, None, |(texture, pixels, blocks)| {
-        println!("starting {texture}");
+    multithread(images, None, |thread_num, (texture, pixels, blocks)| {
+        let p = pixels.lock().unwrap();
+        println!("[thread {thread_num} blockify_images] [{} output pixels] starting {texture}", *p);
+        drop(p);
+
         let img =
             image::open(&texture).unwrap_or_else(|_| panic!("Failed to load image: {texture}"));
         let (width, height) = img.dimensions();
@@ -145,10 +147,9 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
 
         new_texture.save(&texture).unwrap();
 
-        let mut pixels = pixels.lock().unwrap();
-        *pixels += u128::from(width * height);
-        println!("ending {texture}, pixel count: {}", *pixels);
-        drop(pixels);
+        let mut p = pixels.lock().unwrap();
+        *p += u128::from((width * 16) * (height * 16));
+        drop(p);
     });
 }
 
