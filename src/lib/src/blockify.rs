@@ -136,7 +136,7 @@ fn get_closest_match(lab: LabValue, blocks: Vec<Block>) -> String {
         .collect::<Vec<_>>();
     new_blocks.sort_by(|a, b| compare(&a.0, &b.0));
 
-    let mut matches = new_blocks
+    let matches = new_blocks
         .iter()
         .filter(|item| item.0 == new_blocks[0].0)
         .collect::<Vec<_>>();
@@ -144,20 +144,19 @@ fn get_closest_match(lab: LabValue, blocks: Vec<Block>) -> String {
     if matches.len() == 1 {
         return matches[0].1 .0.clone();
     }
-    let multicolor = matches
-        .iter()
-        .map(|block| block.1 .1.len() > 1)
-        .collect::<Vec<_>>();
-    if !multicolor.contains(&true) {
-        matches.sort_by_key(|k| k.1 .0.to_string());
-        return matches[0].1 .0.to_owned();
-    }
     let next_colors = matches
         .iter()
-        .map(|block| (block.1 .0.to_string(), block.1 .1[1..].to_vec()))
+        .filter(|block| block.1 .1.len() > 1)
         .collect::<Vec<_>>();
+    if next_colors.len() > 1 {
+        let next_blocks = next_colors
+            .iter()
+            .map(|block| (block.1 .0.to_string(), block.1 .1[1..].to_vec()))
+            .collect::<Vec<_>>();
 
-    get_closest_match(lab, next_colors)
+        return get_closest_match(lab, next_blocks);
+    }
+    next_colors[0].1 .0.to_owned()
 }
 
 fn get_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
