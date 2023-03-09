@@ -127,35 +127,40 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>) {
 }
 
 fn get_closest_match(lab: LabValue, blocks: Vec<Block>) -> String {
-    let mut new_blocks = blocks.into_iter()
+    let mut new_blocks = blocks
+        .into_iter()
         .map(|block| {
-            let delta = *DeltaE::new(lab, block.1[0].2, DE2000).value() as f64;
-            (delta, block)
+            (
+                *DeltaE::new(lab, block.1[0].2, DE2000).value() as f64,
+                block,
+            )
         })
         .collect::<Vec<_>>();
     new_blocks.sort_by(|a, b| compare(&a.0, &b.0));
 
     let first_match = new_blocks[0].clone();
-    let matches = new_blocks
+    let mut matches = new_blocks
         .iter()
         .filter(|item| item.0 == first_match.0)
         .collect::<Vec<_>>();
 
     if matches.len() == 1 {
-        matches[0].1.0.clone()
+        matches[0].1 .0.clone()
     } else {
-        let mut next_blocks: Vec<Block> = vec![];
-        for block in new_blocks.iter() {
-            let new_pixels: Vec<Pixel> = block.1 .1[1..].to_vec();
-            let pixels: Block = (block.1 .0.to_string(), new_pixels);
-            next_blocks.push(pixels);
-        }
-
-        if !next_blocks.is_empty() {
-            get_closest_match(lab, next_blocks)
+        let multicolor = matches
+            .iter()
+            .map(|block| block.1 .1.len() > 1)
+            .collect::<Vec<_>>();
+        if !multicolor.contains(&true) {
+            matches.sort_by_key(|k| k.1 .0.to_string());
+            matches[0].1 .0.to_owned()
         } else {
-            next_blocks.sort_by_key(|k| k.0.to_string());
-            next_blocks[0].0.to_owned()
+            let next_colors = matches
+                .iter()
+                .map(|block| (block.1 .0.to_string(), block.1 .1[1..].to_vec()))
+                .collect::<Vec<_>>();
+
+            get_closest_match(lab, next_colors)
         }
     }
 }
