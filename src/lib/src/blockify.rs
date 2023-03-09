@@ -106,7 +106,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
                 let delta: f64 = DeltaE::new(lab, block.0, DE2000).value().to_owned().into();
                 distances.push((delta, block.1.to_owned()));
             }
-            let selected = get_closest_match(lab, distances, 1, texture.clone());
+            let selected = get_closest_match(lab, distances, 1);
             let block_img = image::open(&selected)
                 .unwrap_or_else(|_| panic!("Failed to load image: {selected}"));
             for sub_pixel in block_img.pixels() {
@@ -130,14 +130,13 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Average>) {
     });
 }
 
-fn get_closest_match(lab: LabValue, mut distances: Vec<(f64, String)>, index: usize, texture: String) -> String {
+fn get_closest_match(lab: LabValue, mut distances: Vec<(f64, String)>, index: usize) -> String {
     distances.sort_by(|a, b| compare(&a.0, &b.0));
     let matches = distances
         .iter()
         .filter(|item| item.0 == distances[0].0)
         .collect::<Vec<&(f64, String)>>();
     if matches.len() == 1 {
-        println!("{index} - Found a block for a pixel in {}", texture);
         matches[0].1.to_owned()
     } else {
         let mut averages: Vec<(LabValue, String)> = vec![];
@@ -168,13 +167,11 @@ fn get_closest_match(lab: LabValue, mut distances: Vec<(f64, String)>, index: us
             let delta: f64 = DeltaE::new(lab, block.0, DE2000).value().to_owned().into();
             new_distances.push((delta, block.1.to_owned()));
         }
-        if index < 5 {
-            println!("trying again to find a block for a pixel in {}", texture);
-            get_closest_match(lab, new_distances, index + 1, texture)
+        if new_distances.len() != 0 {
+            get_closest_match(lab, new_distances, index + 1)
         } else {
-            new_distances.sort_by_key(|k| k.1.clone());
-            println!("Found a block {} for a pixel in {} by brute force", new_distances[0].1, texture);
-            new_distances[0].1.to_owned()
+            distances.sort_by_key(|k| k.1.clone());
+            distances[0].1.to_owned()
         }
     }
 }
