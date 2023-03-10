@@ -1,7 +1,7 @@
+use super::json_format::{json_formatter, Indent, Json};
+use super::optimize_images::optimize_images;
 use super::pdtfs;
 use super::pdtthread;
-use crate::json_format::{json_formatter, Indent, Json};
-use crate::optimize_images::optimize_images;
 use deltae::*;
 use fs_extra::dir::{copy, CopyOptions};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
@@ -45,7 +45,7 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Block> {
     pdtthread::multithread(blocks, None, |thread_num, (image, averages)| {
         println!(
             "[thread {thread_num:02} get_average_colors] averaging {}",
-            image.split("/").last().unwrap()
+            image.split('/').last().unwrap()
         );
         let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
         if img.dimensions().0 != 16 || img.dimensions().1 != 16 {
@@ -90,7 +90,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>) {
         println!(
             "[thread {thread_num:02} blockify_images] [{:010} output pixels] starting {}",
             *p,
-            texture.split("/").last().unwrap()
+            texture.split('/').last().unwrap()
         );
         drop(p);
 

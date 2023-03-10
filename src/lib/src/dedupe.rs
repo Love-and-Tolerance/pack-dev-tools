@@ -5,11 +5,7 @@ pub fn dedupe(dir: String) -> Vec<Vec<String>> {
     let recursive = true;
     let extensions = Some(vec![".zip"]);
     let files = pdtfs::find_files_in_dir(&dir, recursive, &extensions);
-    let mut records: Vec<(String, String)> = vec![];
-    for file in files {
-        let hash = pdthash::get_hash(&file);
-        records.push((hash, file));
-    }
+    let mut records = pdthash::get_hashes(files);
     records.sort();
     let mut dupes: Vec<Vec<String>> = vec![];
     let mut i = 0;
