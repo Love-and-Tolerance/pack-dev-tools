@@ -156,7 +156,7 @@ fn get_closest_match(lab: LabValue, blocks: Vec<Block>) -> String {
 
         return get_closest_match(lab, next_blocks);
     }
-    next_colors[0].1 .0.to_owned()
+    matches[0].1 .0.clone()
 }
 
 fn get_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
