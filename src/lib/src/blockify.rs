@@ -43,7 +43,10 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Block> {
         .collect();
 
     pdtthread::multithread(blocks, None, |thread_num, (image, averages)| {
-        println!("[thread {thread_num} get_average_colors] averaging {image}");
+        println!(
+            "[thread {thread_num} get_average_colors] averaging {}",
+            image.split("/").last().unwrap()
+        );
         let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
         if img.dimensions().0 != 16 || img.dimensions().1 != 16 {
             return;
@@ -85,8 +88,9 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>) {
     pdtthread::multithread(images, None, |thread_num, (texture, pixels, blocks)| {
         let p = pixels.lock().unwrap();
         println!(
-            "[thread {thread_num} blockify_images] [{} output pixels] starting {texture}",
-            *p
+            "[thread {thread_num} blockify_images] [{} output pixels] starting {}",
+            *p,
+            texture.split("/").last().unwrap()
         );
         drop(p);
 
@@ -144,16 +148,12 @@ fn get_closest_match(lab: LabValue, blocks: Vec<Block>) -> String {
     if matches.len() == 1 {
         return matches[0].1 .0.clone();
     }
-    let next_colors = matches
+    let next_blocks = matches
         .iter()
         .filter(|block| block.1 .1.len() > 1)
+        .map(|block| (block.1 .0.to_string(), block.1 .1[1..].to_vec()))
         .collect::<Vec<_>>();
-    if next_colors.len() > 1 {
-        let next_blocks = next_colors
-            .iter()
-            .map(|block| (block.1 .0.to_string(), block.1 .1[1..].to_vec()))
-            .collect::<Vec<_>>();
-
+    if next_blocks.len() > 1 {
         return get_closest_match(lab, next_blocks);
     }
     matches[0].1 .0.clone()
