@@ -44,7 +44,7 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Block> {
 
     pdtthread::multithread(blocks, None, |thread_num, (image, averages)| {
         println!(
-            "[thread {thread_num} get_average_colors] averaging {}",
+            "[thread {thread_num:02} get_average_colors] averaging {}",
             image.split("/").last().unwrap()
         );
         let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
@@ -88,7 +88,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>) {
     pdtthread::multithread(images, None, |thread_num, (texture, pixels, blocks)| {
         let p = pixels.lock().unwrap();
         println!(
-            "[thread {thread_num} blockify_images] [{} output pixels] starting {}",
+            "[thread {thread_num:02} blockify_images] [{:010} output pixels] starting {}",
             *p,
             texture.split("/").last().unwrap()
         );
