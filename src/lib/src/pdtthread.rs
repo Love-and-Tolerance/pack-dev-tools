@@ -3,7 +3,7 @@ use std::thread::Builder;
 
 pub fn multithread<F, I, O>(tasks: Vec<I>, num_threads: Option<usize>, task_fn: F) -> Vec<O>
 where
-    F: Fn(usize, I) -> O + Send + Clone + 'static,
+    F: Fn(usize, I) -> Option<O> + Send + Clone + 'static,
     I: Send + 'static,
     O: Send + 'static,
 {
@@ -32,8 +32,9 @@ where
 
                     match task {
                         Some((i, task)) => {
-                            let res = task_fn(thread_num, task);
-                            results.push((i, res));
+                            if let Some(res) = task_fn(thread_num, task) {
+                                results.push((i, res));
+                            }
                         }
                         None => break,
                     }
