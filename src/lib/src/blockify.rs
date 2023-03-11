@@ -35,30 +35,26 @@ pub fn blockify(block: String, pack: String, optimize: bool) {
 }
 
 fn get_average_colors(blocks: Vec<String>) -> Vec<Block> {
-    let averages = Arc::new(Mutex::new(Vec::new()));
-
-    let blocks = blocks
-        .into_iter()
-        .map(|b| (b, Arc::clone(&averages)))
-        .collect();
-
-    pdtthread::multithread(blocks, None, |thread_num, (image, averages)| {
+    pdtthread::multithread(blocks, None, |thread_num, image| {
         println!(
             "[thread {thread_num:02} get_average_colors] averaging {}",
             image.split('/').last().unwrap()
         );
+
         let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
         if img.dimensions().0 != 16 || img.dimensions().1 != 16 {
-            return;
+            return None;
         }
+
         let pixel_count: f64 = (img.dimensions().0 * img.dimensions().1).into();
         let mut distances: Vec<Pixel> = vec![];
+
         for pixel in img.pixels() {
             let lab = get_lab(pixel);
             let mut distance: f64 = 0.0;
             for sub_pixel in img.pixels() {
                 if sub_pixel.2 .0[3] < 255 {
-                    return;
+                    return None;
                 }
                 let sub_lab = get_lab(sub_pixel);
                 let delta: f64 = DeltaE::new(lab, sub_lab, DE2000).value().to_owned().into();
@@ -67,14 +63,16 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Block> {
             distance /= pixel_count;
             distances.push((distance, pixel.2, lab));
         }
+
         distances.sort_by(|a, b| compare(&a.0, &b.0));
         distances.dedup();
-        if !distances.is_empty() {
-            averages.lock().unwrap().push((image, distances));
-        }
-    });
 
-    Arc::try_unwrap(averages).unwrap().into_inner().unwrap()
+        if distances.is_empty() {
+            None
+        } else {
+            Some((image, distances))
+        }
+    })
 }
 
 fn blockify_images(images: Vec<String>, blocks: Vec<Block>) {
@@ -99,6 +97,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>) {
         let (width, height) = img.dimensions();
         let mut new_texture: RgbaImage =
             ImageBuffer::from_fn(width * 16, height * 16, |_, _| image::Rgba([0, 0, 0, 0]));
+
         for pixel in img.pixels() {
             let alpha = pixel.2 .0[3];
             if alpha == 0 {
@@ -127,6 +126,8 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>) {
         let mut p = pixels.lock().unwrap();
         *p += u128::from((width * 16) * (height * 16));
         drop(p);
+
+        None::<()>
     });
 }
 

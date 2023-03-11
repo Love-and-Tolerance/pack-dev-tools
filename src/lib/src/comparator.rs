@@ -43,17 +43,12 @@ pub fn comparator(args: Vec<String>) {
 }
 
 pub fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
-    let file_data = Arc::new(Mutex::new(Vec::new()));
-    let files = files
-        .into_iter()
-        .map(|f| (f, Arc::clone(&file_data)))
-        .collect();
-
-    pdtthread::multithread(files, None, move |thread_num, (file, file_data)| {
+    pdtthread::multithread(files, None, move |thread_num, file| {
         println!(
             "[thread {thread_num:02}] getting information for file: {}",
             file.split('/').last().unwrap()
         );
+
         let dir_data = dirs
             .iter()
             .map(|dir| {
@@ -64,10 +59,10 @@ pub fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
                 }
             })
             .collect::<Vec<Option<String>>>();
-        file_data.lock().unwrap().push(FileData {
+
+        Some(FileData {
             filename: file,
             folder_hash: dir_data,
         })
-    });
-    Arc::try_unwrap(file_data).unwrap().into_inner().unwrap()
+    })
 }

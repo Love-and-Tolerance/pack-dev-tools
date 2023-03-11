@@ -67,11 +67,9 @@ pub fn find_files_in_multiple_dirs(
     extensions: &'static Option<Vec<&str>>,
     exclude_dir_name: &'static bool,
 ) -> Vec<String> {
-    let files = Arc::new(Mutex::new(Vec::new()));
-    let dirs = dirs.into_iter().map(|d| (d, Arc::clone(&files))).collect();
-
-    pdtthread::multithread(dirs, None, move |thread_num, (dir, files)| {
+    let files = pdtthread::multithread(dirs, None, move |thread_num, dir| {
         println!("[thread {thread_num:02}] finding files in dir: {}", dir);
+
         let dir_files = if *exclude_dir_name {
             find_files_in_dir(&dir, recursive, &extensions)
                 .iter()
@@ -80,9 +78,9 @@ pub fn find_files_in_multiple_dirs(
         } else {
             find_files_in_dir(&dir, recursive, &extensions)
         };
-        dir_files
-            .iter()
-            .for_each(|f| files.lock().unwrap().push(f.to_string()))
+
+        Some(dir_files)
     });
-    Arc::try_unwrap(files).ok().unwrap().into_inner().unwrap()
+
+    files.into_iter().flatten().collect()
 }
