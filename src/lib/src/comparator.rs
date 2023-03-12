@@ -1,3 +1,4 @@
+use super::pdttrait::Vector;
 use super::{pdtfs, pdthash, pdtthread};
 use std::path::Path;
 
@@ -34,16 +35,15 @@ pub fn comparator(args: Vec<String>) {
     dirs = dirs
         .iter()
         .map(|d| {
-            pdtfs::check_if_dir_exists(&d);
+            pdtfs::check_if_dir_exists(d);
             pdtfs::check_dir_ends_with_slash(d.to_string())
         })
         .collect::<Vec<String>>();
 
     let recursive = true;
-    let mut files = pdtfs::find_files_in_multiple_dirs(dirs.clone(), recursive, &None, &true);
-    files.sort();
-    files.dedup();
-    let file_data = get_files_data(dirs.clone(), files.clone());
+    let files = pdtfs::find_files_in_multiple_dirs(dirs.clone(), recursive, &None, &true)
+        .sort_and_dedup_vec();
+    let file_data = get_files_data(dirs.clone(), files);
     let results = compare_files(dirs, file_data);
     for result in &results {
         println!(
@@ -105,14 +105,12 @@ pub fn compare_files(dirs: Vec<String>, files: Vec<FileData>) -> Vec<PresenceDat
                         .unwrap()
                         + 1;
                 } else {
-                    let mut hash_array = file.folder_hash[0..i]
+                    let hash_array = file.folder_hash[0..i]
                         .iter()
-                        .filter(|h| h.is_some())
-                        .map(|h| h.clone().unwrap())
-                        .collect::<Vec<_>>();
+                        .filter_map(|h| h.clone())
+                        .collect::<Vec<_>>()
+                        .sort_and_dedup_vec();
 
-                    hash_array.sort();
-                    hash_array.dedup();
                     id = hash_array.len() + 1;
                 }
                 presence_data.push(id);

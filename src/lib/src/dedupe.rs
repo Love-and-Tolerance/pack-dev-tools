@@ -1,3 +1,4 @@
+use super::pdttrait::Vector;
 use super::{pdtfs, pdthash};
 
 pub fn dedupe(dir: String) -> Vec<Vec<String>> {
@@ -20,6 +21,5 @@ pub fn dedupe(dir: String) -> Vec<Vec<String>> {
         }
         i += dupe.len();
     }
-    dupes.sort();
-    dupes
+    dupes.sort_vec()
 }

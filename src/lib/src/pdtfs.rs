@@ -70,12 +70,12 @@ pub fn find_files_in_multiple_dirs(
         println!("[thread {thread_num:02}] finding files in dir: {}", dir);
 
         let dir_files = if *exclude_dir_name {
-            find_files_in_dir(&dir, recursive, &extensions)
+            find_files_in_dir(&dir, recursive, extensions)
                 .iter()
                 .map(|f| f[dir.chars().count()..].to_string())
                 .collect()
         } else {
-            find_files_in_dir(&dir, recursive, &extensions)
+            find_files_in_dir(&dir, recursive, extensions)
         };
 
         Some(dir_files)

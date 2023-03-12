@@ -10,3 +10,4 @@ pub mod pdtcmd;
 pub mod pdtfs;
 pub mod pdthash;
 pub mod pdtthread;
+pub mod pdttrait;
