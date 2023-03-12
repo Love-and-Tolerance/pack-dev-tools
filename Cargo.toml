@@ -11,9 +11,6 @@ debug-assertions = false
 lto = true
 codegen-units = 1
 
-[registries.crates-io]
-protocol = "sparse"
-
 [workspace]
 members = [
 	"src/lib",
