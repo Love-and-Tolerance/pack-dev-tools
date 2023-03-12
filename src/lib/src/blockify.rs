@@ -1,7 +1,6 @@
 use super::json_format::{json_formatter, Indent, Json};
 use super::optimize_images::optimize_images;
-use super::pdtfs;
-use super::pdtthread;
+use super::{pdtfs, pdtthread};
 use deltae::*;
 use fs_extra::dir::{copy, CopyOptions};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
