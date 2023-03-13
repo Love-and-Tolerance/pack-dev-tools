@@ -1,8 +1,12 @@
 use super::pdtfs;
+use image::Rgb;
 
 pub fn cauldron(color: String, items: Vec<String>) {
+	let output = pdtfs::create_output_dir("cauldron_output");
+	pdtfs::copy_files_to_dir(output.clone(), items, false);
 	let recursive = true;
 	let extensions = Some(vec![".png".to_string()]);
-	const EXCLUDE_DIR_NAME: bool = false;
-	let files = pdtfs::get_files_in_list(items, recursive, extensions, &EXCLUDE_DIR_NAME);
+	let files = pdtfs::find_files_in_dir(&output, recursive, &extensions);
 }
+
+pub fn change_images_hue(color: Rgb<[u8; 3]>, images: Vec<String>) {}
