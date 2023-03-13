@@ -24,9 +24,7 @@ pub fn rename(dir: &str, new_dir: &str) {
 }
 
 pub fn find_files_in_dir(
-    dir: &str,
-    recursive: bool,
-    extensions: &Option<Vec<&str>>,
+    dir: &str, recursive: bool, extensions: &Option<Vec<&str>>,
 ) -> Vec<String> {
     let mut files = vec![];
     let paths = fs::read_dir(dir).unwrap();
@@ -61,9 +59,7 @@ pub fn check_dir_ends_with_slash(dir: String) -> String {
 }
 
 pub fn find_files_in_multiple_dirs(
-    dirs: Vec<String>,
-    recursive: bool,
-    extensions: &'static Option<Vec<&str>>,
+    dirs: Vec<String>, recursive: bool, extensions: &'static Option<Vec<&str>>,
     exclude_dir_name: &'static bool,
 ) -> Vec<String> {
     let files = pdtthread::multithread(dirs, None, move |thread_num, dir| {
