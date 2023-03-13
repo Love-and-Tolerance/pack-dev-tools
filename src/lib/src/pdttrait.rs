@@ -9,6 +9,7 @@ pub trait Vector<T: Ord> {
 	{
 		self.sort_vec().dedup_vec()
 	}
+	fn extend_vec(self, vec: Vec<T>) -> Vec<T>;
 }
 
 impl<T: Ord> Vector<T> for Vec<T> {
@@ -18,6 +19,10 @@ impl<T: Ord> Vector<T> for Vec<T> {
 	}
 	fn dedup_vec(mut self) -> Vec<T> {
 		self.dedup();
+		self
+	}
+	fn extend_vec(mut self, vec: Vec<T>) -> Vec<T> {
+		self.extend(vec);
 		self
 	}
 }
