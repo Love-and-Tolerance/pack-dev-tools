@@ -1,4 +1,6 @@
 use super::pdtthread;
+use super::pdttrait::Vector;
+use fs_extra::{dir, file};
 use std::fs;
 use std::path::{Path, MAIN_SEPARATOR as SLASH};
 
@@ -78,4 +80,60 @@ pub fn find_files_in_multiple_dirs(
 	});
 
 	files.into_iter().flatten().collect()
+}
+
+pub fn get_files_in_list(
+	items: Vec<String>, recursive: bool, extensions: Option<Vec<String>>,
+	exclude_dir_name: &'static bool,
+) -> Vec<String> {
+	let files = items
+		.iter()
+		.filter(|f| Path::new(f).is_file() && f.ends_with(".png"))
+		.map(|f| f.to_string())
+		.collect::<Vec<String>>();
+	let dirs = items
+		.iter()
+		.filter(|f| Path::new(f).is_dir())
+		.map(|d| {
+			check_if_dir_exists(d);
+			check_dir_ends_with_slash(d.to_string())
+		})
+		.collect::<Vec<String>>();
+	find_files_in_multiple_dirs(dirs, recursive, extensions, exclude_dir_name)
+		.extend_vec(files)
+		.sort_and_dedup_vec()
+}
+
+pub fn create_output_dir(name: &str) -> String {
+	if_dir_exists_remove_and_remake_it(&name);
+	format!(".{SLASH}{name}")
+}
+
+pub fn copy_files_to_dir(folder: String, items: Vec<String>, content_only: bool) {
+	pdtthread::multithread(items, None, move |thread_num, item| {
+		println!("[thread {thread_num:02}] copying: {}", item);
+		if Path::new(&item).is_dir() {
+			copy_dir_to_dir(&folder, item, content_only);
+		} else if Path::new(&item).is_file() {
+			copy_file_to_dir(&folder, item);
+		}
+		None::<()>
+	});
+}
+
+pub fn copy_dir_to_dir(output: &String, input: String, content_only: bool) {
+	let mut options = dir::CopyOptions::new();
+	options.content_only = content_only;
+	dir::copy(&input, &output, &options).unwrap_or_else(|_| {
+		panic!(
+			"Failed to copy {} directory to {} directory.",
+			&input, &output
+		)
+	});
+}
+
+pub fn copy_file_to_dir(output: &String, input: String) {
+	let options = file::CopyOptions::new();
+	file::copy(&input, &output, &options)
+		.unwrap_or_else(|_| panic!("Failed to copy {} file to {} directory.", &input, &output));
 }

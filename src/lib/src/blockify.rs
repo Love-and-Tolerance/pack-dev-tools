@@ -2,9 +2,7 @@ use super::json_format::{json_formatter, Indent, Json};
 use super::optimize_images::optimize_images;
 use super::{pdtcolor, pdtfs, pdtthread, pdttrait};
 use deltae::*;
-use fs_extra::dir::{copy, CopyOptions};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
-use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::{Arc, Mutex};
 
 type Pixel = (f64, Rgba<u8>, LabValue);
@@ -13,12 +11,8 @@ type Block = (String, Vec<Pixel>);
 pub fn blockify(block: String, pack: String, optimize: bool) {
 	pdtfs::check_if_dir_exists(&block);
 	pdtfs::check_if_dir_exists(&pack);
-	let output = format!(".{SLASH}output");
-	pdtfs::if_dir_exists_remove_and_remake_it(&output);
-	let mut options = CopyOptions::new();
-	options.content_only = true;
-	copy(pack, &output, &options)
-		.unwrap_or_else(|_| panic!("Failed to copy old release to {} directory.", &output));
+	let output = pdtfs::create_output_dir("blockify_output");
+	pdtfs::copy_dir_to_dir(&output, pack, true);
 	let extensions = Some(vec![".png".to_string()]);
 	let block_files = pdtfs::find_files_in_dir(&block, false, &extensions);
 	let texture_files = pdtfs::find_files_in_dir(&output, true, &extensions);

@@ -1,5 +1,4 @@
 use super::{pdtcmd, pdtfs};
-use fs_extra::dir::{copy, CopyOptions};
 use std::io::Write;
 use std::path::{Path, MAIN_SEPARATOR as SLASH};
 use std::process::Output;
@@ -15,14 +14,11 @@ pub fn observe(old_release: String, new_release: String) {
 	#[cfg(not(target_os = "windows"))]
 	pdtcmd::execute_unix_command_with_fail_msg("git --version", "git not installed!");
 
-	let observer_dir = format!(".{SLASH}observer_dir");
+	let observer_dir = pdtfs::create_output_dir("observer_output");
 
 	pdtfs::if_dir_exists_remove_and_remake_it(&observer_dir);
 
-	let mut options = CopyOptions::new();
-	options.content_only = true;
-	copy(old_release, &observer_dir, &options)
-		.unwrap_or_else(|_| panic!("Failed to copy old release to {} directory.", &observer_dir));
+	pdtfs::copy_dir_to_dir(&observer_dir, old_release, true);
 
 	pdtfs::if_dir_exists_remove_it(&format!("{}{}.git", &observer_dir, SLASH));
 
@@ -63,8 +59,7 @@ pub fn observe(old_release: String, new_release: String) {
 		pdtfs::rename(&format!(".{SLASH}.git"), &format!(".{SLASH}.git_temp"));
 	}
 
-	copy(new_release, ".", &options)
-		.unwrap_or_else(|_| panic!("Failed to copy new release to {} directory.", &observer_dir));
+	pdtfs::copy_dir_to_dir(&".".to_string(), new_release, true);
 
 	if Path::new(&format!(".{SLASH}.git_temp")).is_dir() {
 		pdtfs::if_dir_exists_remove_it(&format!(".{SLASH}.git"));
