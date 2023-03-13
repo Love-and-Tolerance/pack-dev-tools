@@ -1,14 +1,11 @@
 use super::json_format::{json_formatter, Indent, Json};
 use super::optimize_images::optimize_images;
-use super::{pdtfs, pdtthread};
+use super::{pdtfs, pdtthread, pdttrait};
 use deltae::*;
 use fs_extra::dir::{copy, CopyOptions};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
+use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::{Arc, Mutex};
-use std::{
-    cmp::{Ordering, PartialOrd},
-    path::MAIN_SEPARATOR as SLASH,
-};
 
 type Pixel = (f64, Rgba<u8>, LabValue);
 type Block = (String, Vec<Pixel>);
@@ -63,7 +60,7 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Block> {
             distances.push((distance, pixel.2, lab));
         }
 
-        distances.sort_by(|a, b| compare(&a.0, &b.0));
+        distances.sort_by(|a, b| pdttrait::compare(&a.0, &b.0));
         distances.dedup();
 
         if distances.is_empty() {
@@ -138,7 +135,7 @@ fn get_closest_match(lab: LabValue, blocks: Vec<Block>) -> String {
             (delta, block)
         })
         .collect::<Vec<_>>();
-    new_blocks.sort_by(|a, b| compare(&a.0, &b.0));
+    new_blocks.sort_by(|a, b| pdttrait::compare(&a.0, &b.0));
 
     let matches = new_blocks
         .iter()
@@ -166,15 +163,5 @@ fn get_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
         l: lab.l,
         a: lab.a,
         b: lab.b,
-    }
-}
-
-fn compare<T: PartialOrd>(a: &T, b: &T) -> Ordering {
-    if a < b {
-        Ordering::Less
-    } else if a > b {
-        Ordering::Greater
-    } else {
-        Ordering::Equal
     }
 }
