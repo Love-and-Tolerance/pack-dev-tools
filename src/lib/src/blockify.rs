@@ -1,6 +1,6 @@
 use super::json_format::{json_formatter, Indent, Json};
 use super::optimize_images::optimize_images;
-use super::{pdtfs, pdtthread, pdttrait};
+use super::{pdtcolor, pdtfs, pdtthread, pdttrait};
 use deltae::*;
 use fs_extra::dir::{copy, CopyOptions};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
@@ -46,13 +46,13 @@ fn get_average_colors(blocks: Vec<String>) -> Vec<Block> {
 		let mut distances: Vec<Pixel> = vec![];
 
 		for pixel in img.pixels() {
-			let lab = get_lab(pixel);
+			let lab = pdtcolor::rgb_to_lab(pixel);
 			let mut distance: f64 = 0.0;
 			for sub_pixel in img.pixels() {
 				if sub_pixel.2 .0[3] < 255 {
 					return None;
 				}
-				let sub_lab = get_lab(sub_pixel);
+				let sub_lab = pdtcolor::rgb_to_lab(sub_pixel);
 				let delta: f64 = DeltaE::new(lab, sub_lab, DE2000).value().to_owned().into();
 				distance += delta;
 			}
@@ -100,7 +100,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>) {
 				continue;
 			}
 			let (x, y) = (pixel.0, pixel.1);
-			let lab = get_lab(pixel);
+			let lab = pdtcolor::rgb_to_lab(pixel);
 			let selected = get_closest_match(lab, blocks.to_vec());
 			let block_img = image::open(&selected)
 				.unwrap_or_else(|_| panic!("Failed to load image: {selected}"));
@@ -154,14 +154,4 @@ fn get_closest_match(lab: LabValue, blocks: Vec<Block>) -> String {
 		return get_closest_match(lab, next_blocks);
 	}
 	matches[0].1 .0.clone()
-}
-
-fn get_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
-	let rgb = [[pixel.2 .0[0], pixel.2 .0[1], pixel.2 .0[2]]];
-	let lab = lab::rgbs_to_labs(&rgb)[0];
-	LabValue {
-		l: lab.l,
-		a: lab.a,
-		b: lab.b,
-	}
 }

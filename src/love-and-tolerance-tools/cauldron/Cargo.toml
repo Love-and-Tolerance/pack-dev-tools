@@ -1,0 +1,12 @@
+[package]
+name = "cauldron"
+description = "CLI tool for manipulating colors."
+repository = "https://github.com/Love-and-Tolerance/pack-dev-tools"
+version = "0.1.0"
+authors = ["Silk Rose", "Meadowsys"]
+license = "MIT"
+edition = "2021"
+publish = false
+
+[dependencies]
+pdtlib = { path = "../../lib" }

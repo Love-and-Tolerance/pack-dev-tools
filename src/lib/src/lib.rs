@@ -6,7 +6,9 @@ pub mod observer;
 pub mod optimize_images;
 pub mod texture_unstitch;
 
+pub mod cauldron;
 pub mod pdtcmd;
+pub mod pdtcolor;
 pub mod pdtfs;
 pub mod pdthash;
 pub mod pdtthread;
