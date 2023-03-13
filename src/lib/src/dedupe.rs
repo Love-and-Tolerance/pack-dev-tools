@@ -4,7 +4,7 @@ use super::{pdtfs, pdthash};
 pub fn dedupe(dir: String) -> Vec<Vec<String>> {
 	pdtfs::check_if_dir_exists(&dir);
 	let recursive = true;
-	let extensions = Some(vec![".zip"]);
+	let extensions = Some(vec![".zip".to_string()]);
 	let files = pdtfs::find_files_in_dir(&dir, recursive, &extensions);
 	let records = pdthash::get_hashes(files).sort_vec();
 	let mut dupes: Vec<Vec<String>> = vec![];

@@ -17,7 +17,7 @@ pub enum Indent {
 
 pub fn json_formatter(dir_or_file: String, fmt_type: Json, indent: Indent) {
 	let recursive = true;
-	let extensions = Some(vec![".json", ".mcmeta"]);
+	let extensions = Some(vec![".json".to_string(), ".mcmeta".to_string()]);
 	let mut files = vec![];
 	if Path::new(&dir_or_file).is_dir() {
 		files = pdtfs::find_files_in_dir(&dir_or_file, recursive, &extensions);

@@ -19,7 +19,7 @@ pub fn blockify(block: String, pack: String, optimize: bool) {
 	options.content_only = true;
 	copy(pack, &output, &options)
 		.unwrap_or_else(|_| panic!("Failed to copy old release to {} directory.", &output));
-	let extensions = Some(vec![".png"]);
+	let extensions = Some(vec![".png".to_string()]);
 	let block_files = pdtfs::find_files_in_dir(&block, false, &extensions);
 	let texture_files = pdtfs::find_files_in_dir(&output, true, &extensions);
 	let average_block_colors: Vec<Block> = get_average_colors(block_files);

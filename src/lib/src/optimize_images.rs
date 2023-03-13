@@ -5,7 +5,7 @@ use std::path::PathBuf;
 pub fn optimize_images(dir: String) {
 	check_if_dir_exists(&dir);
 	let recursive = true;
-	let extensions = Some(vec![".png"]);
+	let extensions = Some(vec![".png".to_string()]);
 	let images = find_files_in_dir(&dir, recursive, &extensions);
 	let mut options = Options::from_preset(6);
 	options.fix_errors = true;

@@ -45,7 +45,7 @@ pub fn comparator(args: Vec<String>) {
 		Structure::Ordered => {}
 		Structure::Unordered => {}
 	}
-	let files = pdtfs::find_files_in_multiple_dirs(dirs.clone(), recursive, &None, &true)
+	let files = pdtfs::find_files_in_multiple_dirs(dirs.clone(), recursive, None, &true)
 		.sort_and_dedup_vec();
 	let file_data = get_files_data(dirs.clone(), files);
 	let results = compare_files(dirs, file_data);
