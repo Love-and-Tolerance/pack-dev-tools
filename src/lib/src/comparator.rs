@@ -20,7 +20,7 @@ pub enum Structure {
 }
 
 pub fn comparator(args: Vec<String>) {
-	let mut dirs = vec![];
+	let mut dirs: Vec<String>;
 	let mut order = Structure::Ordered;
 	let ordered_options = ["-o", "--ordered"];
 	let unordered_options = ["-u", "--unordered"];
@@ -41,6 +41,10 @@ pub fn comparator(args: Vec<String>) {
 		.collect::<Vec<String>>();
 
 	let recursive = true;
+	match order {
+		Structure::Ordered => {}
+		Structure::Unordered => {}
+	}
 	let files = pdtfs::find_files_in_multiple_dirs(dirs.clone(), recursive, &None, &true)
 		.sort_and_dedup_vec();
 	let file_data = get_files_data(dirs.clone(), files);
