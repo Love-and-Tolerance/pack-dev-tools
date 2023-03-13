@@ -1,2 +1,2 @@
 fn_args_layout = "Compressed"
-tab_spaces = 4
+hard_tabs = true
