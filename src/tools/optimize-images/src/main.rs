@@ -1,15 +1,16 @@
 use clap::{value_parser, Parser};
 use pdtlib::optimize_images::{optimize_images, Strip};
 use pdtlib::{pdtstdin, pdttrait::Vector};
+use std::path::MAIN_SEPARATOR as SLASH;
 
 #[derive(Debug, Parser)]
 #[command(name = env!("CARGO_PKG_NAME"),
 	bin_name = env!("CARGO_BIN_NAME"),
 	version,
-	about = "Optimize all png files in given path(s).
+	about = format!("Optimize all png files in given path(s).
 
-example: ./optimize-images -l4 a.png ./assets/
-example: ./optimize-images --strip safe a.png b.png",
+example: .{SLASH}optimize-images -l4 a.png .{SLASH}assets{SLASH}
+example: .{SLASH}optimize-images --strip safe a.png b.png"),
 	long_about = None)]
 
 struct Args {

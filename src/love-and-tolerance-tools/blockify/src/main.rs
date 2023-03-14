@@ -1,14 +1,15 @@
 use clap::{value_parser, Parser};
 use pdtlib::blockify::blockify;
 use pdtlib::{pdtstdin, pdttrait::Vector};
+use std::path::MAIN_SEPARATOR as SLASH;
 
 #[derive(Debug, Parser)]
 #[command(name = env!("CARGO_PKG_NAME"),
 bin_name = env!("CARGO_BIN_NAME"),
 	version,
-	about = "Blockify images by turning every pixel into a block texture.
+	about = format!("Blockify images by turning every pixel into a block texture.
 
-example: ./blockify 16 ./assets/minecraft/textures/blocks ./assets",
+example: .{SLASH}blockify 16 .{SLASH}assets{SLASH}minecraft{SLASH}textures{SLASH}blocks .{SLASH}assets"),
 	long_about = None)
 ]
 
