@@ -1,5 +1,3 @@
-use super::json_format::{json_formatter, Indent, Json};
-use super::optimize_images::optimize_images;
 use super::{pdtcolor, pdtfs, pdtthread, pdttrait};
 use deltae::*;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
@@ -8,7 +6,7 @@ use std::sync::{Arc, Mutex};
 type Pixel = (f64, Rgba<u8>, LabValue);
 type Block = (String, Vec<Pixel>);
 
-pub fn blockify(block: String, pack: String, optimize: bool) {
+pub fn blockify(block: String, pack: String) {
 	pdtfs::check_if_dir_exists(&block);
 	pdtfs::check_if_dir_exists(&pack);
 	let output = pdtfs::create_output_dir("blockify_output");
@@ -18,10 +16,6 @@ pub fn blockify(block: String, pack: String, optimize: bool) {
 	let texture_files = pdtfs::find_files_in_dir(&output, true, &extensions);
 	let average_block_colors: Vec<Block> = get_average_colors(block_files);
 	blockify_images(texture_files, average_block_colors);
-	if optimize {
-		json_formatter(output.clone(), Json::Minify, Indent::Tab);
-		//optimize_images(output);
-	}
 }
 
 fn get_average_colors(blocks: Vec<String>) -> Vec<Block> {

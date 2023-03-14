@@ -9,6 +9,5 @@ fn main() {
 	let pack_location = args
 		.get(2)
 		.expect("second arg should be location of assets (dir in a pack)");
-	let optimize = args.get(3).is_some();
-	blockify(blocks_location.into(), pack_location.into(), optimize);
+	blockify(blocks_location.into(), pack_location.into());
 }
