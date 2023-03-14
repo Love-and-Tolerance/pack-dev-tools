@@ -20,7 +20,7 @@ pub fn blockify(block: String, pack: String, optimize: bool) {
 	blockify_images(texture_files, average_block_colors);
 	if optimize {
 		json_formatter(output.clone(), Json::Minify, Indent::Tab);
-		optimize_images(output);
+		//optimize_images(output);
 	}
 }
 

@@ -1,7 +1,6 @@
-use camino::Utf8PathBuf;
-use clap::{value_parser, Parser, ValueEnum};
-use pdtlib::optimize_images::optimize_images;
-use pdtlib::pdtstdin;
+use clap::{value_parser, Parser};
+use pdtlib::optimize_images::{optimize_images, Strip};
+use pdtlib::{pdtstdin, pdttrait::Vector};
 
 #[derive(Debug, Parser)]
 #[command(name = "optimize_images", bin_name = "optimize_images", version)]
@@ -18,23 +17,13 @@ struct Args {
 	#[arg(long, short)]
 	interlace: bool,
 	/// List of files and folders to optimize
-	paths: Vec<Utf8PathBuf>,
-}
-
-#[derive(Clone, Debug, ValueEnum)]
-enum Strip {
-	None,
-	Safe,
-	All,
+	paths: Vec<String>,
 }
 
 fn main() {
 	let args = Args::parse();
-	println!("{args:?}");
-	let stdin = pdtstdin::get_stdin().unwrap_or(["test".to_string()].to_vec());
-
-	for thing in stdin {
-		println!("{thing}");
-	}
-	//optimize_images(dir);
+	let paths = pdtstdin::get_stdin()
+		.unwrap_or(Vec::new())
+		.extend_vec(args.paths);
+	optimize_images(args.level, args.strip, args.fix, args.interlace, paths);
 }

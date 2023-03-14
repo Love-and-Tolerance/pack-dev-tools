@@ -6,15 +6,12 @@ pub fn get_stdin() -> Option<Vec<String>> {
 		Some(
 			io::stdin()
 				.lines()
-				.into_iter()
-				.map(|i| {
+				.flat_map(|i| {
 					i.unwrap()
-						.split(" ")
-						.into_iter()
+						.split(' ')
 						.map(|i| i.to_owned())
 						.collect::<Vec<_>>()
 				})
-				.flatten()
 				.collect::<Vec<_>>(),
 		)
 	} else {

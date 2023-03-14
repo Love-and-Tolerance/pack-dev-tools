@@ -105,7 +105,7 @@ pub fn get_files_in_list(
 }
 
 pub fn create_output_dir(name: &str) -> String {
-	if_dir_exists_remove_and_remake_it(&name);
+	if_dir_exists_remove_and_remake_it(name);
 	format!(".{SLASH}{name}")
 }
 
@@ -124,7 +124,7 @@ pub fn copy_files_to_dir(folder: String, items: Vec<String>, content_only: bool)
 pub fn copy_dir_to_dir(output: &String, input: String, content_only: bool) {
 	let mut options = dir::CopyOptions::new();
 	options.content_only = content_only;
-	dir::copy(&input, &output, &options).unwrap_or_else(|_| {
+	dir::copy(&input, output, &options).unwrap_or_else(|_| {
 		panic!(
 			"Failed to copy {} directory to {} directory.",
 			&input, &output
@@ -134,6 +134,6 @@ pub fn copy_dir_to_dir(output: &String, input: String, content_only: bool) {
 
 pub fn copy_file_to_dir(output: &String, input: String) {
 	let options = file::CopyOptions::new();
-	file::copy(&input, &output, &options)
+	file::copy(&input, output, &options)
 		.unwrap_or_else(|_| panic!("Failed to copy {} file to {} directory.", &input, &output));
 }
