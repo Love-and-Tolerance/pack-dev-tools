@@ -1,4 +1,4 @@
-use colors_transform::Rgb;
+use colors_transform::{Color, Hsl, Rgb};
 use deltae::LabValue;
 use image::Rgba;
 
@@ -19,4 +19,17 @@ pub fn hex_to_rgb(hex: String) -> Rgb {
 		format!("#{hex}")
 	};
 	Rgb::from_hex_str(&hex).unwrap()
+}
+
+pub fn hex_to_hsl(hex: String) -> Hsl {
+	let hex = if hex.starts_with('#') {
+		hex
+	} else {
+		format!("#{hex}")
+	};
+	Rgb::from_hex_str(&hex).unwrap().to_hsl()
+}
+
+pub fn rgb_to_hsl(rgb: Rgb) -> Hsl {
+	rgb.to_hsl()
 }
