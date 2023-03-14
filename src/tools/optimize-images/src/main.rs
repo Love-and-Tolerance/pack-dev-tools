@@ -3,7 +3,15 @@ use pdtlib::optimize_images::{optimize_images, Strip};
 use pdtlib::{pdtstdin, pdttrait::Vector};
 
 #[derive(Debug, Parser)]
-#[command(name = "optimize_images", bin_name = "optimize_images", version)]
+#[command(name = env!("CARGO_PKG_NAME"),
+	bin_name = env!("CARGO_BIN_NAME"),
+	version,
+	about = "Optimize all png files in given path(s).
+
+example: ./optimize-images -l4 a.png ./assets/
+example: ./optimize-images --strip safe a.png b.png",
+	long_about = None)]
+
 struct Args {
 	/// Compression level [possible values: 0 - 6]
 	#[arg(short, long, default_value_t = 6, value_parser = value_parser!(u8).range(0..=6))]
