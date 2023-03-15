@@ -3,17 +3,17 @@ use colors_transform::{Color, Hsl, Rgb};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use std::sync::Arc;
 
-pub fn cauldron(color: String, items: Vec<String>) {
+pub fn cauldron(color: String, items: Vec<String>, saturation: Option<f32>) {
 	let output = pdtfs::create_output_dir("cauldron_output");
 	pdtfs::copy_files_to_dir(output.clone(), items, false);
 	let recursive = true;
 	let extensions = Some(vec![".png".to_string()]);
 	let files = pdtfs::find_files_in_dir(&output, recursive, &extensions);
 	let color = pdtcolor::hex_to_hsl(color);
-	dye_images_in_cauldron(files, color, 75.00);
+	dye_images_in_cauldron(files, color, saturation);
 }
 
-pub fn dye_images_in_cauldron(images: Vec<String>, color: Hsl, saturation: f32) {
+pub fn dye_images_in_cauldron(images: Vec<String>, color: Hsl, saturation: Option<f32>) {
 	let color = Arc::new(color);
 	let saturation = Arc::new(saturation);
 	let images = images
@@ -38,9 +38,10 @@ pub fn dye_images_in_cauldron(images: Vec<String>, color: Hsl, saturation: f32) 
 				let alpha = pixel.2 .0[3];
 				let (x, y) = (pixel.0, pixel.1);
 				let rgb = Rgb::from(pixel.2[0].into(), pixel.2[1].into(), pixel.2[2].into());
+				let base_saturation = pdtcolor::rgb_to_hsl(rgb).get_saturation();
 				let rgb = pdtcolor::rgb_to_hsl(rgb)
 					.set_hue(color.get_hue())
-					.set_saturation(*saturation)
+					.set_saturation(saturation.unwrap_or(base_saturation))
 					.to_rgb();
 				let rgba = Rgba::from([
 					rgb.get_red().round() as u8,
