@@ -35,21 +35,17 @@ pub fn dye_images_in_cauldron(images: Vec<String>, color: Hsl, saturation: Optio
 			let mut new_image: RgbaImage =
 				ImageBuffer::from_fn(width, height, |_, _| image::Rgba([0, 0, 0, 0]));
 			for pixel in img.pixels() {
-				let alpha = pixel.2 .0[3];
+				let a = pixel.2 .0[3];
 				let (x, y) = (pixel.0, pixel.1);
-				let rgb = Rgb::from(pixel.2[0].into(), pixel.2[1].into(), pixel.2[2].into());
-				let base_saturation = pdtcolor::rgb_to_hsl(rgb).get_saturation();
-				let rgb = pdtcolor::rgb_to_hsl(rgb)
+				let hsl =
+					Rgb::from(pixel.2[0].into(), pixel.2[1].into(), pixel.2[2].into()).to_hsl();
+				let rgb = hsl
 					.set_hue(color.get_hue())
-					.set_saturation(saturation.unwrap_or(base_saturation))
-					.to_rgb();
-				let rgba = Rgba::from([
-					rgb.get_red().round() as u8,
-					rgb.get_green().round() as u8,
-					rgb.get_blue().round() as u8,
-					alpha,
-				]);
-				new_image.put_pixel(x, y, rgba);
+					.set_saturation(saturation.unwrap_or(hsl.get_saturation()))
+					.to_rgb()
+					.as_tuple();
+				let rgba = [rgb.0 as u8, rgb.1 as u8, rgb.2 as u8, a];
+				new_image.put_pixel(x, y, Rgba(rgba));
 			}
 			new_image.save(&image).unwrap();
 

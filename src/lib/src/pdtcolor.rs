@@ -29,7 +29,3 @@ pub fn hex_to_hsl(hex: String) -> Hsl {
 	};
 	Rgb::from_hex_str(&hex).unwrap().to_hsl()
 }
-
-pub fn rgb_to_hsl(rgb: Rgb) -> Hsl {
-	rgb.to_hsl()
-}

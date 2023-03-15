@@ -86,8 +86,8 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>, block_pixels: u32) {
 				});
 
 			for pixel in img.pixels() {
-				let alpha = pixel.2 .0[3];
-				if alpha == 0 {
+				let a = pixel.2 .0[3];
+				if a == 0 {
 					continue;
 				}
 				let (x, y) = (pixel.0, pixel.1);
@@ -98,13 +98,8 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>, block_pixels: u32) {
 				for sub_pixel in block_img.pixels() {
 					let sub_x = (x * block_pixels) + sub_pixel.0;
 					let sub_y = (y * block_pixels) + sub_pixel.1;
-					let rgba = Rgba::from([
-						sub_pixel.2 .0[0],
-						sub_pixel.2 .0[1],
-						sub_pixel.2 .0[2],
-						alpha,
-					]);
-					new_texture.put_pixel(sub_x, sub_y, rgba);
+					let rgba = [sub_pixel.2 .0[0], sub_pixel.2 .0[1], sub_pixel.2 .0[2], a];
+					new_texture.put_pixel(sub_x, sub_y, image::Rgba(rgba));
 				}
 			}
 
