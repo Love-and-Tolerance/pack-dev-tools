@@ -1,6 +1,7 @@
 use super::{pdtcmd, pdtfs};
+use camino::Utf8Path;
 use std::io::Write;
-use std::path::{Path, MAIN_SEPARATOR as SLASH};
+use std::path::MAIN_SEPARATOR as SLASH;
 use std::process::Output;
 use std::{env, fs};
 
@@ -43,25 +44,25 @@ pub fn observe(old_release: String, new_release: String) {
 	for path in paths {
 		let path = path.as_ref().unwrap().path().display().to_string();
 		if format!(".{SLASH}.git") != path {
-			if Path::new(&path).is_dir() {
+			if Utf8Path::new(&path).is_dir() {
 				fs::remove_dir_all(&path)
 					.unwrap_or_else(|_| panic!("Failed to remove {} directory.", &path));
-			} else if Path::new(&path).is_file() {
+			} else if Utf8Path::new(&path).is_file() {
 				fs::remove_file(&path)
 					.unwrap_or_else(|_| panic!("Failed to remove {} file.", &path));
 			}
 		}
 	}
 
-	if Path::new(&format!("{}{}.git", &new_release, SLASH)).is_dir()
-		|| Path::new(&format!("{}.git", &new_release)).is_dir()
+	if Utf8Path::new(&format!("{}{}.git", &new_release, SLASH)).is_dir()
+		|| Utf8Path::new(&format!("{}.git", &new_release)).is_dir()
 	{
 		pdtfs::rename(&format!(".{SLASH}.git"), &format!(".{SLASH}.git_temp"));
 	}
 
 	pdtfs::copy_dir_to_dir(&".".to_string(), new_release, true);
 
-	if Path::new(&format!(".{SLASH}.git_temp")).is_dir() {
+	if Utf8Path::new(&format!(".{SLASH}.git_temp")).is_dir() {
 		pdtfs::if_dir_exists_remove_it(&format!(".{SLASH}.git"));
 		pdtfs::rename(&format!(".{SLASH}.git_temp"), &format!(".{SLASH}.git"));
 	}

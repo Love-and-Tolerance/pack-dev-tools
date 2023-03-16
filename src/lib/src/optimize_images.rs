@@ -1,7 +1,7 @@
 use super::pdtfs::get_files_in_list;
+use camino::Utf8PathBuf;
 use clap::ValueEnum;
 use oxipng::{optimize, InFile, Options, OutFile};
-use std::path::PathBuf;
 
 #[derive(Clone, Debug, ValueEnum)]
 pub enum Strip {
@@ -28,8 +28,8 @@ pub fn optimize_images(level: u8, strip: Strip, fix: bool, interlace: bool, path
 	let images = get_files_in_list(paths, recursive, extensions, &EXCLUDE_DIR_NAME);
 	for image in images {
 		println!("optimizing image: {}", &image);
-		let input = InFile::Path(PathBuf::from(&image));
-		let output = OutFile::Path(Some(PathBuf::from(&image)));
+		let input = InFile::Path(Utf8PathBuf::from(&image).into());
+		let output = OutFile::Path(Some(Utf8PathBuf::from(&image).into()));
 		optimize(&input, &output, &options).expect("Failed to optimize image.");
 	}
 }

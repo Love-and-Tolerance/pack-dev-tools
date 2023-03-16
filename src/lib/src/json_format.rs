@@ -1,7 +1,8 @@
 use super::pdtfs;
+use camino::Utf8Path;
 use serde::ser::Serialize;
 use serde_json::{ser::PrettyFormatter, Serializer, Value};
-use std::{fs, path::Path};
+use std::fs;
 
 #[derive(Copy, Clone)]
 pub enum Json {
@@ -19,9 +20,9 @@ pub fn json_formatter(dir_or_file: String, fmt_type: Json, indent: Indent) {
 	let recursive = true;
 	let extensions = Some(vec![".json".to_string(), ".mcmeta".to_string()]);
 	let mut files = vec![];
-	if Path::new(&dir_or_file).is_dir() {
+	if Utf8Path::new(&dir_or_file).is_dir() {
 		files = pdtfs::find_files_in_dir(&dir_or_file, recursive, &extensions);
-	} else if Path::new(&dir_or_file).is_file() {
+	} else if Utf8Path::new(&dir_or_file).is_file() {
 		files.push(dir_or_file);
 	}
 	let indent: String = match indent {

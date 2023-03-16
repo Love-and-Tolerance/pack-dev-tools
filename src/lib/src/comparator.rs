@@ -1,6 +1,6 @@
 use super::pdttrait::Vector;
 use super::{pdtfs, pdthash, pdtthread};
-use std::path::Path;
+use camino::Utf8Path;
 
 #[derive(Debug)]
 pub struct FileData {
@@ -74,7 +74,7 @@ pub fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
 		let dir_data = dirs
 			.iter()
 			.map(|dir| {
-				let presence = Path::new(&format!("{}{}", &dir, &file)).is_file();
+				let presence = Utf8Path::new(&format!("{}{}", &dir, &file)).is_file();
 				match presence {
 					true => Some(pdthash::get_hash(&format!("{}{}", dir, file), false)),
 					false => None,

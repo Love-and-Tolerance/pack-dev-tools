@@ -1,17 +1,18 @@
 use super::pdtthread;
 use super::pdttrait::Vector;
+use camino::Utf8Path;
 use fs_extra::{dir, file};
 use std::fs;
-use std::path::{Path, MAIN_SEPARATOR as SLASH};
+use std::path::MAIN_SEPARATOR as SLASH;
 
 pub fn check_if_dir_exists(dir: &str) {
-	if !Path::new(dir).is_dir() {
+	if !Utf8Path::new(dir).is_dir() {
 		panic!("{dir} not found!");
 	}
 }
 
 pub fn if_dir_exists_remove_it(dir: &str) {
-	if Path::new(dir).is_dir() {
+	if Utf8Path::new(dir).is_dir() {
 		fs::remove_dir_all(dir).unwrap_or_else(|_| panic!("Failed to remove {dir} directory!"));
 	}
 }
@@ -29,12 +30,12 @@ pub fn find_files_in_dir(
 	dir: &str, recursive: bool, extensions: &Option<Vec<String>>,
 ) -> Vec<String> {
 	let mut files = vec![];
-	let paths = fs::read_dir(dir).unwrap();
+	let paths = Utf8Path::read_dir_utf8(dir.into()).unwrap();
 	for path in paths {
-		let path = path.unwrap().path().to_str().unwrap().to_string();
-		if Path::new(&path).is_dir() && recursive {
+		let path = path.unwrap().path().to_string();
+		if Utf8Path::new(&path).is_dir() && recursive {
 			files = [files, find_files_in_dir(&path, recursive, extensions)].concat();
-		} else if Path::new(&path).is_file() {
+		} else if Utf8Path::new(&path).is_file() {
 			match *extensions {
 				Some(ref extensions) => {
 					for ext in extensions {
@@ -88,12 +89,12 @@ pub fn get_files_in_list(
 ) -> Vec<String> {
 	let files = items
 		.iter()
-		.filter(|f| Path::new(f).is_file() && f.ends_with(".png"))
+		.filter(|f| Utf8Path::new(f).is_file() && f.ends_with(".png"))
 		.map(|f| f.to_string())
 		.collect::<Vec<String>>();
 	let dirs = items
 		.iter()
-		.filter(|f| Path::new(f).is_dir())
+		.filter(|f| Utf8Path::new(f).is_dir())
 		.map(|d| {
 			check_if_dir_exists(d);
 			check_dir_ends_with_slash(d.to_string())
@@ -112,10 +113,12 @@ pub fn create_output_dir(name: &str) -> String {
 pub fn copy_files_to_dir(folder: String, items: Vec<String>, content_only: bool) {
 	pdtthread::multithread(items, None, move |thread_num, item| {
 		println!("[thread {thread_num:02}] copying: {}", item);
-		if Path::new(&item).is_dir() {
+		if Utf8Path::new(&item).is_dir() {
 			copy_dir_to_dir(&folder, item, content_only);
-		} else if Path::new(&item).is_file() {
+		} else if Utf8Path::new(&item).is_file() {
 			copy_file_to_dir(&folder, item);
+		} else {
+			panic!("Entry passed as file or folder not found.");
 		}
 		None::<()>
 	});
