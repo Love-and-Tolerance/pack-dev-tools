@@ -9,7 +9,7 @@ bin_name = env!("CARGO_BIN_NAME"),
 	version,
 	about = format!("Blockify images by turning every pixel into a block texture.
 
-example: .{SLASH}blockify 16 .{SLASH}assets{SLASH}minecraft{SLASH}textures{SLASH}blocks .{SLASH}assets"),
+example: .{s}blockify 16 .{s}assets{s}minecraft{s}textures{s}blocks .{s}assets", s = SLASH),
 	long_about = None)
 ]
 

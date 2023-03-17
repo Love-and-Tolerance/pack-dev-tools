@@ -9,8 +9,8 @@ use std::path::MAIN_SEPARATOR as SLASH;
 	version,
 	about = format!("Optimize all png files in given path(s).
 
-example: .{SLASH}optimize-images -l4 a.png .{SLASH}assets{SLASH}
-example: .{SLASH}optimize-images --strip safe a.png b.png"),
+example: .{s}optimize-images -l4 a.png .{s}assets{s}
+example: .{s}optimize-images --strip safe a.png b.png", s = SLASH),
 	long_about = None)]
 
 struct Args {

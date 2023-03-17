@@ -35,8 +35,8 @@ pub fn resource_pack_conversion_setup(
 		"Villager-Skin-Pack{s}assets{s}minelittlepony{s}textures{s}entity",
 		s = SLASH
 	);
-	let pony_location = pdtfs::create_output_dir(&format!("{location}{s}pony", s = SLASH));
-	let zompony_location = pdtfs::create_output_dir(&format!("{location}{s}zompony", s = SLASH));
+	let pony_location = pdtfs::create_output_dir(&format!("{location}{SLASH}pony"));
+	let zompony_location = pdtfs::create_output_dir(&format!("{location}{SLASH}zompony"));
 	pdtfs::copy_dir_to_dir(&pony_location, paths[0].to_string(), true);
 	pdtfs::copy_dir_to_dir(&zompony_location, pony_location, true);
 	pdtfs::find_files_in_dir(&zompony_location, true, &extensions)
@@ -59,7 +59,7 @@ pub fn villager_infector(
 			println!(
 				"[thread {:02} villager-infector] infecting pony: {}",
 				thread_num,
-				pony.rsplit('/')
+				pony.rsplit(SLASH)
 					.next()
 					.unwrap()
 					.trim_end_matches(".png")

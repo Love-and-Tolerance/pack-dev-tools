@@ -1,6 +1,7 @@
 use super::{pdtcolor, pdtfs, pdtthread};
 use colors_transform::{Color, Hsl, Rgb};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
+use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
 
 pub fn cauldron(color: String, items: Vec<String>, saturation: Option<f32>) {
@@ -27,7 +28,7 @@ pub fn dye_images_in_cauldron(images: Vec<String>, color: Hsl, saturation: Optio
 		move |thread_num, (image, color, saturation)| {
 			println!(
 				"[thread {thread_num:02} cauldron] dying image: {}",
-				image.split('/').last().unwrap()
+				image.split(SLASH).last().unwrap()
 			);
 			let img =
 				image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));

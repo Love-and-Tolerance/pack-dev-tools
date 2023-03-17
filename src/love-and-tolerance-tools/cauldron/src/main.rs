@@ -9,8 +9,8 @@ bin_name = env!("CARGO_BIN_NAME"),
 	version,
 	about = format!("Tint png images to a specified color and saturation.
 
-example: .{SLASH}cauldron F5B7D0 .{SLASH}images/
-example: .{SLASH}cauldron e6c343 -s 65 .{SLASH}assets/"),
+example: .{s}cauldron F5B7D0 .{s}images
+example: .{s}cauldron e6c343 -s 65 .{s}assets", s = SLASH),
 	long_about = None)
 ]
 

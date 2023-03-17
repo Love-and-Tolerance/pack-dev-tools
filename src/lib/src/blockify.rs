@@ -1,6 +1,7 @@
 use super::{pdtcolor, pdtfs, pdtthread, pdttrait};
 use deltae::*;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
+use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::{Arc, Mutex};
 
 type Pixel = (f64, Rgba<u8>, LabValue);
@@ -20,7 +21,7 @@ fn get_average_colors(blocks: Vec<String>, pixels: u32) -> Vec<Block> {
 	pdtthread::multithread(blocks, None, move |thread_num, image| {
 		println!(
 			"[thread {thread_num:02} get_average_colors] averaging {}",
-			image.split('/').last().unwrap()
+			image.split(SLASH).last().unwrap()
 		);
 
 		let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
@@ -73,7 +74,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>, block_pixels: u32) {
 			println!(
 				"[thread {thread_num:02} blockify_images] [{:010} output pixels] starting {}",
 				*p,
-				texture.split('/').last().unwrap()
+				texture.split(SLASH).last().unwrap()
 			);
 			drop(p);
 

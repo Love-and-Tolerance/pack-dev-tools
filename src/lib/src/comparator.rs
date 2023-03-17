@@ -1,6 +1,7 @@
 use super::pdttrait::Vector;
 use super::{pdtfs, pdthash, pdtthread};
 use camino::Utf8Path;
+use std::path::MAIN_SEPARATOR as SLASH;
 
 #[derive(Debug)]
 pub struct FileData {
@@ -68,7 +69,7 @@ pub fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
 	pdtthread::multithread(files, None, move |thread_num, file| {
 		println!(
 			"[thread {thread_num:02}] getting information for file: {}",
-			file.split('/').last().unwrap()
+			file.split(SLASH).last().unwrap()
 		);
 
 		let dir_data = dirs
@@ -93,7 +94,7 @@ pub fn compare_files(dirs: Vec<String>, files: Vec<FileData>) -> Vec<PresenceDat
 	pdtthread::multithread(files, None, move |thread_num, file| {
 		println!(
 			"[thread {thread_num:02}] comparing folders for file: {}",
-			file.filename.split('/').last().unwrap()
+			file.filename.split(SLASH).last().unwrap()
 		);
 		let mut presence_data: Vec<usize> = vec![];
 		for i in 0..dirs.len() {
