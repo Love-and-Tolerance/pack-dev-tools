@@ -1,6 +1,6 @@
-use super::{pdtcolor, pdtfs, pdtthread, pdttrait};
+use super::{pdtfs, pdtthread};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 pub fn infect_villagers(paths: Vec<String>, overlay: &[u8]) {
 	let trigger_pixels: [(u32, u32); 6] = [(0, 0), (1, 0), (1, 1), (2, 0), (2, 1), (3, 0)];
@@ -54,14 +54,24 @@ pub fn villager_infector(
 					continue;
 				}
 				let (x, y) = (pixel.0, pixel.1);
-				let average = (pixel.2 .0[0] + pixel.2 .0[1] + pixel.2 .0[2]) / 3;
-				let new_r = average + ((pixel.2 .0[0] - average) / 2);
-				let new_g = average + ((pixel.2 .0[1] - average) / 2);
-				let new_b = average + ((pixel.2 .0[2] - average) / 2);
+				let average =
+					(pixel.2 .0[0] as f32 + pixel.2 .0[1] as f32 + pixel.2 .0[2] as f32) / 3.0;
+				let new_r = (average + ((pixel.2 .0[0] as f32 - average) / 2.0)).round() as u8;
+				let new_g = (average + ((pixel.2 .0[1] as f32 - average) / 2.0)).round() as u8;
+				let new_b = (average + ((pixel.2 .0[2] as f32 - average) / 2.0)).round() as u8;
 				let rgba = [new_r, new_g, new_b, a];
 				infected_pony.put_pixel(x, y, image::Rgba(rgba));
 			}
-
+			for trigger_pixel in trigger_pixels.iter() {
+				infected_pony.put_pixel(
+					trigger_pixel.0,
+					trigger_pixel.1,
+					img.get_pixel(trigger_pixel.0, trigger_pixel.1),
+				);
+			}
+			for overlay_pixel in overlay_pixels.iter() {
+				infected_pony.put_pixel(overlay_pixel.0, overlay_pixel.1, overlay_pixel.2);
+			}
 			infected_pony.save(&pony).unwrap();
 
 			None::<()>
