@@ -31,16 +31,15 @@ pub fn villager_infector(
 		None,
 		move |thread_num, (pony, trigger_pixels, overlay_pixels)| {
 			println!(
-				"[thread {thread_num:02} villager-infector] infecting pony: {}",
-				pony.split('/')
-					.last()
+				"[thread {:02} villager-infector] infecting pony: {}",
+				thread_num,
+				pony.rsplit('/')
+					.next()
 					.unwrap()
-					.split('.')
-					.collect::<Vec<_>>()[0]
-					.split('_')
-					.collect::<Vec<_>>()
-					.iter()
-					.map(|w| format!("{}{}", &w[..0].to_uppercase(), &w[1..]))
+					.trim_end_matches(".png")
+					.replace('_', " ")
+					.split_whitespace()
+					.map(|s| format!("{}{}", &s[..1].to_uppercase(), &s[1..]))
 					.collect::<Vec<_>>()
 					.join(" ")
 			);
@@ -54,8 +53,7 @@ pub fn villager_infector(
 					continue;
 				}
 				let (x, y) = (pixel.0, pixel.1);
-				let average =
-					(pixel.2 .0[0] as f32 + pixel.2 .0[1] as f32 + pixel.2 .0[2] as f32) / 3.0;
+				let average = (pixel.2 .0[0] + pixel.2 .0[1] + pixel.2 .0[2]) as f32 / 3.0;
 				let new_r = (average + ((pixel.2 .0[0] as f32 - average) / 2.0)).round() as u8;
 				let new_g = (average + ((pixel.2 .0[1] as f32 - average) / 2.0)).round() as u8;
 				let new_b = (average + ((pixel.2 .0[2] as f32 - average) / 2.0)).round() as u8;
@@ -72,7 +70,9 @@ pub fn villager_infector(
 			for overlay_pixel in overlay_pixels.iter() {
 				infected_pony.put_pixel(overlay_pixel.0, overlay_pixel.1, overlay_pixel.2);
 			}
-			infected_pony.save(&pony).unwrap();
+			infected_pony
+				.save(&pony)
+				.unwrap_or_else(|_| panic!("Failed to save image: {pony}"));
 
 			None::<()>
 		},
