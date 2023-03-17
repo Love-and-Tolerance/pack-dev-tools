@@ -16,5 +16,6 @@ members = [
 	"src/lib",
     "src/tools/*",
     "src/love-and-tolerance-tools/blockify",
-    "src/love-and-tolerance-tools/cauldron"
+    "src/love-and-tolerance-tools/cauldron",
+    "src/love-and-tolerance-tools/villager-infector"
 ]
