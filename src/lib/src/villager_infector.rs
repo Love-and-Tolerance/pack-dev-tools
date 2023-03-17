@@ -1,19 +1,45 @@
 use super::{pdtfs, pdtthread};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
+use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
 
-pub fn infect_villagers(paths: Vec<String>, overlay: &[u8]) {
+pub fn infect_villagers(paths: Vec<String>, overlay: &[u8], resource_pack_conversion: bool) {
 	let trigger_pixels: [(u32, u32); 6] = [(0, 0), (1, 0), (1, 1), (2, 0), (2, 1), (3, 0)];
 	let overlay_pixels = image::load_from_memory(overlay)
 		.unwrap_or_else(|_| panic!("Failed to load overlay image."))
 		.pixels()
 		.filter(|p| p.2 .0[3] == 255)
 		.collect::<Vec<_>>();
-	let output = pdtfs::create_output_dir("infected_ponies");
-	pdtfs::copy_files_to_dir(output.clone(), paths, true);
 	let extensions = Some(vec![".png".to_string()]);
-	let texture_files = pdtfs::find_files_in_dir(&output, true, &extensions);
+	let texture_files = match resource_pack_conversion {
+		true => resource_pack_conversion_setup(paths, extensions),
+		false => {
+			let output = pdtfs::create_output_dir("infected_ponies");
+			pdtfs::copy_files_to_dir(output.clone(), paths, true);
+			pdtfs::find_files_in_dir(&output, true, &extensions)
+		}
+	};
 	villager_infector(texture_files, trigger_pixels, overlay_pixels);
+}
+
+pub fn resource_pack_conversion_setup(
+	paths: Vec<String>, extensions: Option<Vec<String>>,
+) -> Vec<String> {
+	if paths.len() > 1 {
+		panic!(
+			"Expected 1 argument for resource pack conversion, found {}",
+			paths.len()
+		);
+	}
+	let location = format!(
+		"Villager-Skin-Pack{s}assets{s}minelittlepony{s}textures{s}entity",
+		s = SLASH
+	);
+	let pony_location = pdtfs::create_output_dir(&format!("{location}{s}pony", s = SLASH));
+	let zompony_location = pdtfs::create_output_dir(&format!("{location}{s}zompony", s = SLASH));
+	pdtfs::copy_dir_to_dir(&pony_location, paths[0].to_string(), true);
+	pdtfs::copy_dir_to_dir(&zompony_location, pony_location, true);
+	pdtfs::find_files_in_dir(&zompony_location, true, &extensions)
 }
 
 pub fn villager_infector(
