@@ -42,7 +42,7 @@ pub fn resource_pack_conversion_setup(
 		let (location, folder) = dir.rsplit_once(SLASH).unwrap();
 		let new_name = format!(
 			"{location}{SLASH}{}",
-			folder.replace(" ", "_").to_lowercase()
+			folder.replace(' ', "_").to_lowercase()
 		);
 		pdtfs::rename(dir, &new_name);
 	}
@@ -87,7 +87,8 @@ pub fn villager_infector(
 					continue;
 				}
 				let (x, y) = (pixel.0, pixel.1);
-				let average = (pixel.2 .0[0] + pixel.2 .0[1] + pixel.2 .0[2]) as f32 / 3.0;
+				let average =
+					(pixel.2 .0[0] as f32 + pixel.2 .0[1] as f32 + pixel.2 .0[2] as f32) / 3.0;
 				let new_r = (average + ((pixel.2 .0[0] as f32 - average) / 2.0)).round() as u8;
 				let new_g = (average + ((pixel.2 .0[1] as f32 - average) / 2.0)).round() as u8;
 				let new_b = (average + ((pixel.2 .0[2] as f32 - average) / 2.0)).round() as u8;
