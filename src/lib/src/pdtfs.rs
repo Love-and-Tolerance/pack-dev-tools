@@ -140,3 +140,19 @@ pub fn copy_file_to_dir(output: &String, input: String) {
 	file::copy(&input, output, &options)
 		.unwrap_or_else(|_| panic!("Failed to copy {} file to {} directory.", &input, &output));
 }
+
+pub fn find_dirs_in_dir(dir: &str, recursive: bool) -> Vec<String> {
+	let mut dirs = vec![];
+	let paths = Utf8Path::read_dir_utf8(dir.into()).unwrap();
+	for path in paths {
+		let path = path.unwrap().path().to_string();
+		if Utf8Path::new(&path).is_dir() {
+			if recursive {
+				dirs = [dirs, find_dirs_in_dir(&path, recursive)].concat();
+			} else {
+				dirs.push(path);
+			}
+		}
+	}
+	dirs
+}

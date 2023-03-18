@@ -10,13 +10,13 @@ bin_name = env!("CARGO_BIN_NAME"),
 	about = format!("Infect villager ponies.
 
 example: .{s}villager-infector .{s}assets{s}minelittlepony{s}textures{s}entity/pony
-example: .{s}villager-infector -rp .{s}Community-Skin-Pack", s = SLASH),
+example: .{s}villager-infector -c .{s}Community-Skin-Pack", s = SLASH),
 	long_about = None)
 ]
 
 struct Args {
 	#[arg(short, long)]
-	/// Convert Community Skin Pack into Villager Skin Pack
+	/// Convert Community Skin Pack into Villager Skin Pack.
 	convert: bool,
 	/// List of files and folders to infect.
 	input_paths: Vec<String>,
