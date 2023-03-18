@@ -46,6 +46,13 @@ pub fn resource_pack_conversion_setup(
 		);
 		pdtfs::rename(dir, &new_name);
 	}
+	let remove_extensions = Some(vec![
+		".md".to_string(),
+		".txt".to_string(),
+		".json".to_string(),
+	]);
+	pdtfs::delete_files_in_dir(&pony_location, true, &remove_extensions);
+	pdtfs::if_dir_exists_remove_it(&format!("{}{SLASH}.git", pony_location));
 	pdtfs::copy_dir_to_dir(&zompony_location, pony_location, true);
 	pdtfs::find_files_in_dir(&zompony_location, true, &extensions)
 }

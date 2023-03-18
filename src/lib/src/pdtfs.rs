@@ -155,3 +155,26 @@ pub fn find_dirs_in_dir(dir: &str, recursive: bool) -> Vec<String> {
 	}
 	dirs
 }
+
+pub fn delete_files_in_dir(dir: &str, recursive: bool, extensions: &Option<Vec<String>>) {
+	let paths = Utf8Path::read_dir_utf8(dir.into()).unwrap();
+	for path in paths {
+		let path = path.unwrap().path().to_string();
+		if Utf8Path::new(&path).is_dir() && recursive {
+			delete_files_in_dir(&path, recursive, extensions);
+		} else if Utf8Path::new(&path).is_file() {
+			match *extensions {
+				Some(ref extensions) => {
+					for ext in extensions {
+						if path.ends_with(ext) {
+							fs::remove_file(path.clone())
+								.unwrap_or_else(|_| panic!("Failed to remove file: {}", path))
+						}
+					}
+				}
+				None => fs::remove_file(path.clone())
+					.unwrap_or_else(|_| panic!("Failed to remove file: {}", path)),
+			}
+		}
+	}
+}
