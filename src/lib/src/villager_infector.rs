@@ -39,10 +39,10 @@ pub fn resource_pack_conversion_setup(
 	let zompony_location = pdtfs::create_output_dir(&format!("{location}{SLASH}zompony"));
 	pdtfs::copy_dir_to_dir(&pony_location, paths[0].to_string(), true);
 	for dir in pdtfs::find_dirs_in_dir(&pony_location, true).iter().rev() {
-		let (location, folder) = dir.trim_end_matches(SLASH).rsplit_once(SLASH).unwrap();
+		let (location, folder) = dir.rsplit_once(SLASH).unwrap();
 		let new_name = format!(
 			"{location}{SLASH}{}",
-			folder.replace('_', " ").to_lowercase()
+			folder.replace(" ", "_").to_lowercase()
 		);
 		pdtfs::rename(dir, &new_name);
 	}

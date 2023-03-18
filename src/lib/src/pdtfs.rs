@@ -147,10 +147,9 @@ pub fn find_dirs_in_dir(dir: &str, recursive: bool) -> Vec<String> {
 	for path in paths {
 		let path = path.unwrap().path().to_string();
 		if Utf8Path::new(&path).is_dir() {
+			dirs.push(path.clone());
 			if recursive {
 				dirs = [dirs, find_dirs_in_dir(&path, recursive)].concat();
-			} else {
-				dirs.push(path);
 			}
 		}
 	}
