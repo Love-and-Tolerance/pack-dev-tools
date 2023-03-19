@@ -15,7 +15,5 @@ codegen-units = 1
 members = [
 	"src/lib",
     "src/tools/*",
-    "src/love-and-tolerance-tools/blockify",
-    "src/love-and-tolerance-tools/cauldron",
-    "src/love-and-tolerance-tools/villager-infector"
+    "src/love-and-tolerance-tools/*"
 ]
