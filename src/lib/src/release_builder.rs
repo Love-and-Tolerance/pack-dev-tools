@@ -1,5 +1,5 @@
 use clap::ValueEnum;
-use std::collections::HashMap;
+use serde_json;
 
 #[derive(Clone, Debug, ValueEnum)]
 pub enum MinecraftPlatform {
@@ -10,11 +10,12 @@ pub enum MinecraftPlatform {
 
 pub async fn release_builder() -> Result<(), Box<dyn std::error::Error>> {
 	let resp = reqwest::get(
-		"https://github.com/Love-and-Tolerance/pack-builder-assets/raw/mane/assets/java.json",
+		"https://raw.githubusercontent.com/Love-and-Tolerance/pack-builder-assets/mane/assets/java.json",
 	)
 	.await?
-	.json::<HashMap<String, String>>()
-	.await?;
-	println!("{:#?}", resp);
+   .text()
+   .await?;
+   let json = serde_json::from_str(&resp)?;
+	println!("{:?}", json);
 	Ok(())
 }
