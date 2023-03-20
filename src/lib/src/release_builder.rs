@@ -1,5 +1,5 @@
 use clap::ValueEnum;
-use serde_json;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, ValueEnum)]
 pub enum MinecraftPlatform {
@@ -9,13 +9,46 @@ pub enum MinecraftPlatform {
 }
 
 pub async fn release_builder() -> Result<(), Box<dyn std::error::Error>> {
-	let resp = reqwest::get(
-		"https://raw.githubusercontent.com/Love-and-Tolerance/pack-builder-assets/mane/assets/java.json",
+	let bedrock = reqwest::get(
+		"https://raw.githubusercontent.com/Love-and-Tolerance/pack-builder-assets/mane/assets/bedrock.json",
 	)
 	.await?
-   .text()
+   .json::<BedrockAssets>()
    .await?;
-   let json = serde_json::from_str(&resp)?;
-	println!("{:?}", json);
+	println!("{:#?}", bedrock);
 	Ok(())
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct BedrockBaseRepo {
+	mc_versions: String,
+	pack_format: String,
+	tag: String,
+	version: String,
+	filename: String,
+	url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct BedrockAddon {
+	name: String,
+	filename: String,
+	url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Templates {
+	asset_url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct BedrockRepo {
+	base: BedrockBaseRepo,
+	addons: Vec<BedrockAddon>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct BedrockAssets {
+	templates: Templates,
+	repos: BedrockRepo,
 }
