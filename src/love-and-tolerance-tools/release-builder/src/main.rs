@@ -20,6 +20,6 @@ struct Args {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let args = Args::parse();
-	release_builder().await?;
+	release_builder(args.platform).await?;
 	Ok(())
 }
