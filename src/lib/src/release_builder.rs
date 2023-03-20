@@ -46,6 +46,18 @@ pub struct Condition {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub enum LicenseValue {
+	Boolean(bool),
+	String(String),
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct LicenseCondition {
+	trigger: String,
+	value: LicenseValue,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct AddonUrl {
 	name: String,
 	value: String,
@@ -71,7 +83,7 @@ pub struct JavaVariant {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct JavaVariantAddon {
 	name: String,
-	id: u32,
+	id_pos: u32,
 	apply_order: u32,
 	default_variant: String,
 	variants: Vec<JavaVariant>,
@@ -129,7 +141,7 @@ pub enum JavaConditionalBranch {
 #[derive(Serialize, Deserialize, Debug)]
 pub enum JavaConditionalLicense {
 	Boolean(bool),
-	Conditions(Vec<Condition>),
+	Conditions(Vec<LicenseCondition>),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
