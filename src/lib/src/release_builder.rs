@@ -31,6 +31,29 @@ pub async fn release_builder(
 	Ok(())
 }
 
+// java structs
+#[derive(Serialize, Deserialize, Debug)]
+pub struct JavaAssets {
+	templates: JavaTemplates,
+	repos: JavaRepo,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct JavaTemplates {
+	zips_path: String,
+	base_zip_name: String,
+	variant_addon_zip_name: String,
+	regular_addon_zip_name: String,
+	mod_addon_zip_name: String,
+	filename: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct JavaRepo {
+	base: JavaBaseRepo,
+	addons: JavaAddons,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct JavaBaseRepo {
 	mc_versions: String,
@@ -40,33 +63,20 @@ pub struct JavaBaseRepo {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Condition {
-	trigger: String,
-	value: String,
+pub struct JavaAddons {
+	exclusive: Vec<JavaVariantAddon>,
+	regular: Vec<JavaBasicAddon>,
+	mods: Vec<JavaBasicAddon>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub enum LicenseValue {
-	Boolean(bool),
-	String(String),
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct LicenseCondition {
-	trigger: String,
-	value: LicenseValue,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AddonUrl {
+pub struct JavaVariantAddon {
 	name: String,
-	value: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct JavaAddonLink {
-	name: String,
-	url: JavaAddonUrl,
+	id_pos: u32,
+	apply_order: u32,
+	default_variant: String,
+	variants: Vec<JavaVariant>,
+	license: Option<JavaConditionalLicense>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -81,13 +91,33 @@ pub struct JavaVariant {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JavaVariantAddon {
-	name: String,
-	id_pos: u32,
-	apply_order: u32,
-	default_variant: String,
-	variants: Vec<JavaVariant>,
-	license: Option<JavaConditionalLicense>,
+pub enum JavaConditionalBranch {
+	String(String),
+	Conditions(Vec<Condition>),
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Condition {
+	trigger: String,
+	value: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum JavaConditionalLicense {
+	Boolean(bool),
+	Conditions(Vec<LicenseCondition>),
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct LicenseCondition {
+	trigger: String,
+	value: LicenseValue,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum LicenseValue {
+	Boolean(bool),
+	String(String),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -104,50 +134,39 @@ pub struct JavaBasicAddon {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JavaTemplates {
-	zips_path: String,
-	base_zip_name: String,
-	variant_addon_zip_name: String,
-	regular_addon_zip_name: String,
-	mod_addon_zip_name: String,
-	filename: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct JavaAddons {
-	exclusive: Vec<JavaVariantAddon>,
-	regular: Vec<JavaBasicAddon>,
-	mods: Vec<JavaBasicAddon>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct JavaRepo {
-	base: JavaBaseRepo,
-	addons: JavaAddons,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct JavaAssets {
-	templates: JavaTemplates,
-	repos: JavaRepo,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub enum JavaConditionalBranch {
-	String(String),
-	Conditions(Vec<Condition>),
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub enum JavaConditionalLicense {
-	Boolean(bool),
-	Conditions(Vec<LicenseCondition>),
+pub struct JavaAddonLink {
+	name: String,
+	url: JavaAddonUrl,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum JavaAddonUrl {
 	String(String),
 	URLs(Vec<AddonUrl>),
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct AddonUrl {
+	name: String,
+	value: String,
+}
+
+// Bedrock structs
+#[derive(Serialize, Deserialize, Debug)]
+pub struct BedrockAssets {
+	templates: BedrockTemplates,
+	repos: BedrockRepo,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct BedrockTemplates {
+	asset_url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct BedrockRepo {
+	base: BedrockBaseRepo,
+	addons: Vec<BedrockAddon>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -165,21 +184,4 @@ pub struct BedrockAddon {
 	name: String,
 	filename: String,
 	url: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct BedrockTemplates {
-	asset_url: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct BedrockRepo {
-	base: BedrockBaseRepo,
-	addons: Vec<BedrockAddon>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct BedrockAssets {
-	templates: BedrockTemplates,
-	repos: BedrockRepo,
 }
