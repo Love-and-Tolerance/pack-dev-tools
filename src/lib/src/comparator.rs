@@ -50,19 +50,26 @@ pub fn comparator(args: Vec<String>) {
 		.sort_and_dedup_vec();
 	let file_data = get_files_data(dirs.clone(), files);
 	let results = compare_files(dirs, file_data);
+	let mut changes: Vec<String> = vec![];
 	for result in &results {
-		println!(
-			"{} {}",
-			result
-				.presence_version
-				.iter()
-				.map(|&id| id.to_string())
-				.collect::<Vec<_>>()
-				.join(" "),
-			result.filename
-		);
+		let changed = result.presence_version.clone().sort_and_dedup_vec().len() > 1;
+		if changed {
+			changes.push(format!(
+				"{} {}",
+				result
+					.presence_version
+					.iter()
+					.map(|&id| id.to_string())
+					.collect::<Vec<_>>()
+					.join(" "),
+				result.filename
+			));
+		}
 	}
-	println!("{}", results.len());
+	for change in &changes {
+		println!("{}", change);
+	}
+	println!("{}", &changes.len());
 }
 
 pub fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
