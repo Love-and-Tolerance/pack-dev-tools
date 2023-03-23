@@ -1,7 +1,6 @@
 use super::pdttrait::Vector;
 use super::{pdtfs, pdthash, pdtthread};
 use camino::Utf8Path;
-use std::path::MAIN_SEPARATOR as SLASH;
 
 #[derive(Debug)]
 pub struct FileData {
@@ -46,7 +45,7 @@ pub fn comparator(args: Vec<String>) {
 		Structure::Ordered => {}
 		Structure::Unordered => {}
 	}
-	let files = pdtfs::find_files_in_multiple_dirs(dirs.clone(), recursive, None, &true)
+	let files = pdtfs::find_files_in_multiple_dirs(dirs.clone(), recursive, None, &true, false)
 		.sort_and_dedup_vec();
 	let file_data = get_files_data(dirs.clone(), files);
 	let results = compare_files(dirs, file_data);
@@ -69,16 +68,11 @@ pub fn comparator(args: Vec<String>) {
 	for change in &changes {
 		println!("{}", change);
 	}
-	println!("{}", &changes.len());
+	eprintln!("{}", &changes.len());
 }
 
 pub fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
-	pdtthread::multithread(files, None, move |thread_num, file| {
-		println!(
-			"[thread {thread_num:02}] getting information for file: {}",
-			file.split(SLASH).last().unwrap()
-		);
-
+	pdtthread::multithread(files, None, move |_, file| {
 		let dir_data = dirs
 			.iter()
 			.map(|dir| {
@@ -98,11 +92,7 @@ pub fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
 }
 
 pub fn compare_files(dirs: Vec<String>, files: Vec<FileData>) -> Vec<PresenceData> {
-	pdtthread::multithread(files, None, move |thread_num, file| {
-		println!(
-			"[thread {thread_num:02}] comparing folders for file: {}",
-			file.filename.split(SLASH).last().unwrap()
-		);
+	pdtthread::multithread(files, None, move |_, file| {
 		let mut presence_data: Vec<usize> = vec![];
 		for i in 0..dirs.len() {
 			let mut id = 0;

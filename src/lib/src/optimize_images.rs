@@ -25,7 +25,7 @@ pub fn optimize_images(level: u8, strip: Strip, fix: bool, interlace: bool, path
 	let recursive = true;
 	let extensions = Some(vec![".png".to_string()]);
 	const EXCLUDE_DIR_NAME: bool = false;
-	let images = get_files_in_list(paths, recursive, extensions, &EXCLUDE_DIR_NAME);
+	let images = get_files_in_list(paths, recursive, extensions, &EXCLUDE_DIR_NAME, true);
 	for image in images {
 		println!("optimizing image: {}", &image);
 		let input = InFile::Path(Utf8PathBuf::from(&image).into());
