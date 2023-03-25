@@ -1,7 +1,7 @@
 use super::pdtthread;
 use super::pdttrait::Vector;
 use camino::Utf8Path;
-use fs_extra::{dir, file};
+use fs_extra::dir;
 use std::fs;
 use std::path::MAIN_SEPARATOR as SLASH;
 
@@ -137,8 +137,8 @@ pub fn copy_dir_to_dir(output: &String, input: String, content_only: bool) {
 }
 
 pub fn copy_file_to_dir(output: &String, input: String) {
-	let options = file::CopyOptions::new();
-	file::copy(&input, output, &options)
+	let options = dir::CopyOptions::new();
+	fs_extra::copy_items(&[&input], output, &options)
 		.unwrap_or_else(|_| panic!("Failed to copy {} file to {} directory.", &input, &output));
 }
 
