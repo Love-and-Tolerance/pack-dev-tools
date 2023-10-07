@@ -45,12 +45,14 @@ pub fn json_formatter(dir_or_file: String, fmt_type: Json, indent: Indent) {
 
 pub fn format_json(json: &str, indent: &str) -> String {
 	let value = parse_to_value(json);
-	let mut writer = Vec::with_capacity(256);
+	// json.len() is not ideal but its a _goodish_ default
+	let mut writer = Vec::with_capacity(json.len());
 	let formatter = PrettyFormatter::with_indent(indent.as_bytes());
 	let mut serialiser = Serializer::with_formatter(&mut writer, formatter);
 	value
 		.serialize(&mut serialiser)
 		.expect("Failed to serialize json data.");
+	writer.push(b'\n');
 	String::from_utf8(writer).expect("Failed to convert utf8 to string.")
 }
 
