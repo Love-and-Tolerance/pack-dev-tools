@@ -1,0 +1,13 @@
+[package]
+name = "font-upscaler"
+description = "Upscales fonts and applies relevant transformations to help them look natural"
+repository = "https://github.com/Love-and-Tolerance/pack-dev-tools"
+version = "0.1.0"
+authors = ["Silk Rose", "Meadowsys"]
+license = "MIT"
+edition = "2021"
+publish = false
+
+[dependencies]
+pdtlib = { path = "../../lib" }
+font-upscaler-macro = { path = "../font-upscaler-macro" }
