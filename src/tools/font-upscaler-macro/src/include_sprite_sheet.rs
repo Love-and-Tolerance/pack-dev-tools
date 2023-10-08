@@ -8,7 +8,6 @@ use std::collections::{ HashMap, HashSet };
 use std::fmt;
 
 type Map<K, V> = HashMap<K, V, RandomState>;
-type Set<T> = HashSet<T, RandomState>;
 
 const IMAGE: &[u8] = include_bytes!("./transform-map.png");
 
@@ -16,19 +15,18 @@ pub fn process(_input: TokenStream) -> TokenStream {
 	let transform_map = image::load_from_memory_with_format(IMAGE, image::ImageFormat::Png)
 		.unwrap();
 
-	// TODO: this needs to be updated/removed if/when we decided to do higher res upscaling
 	let cell_height = 4usize;
 	let cell_width = 8usize;
 
-	let num_cells_height = 8usize;
-	let num_cells_width = 8usize;
-
-	let height = cell_height * num_cells_height;
-	let width = cell_width * num_cells_width;
-
-	assert_eq!(transform_map.height() as usize, height, "transformation_map height");
-	assert_eq!(transform_map.width() as usize, width, "transformation_map width");
+	let height = transform_map.height() as usize;
+	let width = transform_map.width() as usize;
 	let num_pixels = height * width;
+
+	assert_eq!(height % cell_height, 0, "transformation_map height multiple of {cell_height}");
+	assert_eq!(width % cell_width, 0, "transformation_map width multiple of {cell_width}");
+
+	let num_cells_height = height / cell_height;
+	let num_cells_width = width / cell_width;
 
 	let num_cells = num_cells_height * num_cells_width;
 
@@ -95,30 +93,76 @@ pub fn process(_input: TokenStream) -> TokenStream {
 		// 24 25 26 27 | 28 29 30 31
 
 
+		let pixel: Pixel = [
+			[s(cell[0]), s(cell[1]), s(cell[2])],
+			[s(cell[8]), s(cell[9]), s(cell[10])],
+			[s(cell[16]), s(cell[17]), s(cell[18])],
+		];
+		let upscaled: UpscaledPixel = [
+			[s(cell[4]), s(cell[5]), s(cell[6]), s(cell[7])],
+			[s(cell[12]), s(cell[13]), s(cell[14]), s(cell[15])],
+			[s(cell[20]), s(cell[21]), s(cell[22]), s(cell[23])],
+			[s(cell[28]), s(cell[29]), s(cell[30]), s(cell[31])]
+		];
+		let none = (pixel, upscaled);
 
-		let pixel = Pixel {
-			t: s(cell[1]),
-			b: s(cell[17]),
-			l: s(cell[8]),
-			r: s(cell[10]),
-			tl: s(cell[0]),
-			tr: s(cell[2]),
-			bl: s(cell[16]),
-			br: s(cell[18]),
-			m: s(cell[9])
+		let pixels = {
+			let mut flipped = none;
+			flip(&mut flipped.0);
+			flip(&mut flipped.1);
+
+			let mut rotated90 = none;
+			rotate(&mut rotated90.0);
+			rotate(&mut rotated90.1);
+			let mut rotated90_flipped = flipped;
+			rotate(&mut rotated90_flipped.0);
+			rotate(&mut rotated90_flipped.1);
+
+
+			let mut rotated180 = rotated90;
+			rotate(&mut rotated180.0);
+			rotate(&mut rotated180.1);
+			let mut rotated180_flipped = rotated90_flipped;
+			rotate(&mut rotated180_flipped.0);
+			rotate(&mut rotated180_flipped.1);
+
+			let mut rotated270 = rotated180;
+			rotate(&mut rotated270.0);
+			rotate(&mut rotated270.1);
+			let mut rotated270_flipped = rotated180_flipped;
+			rotate(&mut rotated270_flipped.0);
+			rotate(&mut rotated270_flipped.1);
+
+
+			vec![
+				none,
+				flipped,
+
+				rotated90,
+				rotated90_flipped,
+
+				rotated180,
+				rotated180_flipped,
+
+				rotated270,
+				rotated270_flipped
+			]
 		};
-		let pixel_key = pixel.to_key();
-		if cells_map.contains_key(&pixel_key) {
-			if !dupes.contains(&pixel) {
-				dupes.push(pixel);
+
+		for (pixel, upscaled) in pixels.into_iter() {
+			let pixel_key = pixel.to_key();
+			if cells_map.contains_key(&pixel_key) {
+				if !dupes.contains(&pixel) {
+					dupes.push(pixel);
+				}
+				continue
 			}
-			continue
+			cells_map.insert(pixel_key, (pixel, upscaled));
 		}
-		cells_map.insert(pixel_key, pixel);
 	}
 
 	// nested loop of doom
-	let mut missing = Vec::with_capacity(num_cells - cells_map.len());
+	let mut missing = Vec::with_capacity(num_cells);
 
 	let states = [PTrue, PFalse];
 
@@ -131,7 +175,11 @@ pub fn process(_input: TokenStream) -> TokenStream {
 							for bl in states.into_iter() {
 								for br in states.into_iter() {
 									for m in states.into_iter() {
-										let pixel = Pixel { t, b, l, r, tl, tr, bl, br, m };
+										let pixel: Pixel = [
+											[tl, t, tr],
+											[l, m, r],
+											[bl, b, br]
+										];
 										let key = pixel.to_key();
 										if !cells_map.contains_key(&key) {
 											missing.push(pixel);
@@ -162,83 +210,20 @@ pub fn process(_input: TokenStream) -> TokenStream {
 	}
 
 	if let Some(panic_msg) = panic_msg {
+		let cells_len = cells_map.len();
+		let dupes_len = dupes.len();
+		let missing_len = missing.len();
+		let panic_msg = format!("{panic_msg}   {cells_len} cells, {dupes_len} dupes, {missing_len} missing");
 		return quote! {
 			compile_error!(#panic_msg);
 		}
 	}
 
-
-	// // vec of rows
-	// let thing = pixels.into_iter()
-	// 	.chunks(width)
-	// 	.into_iter()
-	// 	.map(|c| c.collect::<Vec<_>>())
-	// 	// .collect::<Vec<_>>();
-
-	// // assert_eq!(rows.len(), height, "num rows");
-	// // assert!(rows.iter().all(|r| r.len() == width), "num of all cols");
-
-	// // vecs of vecs, each vec containing a group of rows by `cell_height`
-	// // let grouped_rows = rows.into_iter()
-	// 	.chunks(cell_height)
-	// 	.into_iter()
-	// 	.map(|c| c.collect::<Vec<_>>())
-
-	// // each row now contains vecs of cells divided by width,
-	// 	.map(|row_group| {
-	// 		row_group.into_iter()
-	// 			.map(|row| {
-	// 				row.into_iter()
-	// 					.chunks(cell_width)
-	// 					.into_iter()
-	// 					.map(|c| c.collect::<Vec<_>>())
-	// 					.collect::<Vec<_>>()
-	// 			})
-	// 			.collect::<Vec<_>>()
-	// 	})
-	// 	.collect::<Vec<_>>();
-	// 	// .collect::<Vec<_>>();
-	// 	// NOW
-	// 	// each row contains
-
-	// // now we manipulate
-
-	// // vecs of rows
-	// let cells = thing.into_iter()
-	// 	.map(|row_group| {
-	// 		row_group.into_iter()
-
-	// 			// .map(|row| {})
-	// 	});
-
-	// assert!(grouped_rows.iter().all(|r| r.len() == num_cells_height));
-
-
-	// let grouped = rows.iter_mut().for_each(|me| {})
-
 	_input
 }
 
-#[derive(PartialEq, Eq)]
-struct Pixel {
-	t: PixelState,
-	b: PixelState,
-	l: PixelState,
-	r: PixelState,
-	tl: PixelState,
-	tr: PixelState,
-	bl: PixelState,
-	br: PixelState,
-	m: PixelState
-}
-
-struct UpscaledPixel {
-	r1: [PixelState; 4],
-	r2: [PixelState; 4],
-	r3: [PixelState; 4],
-	r4: [PixelState; 4]
-
-}
+type Pixel = [[PixelState; 3]; 3];
+type UpscaledPixel = [[PixelState; 4]; 4];
 
 use PixelState::*;
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -246,6 +231,9 @@ enum PixelState {
 	PTrue,
 	PFalse
 }
+
+// this is kinda dirty and not how you're supposed to use Display/Debug
+// but exploit the language, lol
 
 impl fmt::Display for PixelState {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -265,14 +253,27 @@ impl fmt::Debug for PixelState {
 	}
 }
 
-impl Pixel {
+trait ToKey {
+	fn to_key(&self) -> String;
+	fn get_nice_grid(&self, msg: &str) -> String;
+}
+
+impl ToKey for Pixel {
 	fn to_key(&self) -> String {
-		let Pixel { t, b, l, r, tl, tr, bl, br, m } = self;
+		let [
+			[tl, t, tr],
+			[l, m, r],
+			[bl, b, br]
+		] = self;
 		format!("{t}{b}{l}{r}{tl}{tr}{bl}{br}{m}")
 	}
 
 	fn get_nice_grid(&self, msg: &str) -> String {
-		let Pixel { t, b, l, r, tl, tr, bl, br, m } = self;
+		let [
+			[tl, t, tr],
+			[l, m, r],
+			[bl, b, br]
+		] = self;
 
 		let line1 = format!("   {msg}");
 		let line2 = format!("   {tl:?}{t:?}{tr:?}");
@@ -284,4 +285,25 @@ impl Pixel {
 
 fn s(pixel: (u32, u32, Rgba<u8>)) -> PixelState {
 	if pixel.2.0[3] == 0 { PFalse } else { PTrue }
+}
+
+fn flip<T: Clone, const N: usize>(vec: &mut [[T; N]; N]) {
+	for i in 0..vec.len() {
+		for h in i..vec.len() {
+			let loc1 = vec.get_mut(i).unwrap().get_mut(h).unwrap();
+			let mut temp = loc1.clone();
+			std::mem::swap(&mut temp, loc1);
+
+			let loc2 = vec.get_mut(h).unwrap().get_mut(i).unwrap();
+			std::mem::swap(&mut temp, loc2);
+
+			let loc1 = vec.get_mut(i).unwrap().get_mut(h).unwrap();
+			std::mem::swap(&mut temp, loc1);
+		}
+	}
+}
+
+fn rotate<T: Clone, const N: usize>(vec: &mut [[T; N]; N]) {
+	vec.reverse();
+	flip(vec);
 }
