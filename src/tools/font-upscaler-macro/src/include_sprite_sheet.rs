@@ -1,10 +1,10 @@
-use ahash::{ HashMapExt as _, HashSetExt as _, RandomState };
+use ahash::{ HashMapExt as _, RandomState };
 use image::GenericImageView as _;
 use image::Rgba;
 use itertools::Itertools as _;
 use proc_macro2::TokenStream;
 use quote::quote;
-use std::collections::{ HashMap, HashSet };
+use std::collections::{ HashMap };
 use std::fmt;
 
 type Map<K, V> = HashMap<K, V, RandomState>;
@@ -18,7 +18,7 @@ pub fn process(_input: TokenStream) -> TokenStream {
 	{
 		let mut footgun_pixels = Vec::new();
 		for (x, y, pixel) in transform_map.pixels() {
-			let [r, g, b, a] = pixel.0;
+			let [_, _, _, a] = pixel.0;
 
 			if a != 0 && a != u8::MAX {
 				footgun_pixels.push((x, y));
