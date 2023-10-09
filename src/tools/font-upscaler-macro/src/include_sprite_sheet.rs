@@ -326,13 +326,10 @@ impl ToKey for Pixel {
 
 fn s(pixel: (u32, u32, Rgba<u8>)) -> PixelState {
 	let alpha = pixel.2.0[3];
-
-	if alpha == 0 {
-		PFalse
-	} else if alpha == u8::MAX {
-		PTrue
-	} else {
-		panic!("AAAaaaaaaAAaAAAaaAAaaAAaAAAAAAAAaaaaaAAaaAAaaaaa")
+	match alpha {
+		0 => { PFalse }
+		1 => { PTrue }
+		_ => { unreachable!("pixel should have been checked for valid opacity AAAaaaaaaAAaAAAaaAAaaAAaAAAAAAAAaaaaaAAaaAAaaaaa") }
 	}
 }
 
