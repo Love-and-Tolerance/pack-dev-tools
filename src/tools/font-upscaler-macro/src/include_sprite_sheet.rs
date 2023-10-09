@@ -108,7 +108,7 @@ pub fn process(_input: TokenStream) -> TokenStream {
 		];
 		let none = (pixel, upscaled);
 
-		let pixels = {
+		let (none, generated) = {
 			let mut flipped = none;
 			flip(&mut flipped.0);
 			flip(&mut flipped.1);
@@ -136,8 +136,7 @@ pub fn process(_input: TokenStream) -> TokenStream {
 			rotate(&mut rotated270_flipped.1);
 
 
-			vec![
-				none,
+			let generated = vec![
 				flipped,
 
 				rotated90,
@@ -148,10 +147,19 @@ pub fn process(_input: TokenStream) -> TokenStream {
 
 				rotated270,
 				rotated270_flipped
-			]
+			];
+			(none, generated)
 		};
 
-		for (pixel, upscaled) in pixels.into_iter() {
+		let mut to_test = Vec::with_capacity(8);
+
+		for (pixel, upscaled) in generated.into_iter() {
+			if pixel != none.0 && !to_test.iter().any(|(p, _)| p == &pixel) {
+				to_test.push((pixel, upscaled));
+			}
+		}
+		to_test.push(none);
+		for (pixel, upscaled) in to_test.into_iter() {
 			let pixel_key = pixel.to_key();
 			if cells_map.contains_key(&pixel_key) {
 				if !dupes.contains(&pixel) {
