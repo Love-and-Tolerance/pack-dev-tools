@@ -61,8 +61,24 @@ pub fn process(_input: TokenStream) -> TokenStream {
 
 	assert_eq!(cells_vec.len(), num_cells);
 
-	let mut cells_map = Map::new();
+	let mut cells_map = Map::<String, (Pixel, UpscaledPixel)>::new();
+	let mut transformed_map = Map::<String, (Pixel, UpscaledPixel)>::new();
 	let mut dupes = Map::<String, (Pixel, usize)>::new();
+
+	let mut insert_into_map = |map: &mut Map<String, (Pixel, UpscaledPixel)>, k: String, v: (Pixel, UpscaledPixel), insert_to_dupes: bool| {
+		if map.contains_key(&k) {
+			if insert_to_dupes {
+				if let Some(dupe) = dupes.get_mut(&k) {
+					dupe.1 += 1;
+				} else {
+					dupes.insert(k, (v.0, 1));
+				}
+			}
+			return
+		}
+
+		map.insert(k, v);
+	};
 
 	let cell_iter = cells_vec.into_iter()
 		.filter(|c| c.iter().any(|p| s(*p) == PTrue));
@@ -108,76 +124,59 @@ pub fn process(_input: TokenStream) -> TokenStream {
 		];
 		let none = (pixel, upscaled);
 
-		let (none, generated) = {
-			let mut flipped = none;
-			flip(&mut flipped.0);
-			flip(&mut flipped.1);
+		let mut flipped = none;
+		flip(&mut flipped.0);
+		flip(&mut flipped.1);
 
-			let mut rotated90 = none;
-			rotate(&mut rotated90.0);
-			rotate(&mut rotated90.1);
-			let mut rotated90_flipped = flipped;
-			rotate(&mut rotated90_flipped.0);
-			rotate(&mut rotated90_flipped.1);
-
-
-			let mut rotated180 = rotated90;
-			rotate(&mut rotated180.0);
-			rotate(&mut rotated180.1);
-			let mut rotated180_flipped = rotated90_flipped;
-			rotate(&mut rotated180_flipped.0);
-			rotate(&mut rotated180_flipped.1);
-
-			let mut rotated270 = rotated180;
-			rotate(&mut rotated270.0);
-			rotate(&mut rotated270.1);
-			let mut rotated270_flipped = rotated180_flipped;
-			rotate(&mut rotated270_flipped.0);
-			rotate(&mut rotated270_flipped.1);
+		let mut rotated90 = none;
+		rotate(&mut rotated90.0);
+		rotate(&mut rotated90.1);
+		let mut rotated90_flipped = flipped;
+		rotate(&mut rotated90_flipped.0);
+		rotate(&mut rotated90_flipped.1);
 
 
-			let generated = vec![
-				flipped,
+		let mut rotated180 = rotated90;
+		rotate(&mut rotated180.0);
+		rotate(&mut rotated180.1);
+		let mut rotated180_flipped = rotated90_flipped;
+		rotate(&mut rotated180_flipped.0);
+		rotate(&mut rotated180_flipped.1);
 
-				rotated90,
-				rotated90_flipped,
+		let mut rotated270 = rotated180;
+		rotate(&mut rotated270.0);
+		rotate(&mut rotated270.1);
+		let mut rotated270_flipped = rotated180_flipped;
+		rotate(&mut rotated270_flipped.0);
+		rotate(&mut rotated270_flipped.1);
 
-				rotated180,
-				rotated180_flipped,
+		let transformed_cells = [
+			flipped,
+			rotated90,
+			rotated90_flipped,
+			rotated180,
+			rotated180_flipped,
+			rotated270,
+			rotated270_flipped,
+		];
 
-				rotated270,
-				rotated270_flipped
-			];
-			(none, generated)
-		};
+		let none_key = none.0.to_key();
+		insert_into_map(&mut cells_map, none_key, none, true);
 
-		let mut to_test = Vec::with_capacity(8);
-
-		for (pixel, upscaled) in generated.into_iter() {
-			if pixel != none.0 && !to_test.iter().any(|(p, _)| p == &pixel) {
-				to_test.push((pixel, upscaled));
-			}
-		}
-		to_test.push(none);
-		for (pixel, upscaled) in to_test.into_iter() {
-			let pixel_key = pixel.to_key();
-			if cells_map.contains_key(&pixel_key) {
-				if let Some(dupe) = dupes.get_mut(&pixel_key) {
-					dupe.1 += 1;
-				} else {
-					dupes.insert(pixel_key, (pixel, 1));
-				}
-				continue
-			}
-			cells_map.insert(pixel_key, (pixel, upscaled));
+		for cell in transformed_cells {
+			let k = cell.0.to_key();
+			insert_into_map(&mut transformed_map, k, cell, false);
 		}
 	}
 
-	// nested loop of doom
-	let mut missing = Vec::with_capacity(num_cells);
+	for (k, v) in transformed_map.into_iter() {
+		insert_into_map(&mut cells_map, k, v, false);
+	}
 
+	let mut missing = Vec::with_capacity(num_cells);
 	let states = [PTrue, PFalse];
 
+	// nested loop of doom
 	for t in states.into_iter() {
 		for b in states.into_iter() {
 			for l in states.into_iter() {
