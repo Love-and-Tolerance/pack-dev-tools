@@ -33,9 +33,10 @@ pub fn find_files_in_dir(
 	let paths = Utf8Path::read_dir_utf8(dir.into()).unwrap();
 	for path in paths {
 		let path = path.unwrap().path().to_string();
-		if Utf8Path::new(&path).is_dir() && recursive {
+		let utf8_path = Utf8Path::new(&path);
+		if utf8_path.is_dir() && recursive {
 			files = [files, find_files_in_dir(&path, recursive, extensions)].concat();
-		} else if Utf8Path::new(&path).is_file() {
+		} else if utf8_path.is_file() {
 			match *extensions {
 				Some(ref extensions) => {
 					for ext in extensions {

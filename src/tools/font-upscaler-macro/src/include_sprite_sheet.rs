@@ -4,6 +4,7 @@ use image::Rgba;
 use itertools::Itertools as _;
 use proc_macro2::TokenStream;
 use quote::quote;
+use quote::ToTokens;
 use std::collections::HashMap;
 use std::fmt;
 
@@ -95,7 +96,12 @@ pub fn process(_input: TokenStream) -> TokenStream {
 	let mut transformed_map = Map::<String, (Pixel, UpscaledPixel)>::new();
 	let mut dupes = Map::<String, (Pixel, usize)>::new();
 
-	let mut insert_into_map = |map: &mut Map<String, (Pixel, UpscaledPixel)>, k: String, v: (Pixel, UpscaledPixel), insert_to_dupes: bool| {
+	let mut insert_into_map = |
+		map: &mut Map<String, (Pixel, UpscaledPixel)>,
+		k: String,
+		v: (Pixel, UpscaledPixel),
+		insert_to_dupes: bool
+	| {
 		if map.contains_key(&k) {
 			if insert_to_dupes {
 				if let Some(dupe) = dupes.get_mut(&k) {
@@ -204,36 +210,19 @@ pub fn process(_input: TokenStream) -> TokenStream {
 	}
 
 	let mut missing = Vec::with_capacity(num_cells);
-	let states = [PTrue, PFalse];
 
 	// nested loop of doom
-	for t in states.into_iter() {
-		for b in states.into_iter() {
-			for l in states.into_iter() {
-				for r in states.into_iter() {
-					for tl in states.into_iter() {
-						for tr in states.into_iter() {
-							for bl in states.into_iter() {
-								for br in states.into_iter() {
-									for m in states.into_iter() {
-										let pixel: Pixel = [
-											[tl, t, tr],
-											[l, m, r],
-											[bl, b, br]
-										];
-										let key = pixel.to_key();
-										if !cells_map.contains_key(&key) {
-											missing.push(pixel);
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+	nested_loop_of_doom(|t, b, l, r, tl, tr, bl, br, m| {
+		let pixel: Pixel = [
+			[tl, t, tr],
+			[l, m, r],
+			[bl, b, br]
+		];
+		let key = pixel.to_key();
+		if !cells_map.contains_key(&key) {
+			missing.push(pixel);
 		}
-	}
+	});
 
 	let mut panic_msg = None;
 
@@ -260,7 +249,15 @@ pub fn process(_input: TokenStream) -> TokenStream {
 		}
 	}
 
-	_input
+	let pixel_state = gen_types();
+	let matcher_function = gen_matcher(&cells_map);
+
+	quote!{
+		pub mod upscaler {
+			#pixel_state
+			#matcher_function
+		}
+	}
 }
 
 type Pixel = [[PixelState; 3]; 3];
@@ -291,6 +288,53 @@ impl fmt::Debug for PixelState {
 			PTrue => { '0' }
 			PFalse => { '_' }
 		})
+	}
+}
+
+impl ToTokens for PixelState {
+	fn to_tokens(&self, tokens: &mut TokenStream) {
+		tokens.extend(match self {
+			PTrue => { quote!(true) }
+			PFalse => { quote!(false) }
+		});
+	}
+}
+
+struct PixelWrapper<'h>(&'h Pixel);
+impl<'h> ToTokens for PixelWrapper<'h> {
+	fn to_tokens(&self, tokens: &mut TokenStream) {
+		let [
+			[p1, p2, p3],
+			[p4, p5, p6],
+			[p7, p8, p9],
+		] = self.0;
+		tokens.extend(quote! {
+			[
+				[#p1, #p2, #p3],
+				[#p4, #p5, #p6],
+				[#p7, #p8, #p9]
+			]
+		});
+	}
+}
+
+struct UpscaledPixelWrapper<'h>(&'h UpscaledPixel);
+impl<'h> ToTokens for UpscaledPixelWrapper<'h> {
+	fn to_tokens(&self, tokens: &mut TokenStream) {
+		let [
+			[p1, p2, p3, p4],
+			[p5, p6, p7, p8],
+			[p9, p10, p11, p12],
+			[p13, p14, p15, p16]
+		] = self.0;
+		tokens.extend(quote! {
+			[
+				[#p1, #p2, #p3, #p4],
+				[#p5, #p6, #p7, #p8],
+				[#p9, #p10, #p11, #p12],
+				[#p13, #p14, #p15, #p16]
+			]
+		});
 	}
 }
 
@@ -352,4 +396,81 @@ fn flip<T: Clone, const N: usize>(vec: &mut [[T; N]; N]) {
 fn rotate<T: Clone, const N: usize>(vec: &mut [[T; N]; N]) {
 	vec.reverse();
 	flip(vec);
+}
+
+const STATES: [PixelState; 2] = [PTrue, PFalse];
+/// t, b, l, r, tl, tr, bl, br, m
+fn nested_loop_of_doom(
+	mut f: impl FnMut(
+		PixelState,
+		PixelState,
+		PixelState,
+		PixelState,
+		PixelState,
+		PixelState,
+		PixelState,
+		PixelState,
+		PixelState
+	)
+) {
+	for t in STATES.into_iter() {
+		for b in STATES.into_iter() {
+			for l in STATES.into_iter() {
+				for r in STATES.into_iter() {
+					for tl in STATES.into_iter() {
+						for tr in STATES.into_iter() {
+							for bl in STATES.into_iter() {
+								for br in STATES.into_iter() {
+									for m in STATES.into_iter() {
+										f(t, b, l, r, tl, tr, bl, br, m)
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+fn gen_types() -> TokenStream {
+	quote! {
+		pub type Pixel = [[bool; 3]; 3];
+		pub type UpscaledPixel = [[bool; 4]; 4];
+	}
+}
+
+fn gen_matcher(cells_map: &Map<String, (Pixel, UpscaledPixel)>) -> TokenStream {
+	let mut variants = Vec::with_capacity(2usize.pow(9));
+
+	nested_loop_of_doom(|t, b, l, r, tl, tr, bl, br, m| {
+		let pixel: Pixel = [
+			[tl, t, tr],
+			[l, m, r],
+			[bl, b, br]
+		];
+		let pixel_match_pattern = quote! {
+			[
+				[#tl, #t, #tr],
+				[#l, #m, #r],
+				[#bl, #b, #br]
+			]
+		};
+
+		let key = pixel.to_key();
+		let cell = cells_map.get(&key).unwrap();
+		let upscaled_pixel = UpscaledPixelWrapper(&cell.1);
+
+		variants.push(quote! {
+			#pixel_match_pattern => { #upscaled_pixel }
+		});
+	});
+	quote! {
+		pub fn match_pixel(pixel: Pixel) -> UpscaledPixel {
+			match pixel {
+				#(#variants)*
+			}
+		}
+	}
 }
