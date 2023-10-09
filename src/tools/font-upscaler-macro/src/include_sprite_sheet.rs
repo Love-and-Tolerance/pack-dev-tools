@@ -62,7 +62,7 @@ pub fn process(_input: TokenStream) -> TokenStream {
 	assert_eq!(cells_vec.len(), num_cells);
 
 	let mut cells_map = Map::new();
-	let mut dupes = Vec::with_capacity(num_cells);
+	let mut dupes = Map::<String, (Pixel, usize)>::new();
 
 	let cell_iter = cells_vec.into_iter()
 		.filter(|c| c.iter().any(|p| s(*p) == PTrue));
@@ -162,8 +162,10 @@ pub fn process(_input: TokenStream) -> TokenStream {
 		for (pixel, upscaled) in to_test.into_iter() {
 			let pixel_key = pixel.to_key();
 			if cells_map.contains_key(&pixel_key) {
-				if !dupes.contains(&pixel) {
-					dupes.push(pixel);
+				if let Some(dupe) = dupes.get_mut(&pixel_key) {
+					dupe.1 += 1;
+				} else {
+					dupes.insert(pixel_key, (pixel, 1));
 				}
 				continue
 			}
@@ -207,7 +209,7 @@ pub fn process(_input: TokenStream) -> TokenStream {
 	let mut panic_msg = None;
 
 	if !dupes.is_empty() {
-		panic_msg = Some(dupes.iter().map(|dupe| dupe.get_nice_grid("Duplicate entry!")).join(""));
+		panic_msg = Some(dupes.iter().map(|(_, (dupe, _))| dupe.get_nice_grid("Duplicate entry!")).join(""));
 	}
 
 	if !missing.is_empty() {
@@ -221,7 +223,7 @@ pub fn process(_input: TokenStream) -> TokenStream {
 
 	if let Some(panic_msg) = panic_msg {
 		let cells_len = cells_map.len();
-		let dupes_len = dupes.len();
+		let dupes_len = dupes.values().fold(0usize, |curr, (_, c)| curr + c);
 		let missing_len = missing.len();
 		let panic_msg = format!("{panic_msg}   {cells_len} cells, {dupes_len} dupes, {missing_len} missing");
 		return quote! {
