@@ -4,7 +4,7 @@ use image::Rgba;
 use itertools::Itertools as _;
 use proc_macro2::TokenStream;
 use quote::quote;
-use std::collections::{ HashMap };
+use std::collections::HashMap;
 use std::fmt;
 
 type Map<K, V> = HashMap<K, V, RandomState>;
