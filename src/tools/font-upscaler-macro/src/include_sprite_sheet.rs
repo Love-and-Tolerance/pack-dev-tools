@@ -284,7 +284,16 @@ impl ToKey for Pixel {
 }
 
 fn s(pixel: (u32, u32, Rgba<u8>)) -> PixelState {
-	if pixel.2.0[3] == 0 { PFalse } else { PTrue }
+	let alpha = pixel.2.0[3];
+
+	if alpha == 0 {
+		PFalse
+	} else if alpha == u8::MAX {
+		PTrue
+	} else {
+		// TODO: better error message very much needed
+		panic!("not fully transparent / fully opaque pixel detected")
+	}
 }
 
 fn flip<T: Clone, const N: usize>(vec: &mut [[T; N]; N]) {
