@@ -15,6 +15,36 @@ pub fn process(_input: TokenStream) -> TokenStream {
 	let transform_map = image::load_from_memory_with_format(IMAGE, image::ImageFormat::Png)
 		.unwrap();
 
+	{
+		let mut footgun_pixels = Vec::new();
+		for (x, y, pixel) in transform_map.pixels() {
+			let [r, g, b, a] = pixel.0;
+
+			if a != 0 && a != u8::MAX {
+				footgun_pixels.push((x, y));
+			}
+		}
+
+		if !footgun_pixels.is_empty() {
+			let pixels = footgun_pixels.iter().fold(
+				Vec::with_capacity(footgun_pixels.len()),
+				|mut pixels, (x, y)| {
+					pixels.push(format!("({x}, {y})"));
+					pixels
+				}
+			)
+			.join(", ");
+
+			let num = footgun_pixels.len();
+			let plural = if num == 1 { "pixel" } else { "pixels" };
+			let message = format!("{num} problematic {plural} found! make sure these pixels are either fully opaque or fully transparent.\ncoords: {pixels}");
+
+			return quote! {
+				compile_error!(#message);
+			}
+		}
+	}
+
 	let cell_height = 4usize;
 	let cell_width = 8usize;
 
@@ -302,8 +332,7 @@ fn s(pixel: (u32, u32, Rgba<u8>)) -> PixelState {
 	} else if alpha == u8::MAX {
 		PTrue
 	} else {
-		// TODO: better error message very much needed
-		panic!("not fully transparent / fully opaque pixel detected")
+		panic!("AAAaaaaaaAAaAAAaaAAaaAAaAAAAAAAAaaaaaAAaaAAaaaaa")
 	}
 }
 
