@@ -64,7 +64,9 @@ pub fn process(_input: TokenStream) -> TokenStream {
 	let mut cells_map = Map::new();
 	let mut dupes = Vec::with_capacity(num_cells);
 
-	for cell in cells_vec.into_iter() {
+	let cell_iter = cells_vec.into_iter()
+		.filter(|c| c.iter().any(|p| s(*p) == PTrue));
+	for cell in cell_iter {
 		assert_eq!(cell.len(), cell_height * cell_width);
 		// 00 01 02 03 04 05 06 07
 		// 08 09 10 11 12 13 14 15
