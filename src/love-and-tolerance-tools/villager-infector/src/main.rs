@@ -26,7 +26,7 @@ fn main() {
 	let overlay = include_bytes!("zompony_overlay.png");
 	let args = Args::parse();
 	let paths = pdtstdin::get_stdin()
-		.unwrap_or(Vec::new())
+		.unwrap_or_default()
 		.extend_vec(args.input_paths);
 	infect_villagers(paths, overlay, args.convert);
 }
