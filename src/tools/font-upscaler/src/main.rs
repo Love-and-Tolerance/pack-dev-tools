@@ -49,13 +49,13 @@ fn main() {
 		.collect();
 	create_output_dir(&output_dir);
 
-	multithread(dirs, None, move |tn, (in_dir, out_dir, exts)| {
+	multithread(dirs, None, move |_tn, (in_dir, out_dir, exts)| {
 		let files = find_files_in_dir(&in_dir, true, &Some(exts));
 		let files = files.into_iter()
 			.map(|f| (f, in_dir.clone(), out_dir.clone()))
 			.collect::<Vec<_>>();
 
-		let processed = multithread(files, None, move |tn2, (file, in_dir, out_dir)| {
+		let _processed = multithread(files, None, move |_tn2, (file, in_dir, out_dir)| {
 			let img = image::open(&file).unwrap();
 			let (height, width) = (img.height() as usize, img.width() as usize);
 
@@ -85,7 +85,7 @@ fn main() {
 				})
 				.collect::<Vec<_>>();
 
-			let upscaled_cells = multithread(cells, None, |tn3, (height, width, pixels)| {
+			let upscaled_cells = multithread(cells, None, |_tn3, (height, width, pixels)| {
 				let cell = CellHelper { height, width, pixels };
 
 				let upscaled = cell.get_pixels()
