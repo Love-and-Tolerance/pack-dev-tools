@@ -26,7 +26,7 @@ struct Args {
 fn main() {
 	let args = Args::parse();
 	let paths = pdtstdin::get_stdin()
-		.unwrap_or(Vec::new())
+		.unwrap_or_default()
 		.extend_vec(args.input_paths);
 	blockify(args.block_pixels, args.blocks_path, paths);
 }
