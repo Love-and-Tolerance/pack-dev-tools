@@ -63,8 +63,8 @@ pub fn check_dir_ends_with_slash(dir: String) -> String {
 }
 
 pub fn find_files_in_multiple_dirs(
-	dirs: Vec<String>, recursive: bool, extensions: Option<Vec<String>>,
-	exclude_dir_name: bool, announce: bool,
+	dirs: Vec<String>, recursive: bool, extensions: Option<Vec<String>>, exclude_dir_name: bool,
+	announce: bool,
 ) -> Vec<String> {
 	let files = pdtthread::multithread(dirs, None, move |thread_num, dir| {
 		if announce {
@@ -86,8 +86,8 @@ pub fn find_files_in_multiple_dirs(
 }
 
 pub fn get_files_in_list(
-	items: Vec<String>, recursive: bool, extensions: Option<Vec<String>>,
-	exclude_dir_name: bool, announce: bool,
+	items: Vec<String>, recursive: bool, extensions: Option<Vec<String>>, exclude_dir_name: bool,
+	announce: bool,
 ) -> Vec<String> {
 	let files = items
 		.iter()

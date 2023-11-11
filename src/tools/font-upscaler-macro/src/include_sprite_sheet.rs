@@ -1,4 +1,4 @@
-use ahash::{ HashMapExt as _, RandomState };
+use ahash::{HashMapExt as _, RandomState};
 use image::GenericImageView as _;
 use image::Rgba;
 use itertools::Itertools as _;
@@ -13,8 +13,8 @@ type Map<K, V> = HashMap<K, V, RandomState>;
 const IMAGE: &[u8] = include_bytes!("./transform-map.png");
 
 pub fn process(_input: TokenStream) -> TokenStream {
-	let transform_map = image::load_from_memory_with_format(IMAGE, image::ImageFormat::Png)
-		.unwrap();
+	let transform_map =
+		image::load_from_memory_with_format(IMAGE, image::ImageFormat::Png).unwrap();
 
 	{
 		let mut footgun_pixels = Vec::new();
@@ -27,14 +27,16 @@ pub fn process(_input: TokenStream) -> TokenStream {
 		}
 
 		if !footgun_pixels.is_empty() {
-			let pixels = footgun_pixels.iter().fold(
-				Vec::with_capacity(footgun_pixels.len()),
-				|mut pixels, (x, y)| {
-					pixels.push(format!("({x}, {y})"));
-					pixels
-				}
-			)
-			.join(", ");
+			let pixels = footgun_pixels
+				.iter()
+				.fold(
+					Vec::with_capacity(footgun_pixels.len()),
+					|mut pixels, (x, y)| {
+						pixels.push(format!("({x}, {y})"));
+						pixels
+					},
+				)
+				.join(", ");
 
 			let num = footgun_pixels.len();
 			let plural = if num == 1 { "pixel" } else { "pixels" };
@@ -42,7 +44,7 @@ pub fn process(_input: TokenStream) -> TokenStream {
 
 			return quote! {
 				compile_error!(#message);
-			}
+			};
 		}
 	}
 
@@ -53,8 +55,16 @@ pub fn process(_input: TokenStream) -> TokenStream {
 	let width = transform_map.width() as usize;
 	let num_pixels = height * width;
 
-	assert_eq!(height % cell_height, 0, "transformation_map height multiple of {cell_height}");
-	assert_eq!(width % cell_width, 0, "transformation_map width multiple of {cell_width}");
+	assert_eq!(
+		height % cell_height,
+		0,
+		"transformation_map height multiple of {cell_height}"
+	);
+	assert_eq!(
+		width % cell_width,
+		0,
+		"transformation_map width multiple of {cell_width}"
+	);
 
 	let num_cells_height = height / cell_height;
 	let num_cells_width = width / cell_width;
@@ -64,7 +74,8 @@ pub fn process(_input: TokenStream) -> TokenStream {
 	let pixels = transform_map.pixels().collect::<Vec<_>>();
 	assert_eq!(pixels.len(), num_pixels, "num_pixels");
 
-	let cells_vec = pixels.into_iter()
+	let cells_vec = pixels
+		.into_iter()
 		.chunks(width) // divide it into rows
 		.into_iter()
 		.chunks(cell_height) // group rows by cell_height
@@ -96,12 +107,10 @@ pub fn process(_input: TokenStream) -> TokenStream {
 	let mut transformed_map = Map::<String, (Pixel, UpscaledPixel)>::new();
 	let mut dupes = Map::<String, (Pixel, usize)>::new();
 
-	let mut insert_into_map = |
-		map: &mut Map<String, (Pixel, UpscaledPixel)>,
-		k: String,
-		v: (Pixel, UpscaledPixel),
-		insert_to_dupes: bool
-	| {
+	let mut insert_into_map = |map: &mut Map<String, (Pixel, UpscaledPixel)>,
+	                           k: String,
+	                           v: (Pixel, UpscaledPixel),
+	                           insert_to_dupes: bool| {
 		if map.contains_key(&k) {
 			if insert_to_dupes {
 				if let Some(dupe) = dupes.get_mut(&k) {
@@ -110,13 +119,14 @@ pub fn process(_input: TokenStream) -> TokenStream {
 					dupes.insert(k, (v.0, 1));
 				}
 			}
-			return
+			return;
 		}
 
 		map.insert(k, v);
 	};
 
-	let cell_iter = cells_vec.into_iter()
+	let cell_iter = cells_vec
+		.into_iter()
 		.filter(|c| c.iter().any(|p| s(*p) == PTrue));
 	for cell in cell_iter {
 		assert_eq!(cell.len(), cell_height * cell_width);
@@ -124,7 +134,6 @@ pub fn process(_input: TokenStream) -> TokenStream {
 		// 08 09 10 11 12 13 14 15
 		// 16 17 18 19 20 21 22 23
 		// 24 25 26 27 28 29 30 31
-
 
 		// That there is the pixel
 		//     |
@@ -136,7 +145,6 @@ pub fn process(_input: TokenStream) -> TokenStream {
 		// ---------
 		// 24 25 26   27 28 29 30 31
 
-
 		// that there is the upscaled pixel
 		//                    |
 		//                    |
@@ -145,7 +153,6 @@ pub fn process(_input: TokenStream) -> TokenStream {
 		// 08 09 10 11 | 12 13 14 15
 		// 16 17 18 19 | 20 21 22 23
 		// 24 25 26 27 | 28 29 30 31
-
 
 		let pixel: Pixel = [
 			[s(cell[0]), s(cell[1]), s(cell[2])],
@@ -156,7 +163,7 @@ pub fn process(_input: TokenStream) -> TokenStream {
 			[s(cell[4]), s(cell[5]), s(cell[6]), s(cell[7])],
 			[s(cell[12]), s(cell[13]), s(cell[14]), s(cell[15])],
 			[s(cell[20]), s(cell[21]), s(cell[22]), s(cell[23])],
-			[s(cell[28]), s(cell[29]), s(cell[30]), s(cell[31])]
+			[s(cell[28]), s(cell[29]), s(cell[30]), s(cell[31])],
 		];
 		let none = (pixel, upscaled);
 
@@ -170,7 +177,6 @@ pub fn process(_input: TokenStream) -> TokenStream {
 		let mut rotated90_flipped = flipped;
 		rotate(&mut rotated90_flipped.0);
 		rotate(&mut rotated90_flipped.1);
-
 
 		let mut rotated180 = rotated90;
 		rotate(&mut rotated180.0);
@@ -213,11 +219,7 @@ pub fn process(_input: TokenStream) -> TokenStream {
 
 	// nested loop of doom
 	nested_loop_of_doom(|t, b, l, r, tl, tr, bl, br, m| {
-		let pixel: Pixel = [
-			[tl, t, tr],
-			[l, m, r],
-			[bl, b, br]
-		];
+		let pixel: Pixel = [[tl, t, tr], [l, m, r], [bl, b, br]];
 		let key = pixel.to_key();
 		if !cells_map.contains_key(&key) {
 			missing.push(pixel);
@@ -227,13 +229,23 @@ pub fn process(_input: TokenStream) -> TokenStream {
 	let mut panic_msg = None;
 
 	if !dupes.is_empty() {
-		panic_msg = Some(dupes.iter().map(|(_, (dupe, _))| dupe.get_nice_grid("Duplicate entry!")).join(""));
+		panic_msg = Some(
+			dupes
+				.iter()
+				.map(|(_, (dupe, _))| dupe.get_nice_grid("Duplicate entry!"))
+				.join(""),
+		);
 	}
 
 	if !missing.is_empty() {
-		let msg = missing.iter().map(|missing| missing.get_nice_grid("Missing entry!")).join("");
+		let msg = missing
+			.iter()
+			.map(|missing| missing.get_nice_grid("Missing entry!"))
+			.join("");
 		panic_msg = if let Some(panic_msg) = panic_msg {
-			Some(format!("{panic_msg}=============================================\n{msg}"))
+			Some(format!(
+				"{panic_msg}=============================================\n{msg}"
+			))
 		} else {
 			Some(msg)
 		};
@@ -243,16 +255,17 @@ pub fn process(_input: TokenStream) -> TokenStream {
 		let cells_len = cells_map.len();
 		let dupes_len = dupes.values().fold(0usize, |curr, (_, c)| curr + c);
 		let missing_len = missing.len();
-		let panic_msg = format!("{panic_msg}   {cells_len} cells, {dupes_len} dupes, {missing_len} missing");
+		let panic_msg =
+			format!("{panic_msg}   {cells_len} cells, {dupes_len} dupes, {missing_len} missing");
 		return quote! {
 			compile_error!(#panic_msg);
-		}
+		};
 	}
 
 	let pixel_state = gen_types();
 	let matcher_function = gen_matcher(&cells_map);
 
-	quote!{
+	quote! {
 		pub mod upscaler {
 			#pixel_state
 			#matcher_function
@@ -267,7 +280,7 @@ use PixelState::*;
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum PixelState {
 	PTrue,
-	PFalse
+	PFalse,
 }
 
 // this is kinda dirty and not how you're supposed to use Display/Debug
@@ -275,27 +288,47 @@ enum PixelState {
 
 impl fmt::Display for PixelState {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		write!(f, "{}", match self {
-			PTrue => { '1' }
-			PFalse => { '0' }
-		})
+		write!(
+			f,
+			"{}",
+			match self {
+				PTrue => {
+					'1'
+				}
+				PFalse => {
+					'0'
+				}
+			}
+		)
 	}
 }
 
 impl fmt::Debug for PixelState {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		write!(f, "{}", match self {
-			PTrue => { '0' }
-			PFalse => { '_' }
-		})
+		write!(
+			f,
+			"{}",
+			match self {
+				PTrue => {
+					'0'
+				}
+				PFalse => {
+					'_'
+				}
+			}
+		)
 	}
 }
 
 impl ToTokens for PixelState {
 	fn to_tokens(&self, tokens: &mut TokenStream) {
 		tokens.extend(match self {
-			PTrue => { quote!(true) }
-			PFalse => { quote!(false) }
+			PTrue => {
+				quote!(true)
+			}
+			PFalse => {
+				quote!(false)
+			}
 		});
 	}
 }
@@ -303,11 +336,7 @@ impl ToTokens for PixelState {
 struct PixelWrapper<'h>(&'h Pixel);
 impl<'h> ToTokens for PixelWrapper<'h> {
 	fn to_tokens(&self, tokens: &mut TokenStream) {
-		let [
-			[p1, p2, p3],
-			[p4, p5, p6],
-			[p7, p8, p9],
-		] = self.0;
+		let [[p1, p2, p3], [p4, p5, p6], [p7, p8, p9]] = self.0;
 		tokens.extend(quote! {
 			[
 				[#p1, #p2, #p3],
@@ -321,12 +350,8 @@ impl<'h> ToTokens for PixelWrapper<'h> {
 struct UpscaledPixelWrapper<'h>(&'h UpscaledPixel);
 impl<'h> ToTokens for UpscaledPixelWrapper<'h> {
 	fn to_tokens(&self, tokens: &mut TokenStream) {
-		let [
-			[p1, p2, p3, p4],
-			[p5, p6, p7, p8],
-			[p9, p10, p11, p12],
-			[p13, p14, p15, p16]
-		] = self.0;
+		let [[p1, p2, p3, p4], [p5, p6, p7, p8], [p9, p10, p11, p12], [p13, p14, p15, p16]] =
+			self.0;
 		tokens.extend(quote! {
 			[
 				[#p1, #p2, #p3, #p4],
@@ -345,20 +370,12 @@ trait ToKey {
 
 impl ToKey for Pixel {
 	fn to_key(&self) -> String {
-		let [
-			[tl, t, tr],
-			[l, m, r],
-			[bl, b, br]
-		] = self;
+		let [[tl, t, tr], [l, m, r], [bl, b, br]] = self;
 		format!("{t}{b}{l}{r}{tl}{tr}{bl}{br}{m}")
 	}
 
 	fn get_nice_grid(&self, msg: &str) -> String {
-		let [
-			[tl, t, tr],
-			[l, m, r],
-			[bl, b, br]
-		] = self;
+		let [[tl, t, tr], [l, m, r], [bl, b, br]] = self;
 
 		let line1 = format!("   {msg}");
 		let line2 = format!("   {tl:?}{t:?}{tr:?}");
@@ -369,11 +386,13 @@ impl ToKey for Pixel {
 }
 
 fn s(pixel: (u32, u32, Rgba<u8>)) -> PixelState {
-	let alpha = pixel.2.0[3];
+	let alpha = pixel.2 .0[3];
 	match alpha {
-		0 => { PFalse }
-		u8::MAX => { PTrue }
-		_ => { unreachable!("pixel should have been checked for valid opacity AAAaaaaaaAAaAAAaaAAaaAAaAAAAAAAAaaaaaAAaaAAaaaaa") }
+		0 => PFalse,
+		u8::MAX => PTrue,
+		_ => {
+			unreachable!("pixel should have been checked for valid opacity AAAaaaaaaAAaAAAaaAAaaAAaAAAAAAAAaaaaaAAaaAAaaaaa")
+		}
 	}
 }
 
@@ -410,8 +429,8 @@ fn nested_loop_of_doom(
 		PixelState,
 		PixelState,
 		PixelState,
-		PixelState
-	)
+		PixelState,
+	),
 ) {
 	for t in STATES.into_iter() {
 		for b in STATES.into_iter() {
@@ -445,11 +464,7 @@ fn gen_matcher(cells_map: &Map<String, (Pixel, UpscaledPixel)>) -> TokenStream {
 	let mut variants = Vec::with_capacity(2usize.pow(9));
 
 	nested_loop_of_doom(|t, b, l, r, tl, tr, bl, br, m| {
-		let pixel: Pixel = [
-			[tl, t, tr],
-			[l, m, r],
-			[bl, b, br]
-		];
+		let pixel: Pixel = [[tl, t, tr], [l, m, r], [bl, b, br]];
 		let pixel_match_pattern = quote! {
 			[
 				[#tl, #t, #tr],
