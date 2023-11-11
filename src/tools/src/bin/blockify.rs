@@ -1,13 +1,43 @@
-use super::{pdtcolor, pdtfs, pdtthread, pdttrait};
+use clap::{value_parser, Parser};
 use deltae::*;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
+use pdtlib::{pdtcolor, pdtfs, pdtthread, pdttrait};
+use pdtlib::{pdtstdin, pdttrait::Vector};
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::{Arc, Mutex};
+
+#[derive(Debug, Parser)]
+#[command(name = env!("CARGO_PKG_NAME"),
+bin_name = env!("CARGO_BIN_NAME"),
+	version,
+	about = format!("Blockify images by turning every pixel into a block texture.
+
+example: .{s}blockify 16 .{s}assets{s}minecraft{s}textures{s}blocks .{s}assets", s = SLASH),
+	long_about = None)
+]
+
+struct Args {
+	#[arg(value_parser = value_parser!(u32).range(2..=32))]
+	/// The width or height of the block textures [2..32]
+	block_pixels: u32,
+	/// Path to block textures
+	blocks_path: String,
+	/// List of files and folders to blockify
+	input_paths: Vec<String>,
+}
 
 type Pixel = (f64, Rgba<u8>, LabValue);
 type Block = (String, Vec<Pixel>);
 
-pub fn blockify(pixels: u32, blocks_dir: String, paths: Vec<String>) {
+fn main() {
+	let args = Args::parse();
+	let paths = pdtstdin::get_stdin()
+		.unwrap_or_default()
+		.extend_vec(args.input_paths);
+	blockify(args.block_pixels, args.blocks_path, paths);
+}
+
+fn blockify(pixels: u32, blocks_dir: String, paths: Vec<String>) {
 	let output = pdtfs::create_output_dir("blockify_output");
 	pdtfs::copy_files_to_dir(output.clone(), paths, true);
 	let extensions = Some(vec![".png".to_string()]);

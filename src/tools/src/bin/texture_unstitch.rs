@@ -1,8 +1,17 @@
-use super::pdtfs;
 use image::{imageops, GenericImageView};
+use pdtlib::pdtfs;
+use std::env;
 use std::path::MAIN_SEPARATOR as SLASH;
 
-pub fn unstitch_texture(filename: String, width: u32, height: u32) {
+fn main() {
+	let args: Vec<String> = env::args().collect();
+	let filename = args[1].to_string();
+	let width = args[2].to_string().parse::<u32>().unwrap();
+	let height = args[3].to_string().parse::<u32>().unwrap();
+	unstitch_texture(filename, width, height);
+}
+
+fn unstitch_texture(filename: String, width: u32, height: u32) {
 	let name = filename.split('.').collect::<Vec<&str>>()[0].to_string();
 	let filetype = filename.split('.').collect::<Vec<&str>>()[1].to_string();
 	let mut img = image::open(filename).unwrap();

@@ -1,9 +1,39 @@
-use super::{pdtfs, pdtthread};
+use clap::Parser;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
+use pdtlib::{pdtfs, pdtthread};
+use pdtlib::{pdtstdin, pdttrait::Vector};
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
 
-pub fn infect_villagers(paths: Vec<String>, overlay: &[u8], resource_pack_conversion: bool) {
+#[derive(Debug, Parser)]
+#[command(name = env!("CARGO_PKG_NAME"),
+bin_name = env!("CARGO_BIN_NAME"),
+	version,
+	about = format!("Infect villager ponies.
+
+example: .{s}villager-infector .{s}assets{s}minelittlepony{s}textures{s}entity/pony
+example: .{s}villager-infector -c .{s}Community-Skin-Pack", s = SLASH),
+	long_about = None)
+]
+
+struct Args {
+	#[arg(short, long)]
+	/// Convert Community Skin Pack into Villager Skin Pack.
+	convert: bool,
+	/// List of files and folders to infect.
+	input_paths: Vec<String>,
+}
+
+fn main() {
+	let overlay = include_bytes!("zompony_overlay.png");
+	let args = Args::parse();
+	let paths = pdtstdin::get_stdin()
+		.unwrap_or_default()
+		.extend_vec(args.input_paths);
+	infect_villagers(paths, overlay, args.convert);
+}
+
+fn infect_villagers(paths: Vec<String>, overlay: &[u8], resource_pack_conversion: bool) {
 	let trigger_pixels: [(u32, u32); 6] = [(0, 0), (1, 0), (1, 1), (2, 0), (2, 1), (3, 0)];
 	let overlay_pixels = image::load_from_memory(overlay)
 		.unwrap_or_else(|_| panic!("Failed to load overlay image."))
@@ -22,7 +52,7 @@ pub fn infect_villagers(paths: Vec<String>, overlay: &[u8], resource_pack_conver
 	villager_infector(texture_files, trigger_pixels, overlay_pixels);
 }
 
-pub fn resource_pack_conversion_setup(
+fn resource_pack_conversion_setup(
 	paths: Vec<String>, extensions: Option<Vec<String>>,
 ) -> Vec<String> {
 	if paths.len() > 1 {
@@ -57,7 +87,7 @@ pub fn resource_pack_conversion_setup(
 	pdtfs::find_files_in_dir(&zompony_location, true, &extensions)
 }
 
-pub fn villager_infector(
+fn villager_infector(
 	ponies: Vec<String>, trigger_pixels: [(u32, u32); 6], overlay_pixels: Vec<(u32, u32, Rgba<u8>)>,
 ) {
 	let trigger_pixels = Arc::new(trigger_pixels);

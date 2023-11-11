@@ -1,5 +1,7 @@
+use clap::Parser;
 use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
+use std::path::MAIN_SEPARATOR as SLASH;
 
 #[derive(Clone, Debug, ValueEnum)]
 pub enum MinecraftPlatform {
@@ -8,7 +10,29 @@ pub enum MinecraftPlatform {
 	Both,
 }
 
-pub async fn release_builder(
+#[derive(Debug, Parser)]
+#[command(name = env!("CARGO_PKG_NAME"),
+bin_name = env!("CARGO_BIN_NAME"),
+	version,
+	about = format!("Build Love & Tolerance release.
+
+example: .{SLASH}release-builder"),
+	long_about = None)
+]
+
+struct Args {
+	#[arg(short, long)]
+	/// Minecraft platform
+	platform: Option<MinecraftPlatform>,
+}
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+	let args = Args::parse();
+	release_builder(args.platform).await?;
+	Ok(())
+}
+
+async fn release_builder(
 	platform: Option<MinecraftPlatform>,
 ) -> Result<(), Box<dyn std::error::Error>> {
 	if platform.is_some() {
@@ -33,13 +57,13 @@ pub async fn release_builder(
 
 // java structs
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JavaAssets {
+struct JavaAssets {
 	templates: JavaTemplates,
 	repos: JavaRepo,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JavaTemplates {
+struct JavaTemplates {
 	zips_path: String,
 	base_zip_name: String,
 	variant_addon_zip_name: String,
@@ -49,13 +73,13 @@ pub struct JavaTemplates {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JavaRepo {
+struct JavaRepo {
 	base: JavaBaseRepo,
 	addons: JavaAddons,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JavaBaseRepo {
+struct JavaBaseRepo {
 	mc_versions: String,
 	pack_format: String,
 	version: String,
@@ -63,14 +87,14 @@ pub struct JavaBaseRepo {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JavaAddons {
+struct JavaAddons {
 	exclusive: Vec<JavaVariantAddon>,
 	regular: Vec<JavaBasicAddon>,
 	mods: Vec<JavaBasicAddon>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JavaVariantAddon {
+struct JavaVariantAddon {
 	name: String,
 	id_pos: u32,
 	apply_order: u32,
@@ -80,7 +104,7 @@ pub struct JavaVariantAddon {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JavaVariant {
+struct JavaVariant {
 	name: String,
 	id: String,
 	image: Option<String>,
@@ -91,37 +115,37 @@ pub struct JavaVariant {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub enum JavaConditionalBranch {
+enum JavaConditionalBranch {
 	String(String),
 	Conditions(Vec<Condition>),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Condition {
+struct Condition {
 	trigger: String,
 	value: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub enum JavaConditionalLicense {
+enum JavaConditionalLicense {
 	Boolean(bool),
 	Conditions(Vec<LicenseCondition>),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct LicenseCondition {
+struct LicenseCondition {
 	trigger: String,
 	value: LicenseValue,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub enum LicenseValue {
+enum LicenseValue {
 	Boolean(bool),
 	String(String),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JavaBasicAddon {
+struct JavaBasicAddon {
 	id: String,
 	name: String,
 	recommended: bool,
@@ -134,43 +158,43 @@ pub struct JavaBasicAddon {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct JavaAddonLink {
+struct JavaAddonLink {
 	name: String,
 	url: JavaAddonUrl,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub enum JavaAddonUrl {
+enum JavaAddonUrl {
 	String(String),
 	URLs(Vec<AddonUrl>),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct AddonUrl {
+struct AddonUrl {
 	name: String,
 	value: String,
 }
 
 // Bedrock structs
 #[derive(Serialize, Deserialize, Debug)]
-pub struct BedrockAssets {
+struct BedrockAssets {
 	templates: BedrockTemplates,
 	repos: BedrockRepo,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct BedrockTemplates {
+struct BedrockTemplates {
 	asset_url: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct BedrockRepo {
+struct BedrockRepo {
 	base: BedrockBaseRepo,
 	addons: Vec<BedrockAddon>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct BedrockBaseRepo {
+struct BedrockBaseRepo {
 	mc_versions: String,
 	pack_format: String,
 	tag: String,
@@ -180,7 +204,7 @@ pub struct BedrockBaseRepo {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct BedrockAddon {
+struct BedrockAddon {
 	name: String,
 	filename: String,
 	url: String,

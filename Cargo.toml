@@ -15,6 +15,5 @@ codegen-units = 1
 resolver = "2"
 members = [
 	"src/lib",
-    "src/tools/*",
-    "src/love-and-tolerance-tools/*"
+    "src/tools"
 ]

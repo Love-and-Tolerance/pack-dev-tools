@@ -1,25 +1,10 @@
-use super::pdttrait::Vector;
-use super::{pdtfs, pdthash, pdtthread};
 use camino::Utf8Path;
+use pdtlib::pdttrait::Vector;
+use pdtlib::{pdtfs, pdthash, pdtthread};
+use std::env;
 
-#[derive(Debug)]
-pub struct FileData {
-	filename: String,
-	folder_hash: Vec<Option<String>>,
-}
-
-#[derive(Debug)]
-pub struct PresenceData {
-	filename: String,
-	presence_version: Vec<usize>,
-}
-
-pub enum Structure {
-	Ordered,
-	Unordered,
-}
-
-pub fn comparator(args: Vec<String>) {
+fn main() {
+	let args: Vec<String> = env::args().collect();
 	let mut dirs: Vec<String>;
 	let mut order = Structure::Ordered;
 	let ordered_options = ["-o", "--ordered"];
@@ -71,7 +56,24 @@ pub fn comparator(args: Vec<String>) {
 	eprintln!("{}", &changes.len());
 }
 
-pub fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
+#[derive(Debug)]
+struct FileData {
+	filename: String,
+	folder_hash: Vec<Option<String>>,
+}
+
+#[derive(Debug)]
+struct PresenceData {
+	filename: String,
+	presence_version: Vec<usize>,
+}
+
+enum Structure {
+	Ordered,
+	Unordered,
+}
+
+fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
 	pdtthread::multithread(files, None, move |_, file| {
 		let dir_data = dirs
 			.iter()
@@ -91,7 +93,7 @@ pub fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
 	})
 }
 
-pub fn compare_files(dirs: Vec<String>, files: Vec<FileData>) -> Vec<PresenceData> {
+fn compare_files(dirs: Vec<String>, files: Vec<FileData>) -> Vec<PresenceData> {
 	pdtthread::multithread(files, None, move |_, file| {
 		let mut presence_data: Vec<usize> = vec![];
 		for i in 0..dirs.len() {

@@ -1,11 +1,18 @@
-use super::{pdtcmd, pdtfs};
 use camino::Utf8Path;
+use pdtlib::{pdtcmd, pdtfs};
 use std::io::Write;
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::process::Output;
 use std::{env, fs};
 
-pub fn observe(old_release: String, new_release: String) {
+fn main() {
+	let args: Vec<String> = env::args().collect();
+	let old_release = args[1].to_string();
+	let new_release = args[2].to_string();
+	observe(old_release, new_release);
+}
+
+fn observe(old_release: String, new_release: String) {
 	pdtfs::check_if_dir_exists(&old_release);
 	pdtfs::check_if_dir_exists(&new_release);
 
