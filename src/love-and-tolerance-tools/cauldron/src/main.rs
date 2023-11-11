@@ -27,7 +27,7 @@ struct Args {
 fn main() {
 	let args = Args::parse();
 	let paths = pdtstdin::get_stdin()
-		.unwrap_or(Vec::new())
+		.unwrap_or_default()
 		.extend_vec(args.input_paths);
 	let saturation: Option<f32> = match args.saturation {
 		Some(_) => Some(args.saturation.unwrap() as f32),
