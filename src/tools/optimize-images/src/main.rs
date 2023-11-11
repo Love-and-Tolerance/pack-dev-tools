@@ -32,7 +32,7 @@ struct Args {
 fn main() {
 	let args = Args::parse();
 	let paths = pdtstdin::get_stdin()
-		.unwrap_or(Vec::new())
+		.unwrap_or_default()
 		.extend_vec(args.paths);
 	optimize_images(args.level, args.strip, args.fix, args.interlace, paths);
 }
