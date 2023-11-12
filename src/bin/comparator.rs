@@ -1,6 +1,6 @@
 use camino::Utf8Path;
-use pdtlib::pdttrait::Vector;
-use pdtlib::{pdtfs, pdthash, pdtthread};
+use pdt::pdttrait::Vector;
+use pdt::{pdtfs, pdthash, pdtthread};
 use std::env;
 
 fn main() {

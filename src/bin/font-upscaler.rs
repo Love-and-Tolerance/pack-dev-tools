@@ -1,12 +1,12 @@
 use camino::Utf8Path;
 use image::{GenericImageView as _, Rgba};
 use itertools::Itertools as _;
-use pdtlib::pdtfs::{create_output_dir, find_files_in_dir};
-use pdtlib::pdtthread::multithread;
+use pdt::pdtfs::{create_output_dir, find_files_in_dir};
+use pdt::pdtthread::multithread;
 use std::fs;
 use std::num::NonZeroUsize;
 
-font_upscaler_macro::include_sprite_sheet!();
+pdt_macros::include_sprite_sheet!();
 
 fn main() {
 	let mut dirs = Vec::new();

@@ -1,5 +1,5 @@
-use pdtlib::pdttrait::Vector;
-use pdtlib::{pdtfs, pdthash};
+use pdt::pdttrait::Vector;
+use pdt::{pdtfs, pdthash};
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::time::SystemTime;
 use std::{env, fs, io::Write};

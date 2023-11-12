@@ -10,7 +10,7 @@ use std::fmt;
 
 type Map<K, V> = HashMap<K, V, RandomState>;
 
-const IMAGE: &[u8] = include_bytes!("./transform-map.png");
+const IMAGE: &[u8] = include_bytes!("../../assets/transform-map.png");
 
 pub fn process(_input: TokenStream) -> TokenStream {
 	let transform_map =

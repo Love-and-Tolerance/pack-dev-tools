@@ -1,7 +1,7 @@
 use clap::Parser;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
-use pdtlib::{pdtfs, pdtthread};
-use pdtlib::{pdtstdin, pdttrait::Vector};
+use pdt::{pdtfs, pdtthread};
+use pdt::{pdtstdin, pdttrait::Vector};
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
 
@@ -25,7 +25,7 @@ struct Args {
 }
 
 fn main() {
-	let overlay = include_bytes!("zompony_overlay.png");
+	let overlay = include_bytes!("../../assets/zompony_overlay.png");
 	let args = Args::parse();
 	let paths = pdtstdin::get_stdin()
 		.unwrap_or_default()

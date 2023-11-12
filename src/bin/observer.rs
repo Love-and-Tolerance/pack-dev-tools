@@ -1,5 +1,5 @@
 use camino::Utf8Path;
-use pdtlib::{pdtcmd, pdtfs};
+use pdt::{pdtcmd, pdtfs};
 use std::io::Write;
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::process::Output;

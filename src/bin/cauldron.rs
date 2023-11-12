@@ -1,8 +1,8 @@
 use clap::{value_parser, Parser};
 use colors_transform::{Color, Hsl, Rgb};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
-use pdtlib::{pdtcolor, pdtfs, pdtthread};
-use pdtlib::{pdtstdin, pdttrait::Vector};
+use pdt::{pdtcolor, pdtfs, pdtthread};
+use pdt::{pdtstdin, pdttrait::Vector};
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
 
