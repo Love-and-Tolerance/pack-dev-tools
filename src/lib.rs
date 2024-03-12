@@ -1,8 +1,16 @@
+#[cfg(feature = "cmd")]
 pub mod pdtcmd;
+#[cfg(feature = "color")]
 pub mod pdtcolor;
+#[cfg(feature = "fs")]
 pub mod pdtfs;
+#[cfg(feature = "hash")]
 pub mod pdthash;
+#[cfg(feature = "stdin")]
 pub mod pdtstdin;
+#[cfg(feature = "struct")]
 pub mod pdtstruct;
+#[cfg(feature = "thread")]
 pub mod pdtthread;
+#[cfg(feature = "trait")]
 pub mod pdttrait;

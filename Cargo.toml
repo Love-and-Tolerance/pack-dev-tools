@@ -6,6 +6,7 @@ repository = "https://github.com/Love-and-Tolerance/pack-dev-tools"
 authors = ["Silk Rose", "Meadowsys"]
 edition = "2021"
 license = "MIT"
+resolver = "2"
 publish = false
 
 [dependencies]
@@ -31,6 +32,17 @@ pdt-macros = { path = "./macros" }
 members = [
 	"macros"
 ]
+
+[features]
+default = ["cmd", "color", "fs", "hash", "stdin", "struct", "thread", "trait"]
+cmd = []
+color = []
+fs = []
+hash = []
+stdin = []
+struct = []
+thread = []
+trait = []
 
 [profile.dev]
 opt-level = 0
