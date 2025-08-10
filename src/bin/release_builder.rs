@@ -11,15 +11,15 @@ pub enum MinecraftPlatform {
 }
 
 #[derive(Debug, Parser)]
-#[command(name = env!("CARGO_PKG_NAME"),
-bin_name = env!("CARGO_BIN_NAME"),
-	version,
-	about = format!("Build Love & Tolerance release.
+#[command(
+	name = env!("CARGO_PKG_NAME"),
+	bin_name = env!("CARGO_BIN_NAME"),
+		version,
+		about = format!("Build Love & Tolerance release.
 
-example: .{SLASH}release-builder"),
-	long_about = None)
-]
-
+	example: .{SLASH}release-builder"),
+		long_about = None
+)]
 struct Args {
 	#[arg(short, long)]
 	/// Minecraft platform

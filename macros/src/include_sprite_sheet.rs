@@ -333,20 +333,6 @@ impl ToTokens for PixelState {
 	}
 }
 
-struct PixelWrapper<'h>(&'h Pixel);
-impl<'h> ToTokens for PixelWrapper<'h> {
-	fn to_tokens(&self, tokens: &mut TokenStream) {
-		let [[p1, p2, p3], [p4, p5, p6], [p7, p8, p9]] = self.0;
-		tokens.extend(quote! {
-			[
-				[#p1, #p2, #p3],
-				[#p4, #p5, #p6],
-				[#p7, #p8, #p9]
-			]
-		});
-	}
-}
-
 struct UpscaledPixelWrapper<'h>(&'h UpscaledPixel);
 impl<'h> ToTokens for UpscaledPixelWrapper<'h> {
 	fn to_tokens(&self, tokens: &mut TokenStream) {

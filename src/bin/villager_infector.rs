@@ -6,16 +6,16 @@ use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
 
 #[derive(Debug, Parser)]
-#[command(name = env!("CARGO_PKG_NAME"),
-bin_name = env!("CARGO_BIN_NAME"),
+#[command(
+	name = env!("CARGO_PKG_NAME"),
+	bin_name = env!("CARGO_BIN_NAME"),
 	version,
 	about = format!("Infect villager ponies.
 
 example: .{s}villager-infector .{s}assets{s}minelittlepony{s}textures{s}entity/pony
 example: .{s}villager-infector -c .{s}Community-Skin-Pack", s = SLASH),
-	long_about = None)
-]
-
+	long_about = None
+)]
 struct Args {
 	#[arg(short, long)]
 	/// Convert Community Skin Pack into Villager Skin Pack.

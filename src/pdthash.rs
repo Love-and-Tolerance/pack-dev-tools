@@ -8,7 +8,7 @@ pub fn get_hashes(files: Vec<String>) -> Vec<(String, String)> {
 	pdtthread::multithread(files, None, |thread_num, file| {
 		println!(
 			"[thread {thread_num:02}] getting hash of file: {}",
-			file.split(SLASH).last().unwrap()
+			file.split(SLASH).next_back().unwrap()
 		);
 
 		let hash = get_hash(&file, false);

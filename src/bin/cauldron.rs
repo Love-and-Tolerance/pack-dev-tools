@@ -7,16 +7,16 @@ use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
 
 #[derive(Debug, Parser)]
-#[command(name = env!("CARGO_PKG_NAME"),
-bin_name = env!("CARGO_BIN_NAME"),
+#[command(
+	name = env!("CARGO_PKG_NAME"),
+	bin_name = env!("CARGO_BIN_NAME"),
 	version,
 	about = format!("Tint png images to a specified color and saturation.
 
 example: .{s}cauldron F5B7D0 .{s}images
 example: .{s}cauldron e6c343 -s 65 .{s}assets", s = SLASH),
-	long_about = None)
-]
-
+	long_about = None
+)]
 struct Args {
 	/// Hex color to tint images
 	hex_color: String,
@@ -63,7 +63,7 @@ fn dye_images_in_cauldron(images: Vec<String>, color: Hsl, saturation: Option<f3
 		move |thread_num, (image, color, saturation)| {
 			println!(
 				"[thread {thread_num:02} cauldron] dying image: {}",
-				image.split(SLASH).last().unwrap()
+				image.split(SLASH).next_back().unwrap()
 			);
 			let img =
 				image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));

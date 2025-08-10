@@ -7,15 +7,15 @@ use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::{Arc, Mutex};
 
 #[derive(Debug, Parser)]
-#[command(name = env!("CARGO_PKG_NAME"),
-bin_name = env!("CARGO_BIN_NAME"),
+#[command(
+	name = env!("CARGO_PKG_NAME"),
+	bin_name = env!("CARGO_BIN_NAME"),
 	version,
 	about = format!("Blockify images by turning every pixel into a block texture.
 
 example: .{s}blockify 16 .{s}assets{s}minecraft{s}textures{s}blocks .{s}assets", s = SLASH),
-	long_about = None)
-]
-
+	long_about = None
+)]
 struct Args {
 	#[arg(value_parser = value_parser!(u32).range(2..=32))]
 	/// The width or height of the block textures [2..32]
@@ -51,7 +51,7 @@ fn get_average_colors(blocks: Vec<String>, pixels: u32) -> Vec<Block> {
 	pdtthread::multithread(blocks, None, move |thread_num, image| {
 		println!(
 			"[thread {thread_num:02} get_average_colors] averaging {}",
-			image.split(SLASH).last().unwrap()
+			image.split(SLASH).next_back().unwrap()
 		);
 
 		let img = image::open(&image).unwrap_or_else(|_| panic!("Failed to load image: {image}"));
@@ -104,7 +104,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>, block_pixels: u32) {
 			println!(
 				"[thread {thread_num:02} blockify_images] [{:010} output pixels] starting {}",
 				*p,
-				texture.split(SLASH).last().unwrap()
+				texture.split(SLASH).next_back().unwrap()
 			);
 			drop(p);
 
