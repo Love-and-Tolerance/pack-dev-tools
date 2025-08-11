@@ -62,8 +62,7 @@ fn resource_pack_conversion_setup(
 		);
 	}
 	let location = format!(
-		"Villager-Skin-Pack{s}assets{s}minelittlepony{s}textures{s}entity",
-		s = SLASH
+		"Villager-Skin-Pack{SLASH}assets{SLASH}minelittlepony{SLASH}textures{SLASH}entity"
 	);
 	let pony_location = pdtfs::create_output_dir(&format!("{location}{SLASH}pony"));
 	let zompony_location = pdtfs::create_output_dir(&format!("{location}{SLASH}zompony"));
@@ -82,7 +81,7 @@ fn resource_pack_conversion_setup(
 		".json".to_string(),
 	]);
 	pdtfs::delete_files_in_dir(&pony_location, true, &remove_extensions);
-	pdtfs::if_dir_exists_remove_it(&format!("{}{SLASH}.git", pony_location));
+	pdtfs::if_dir_exists_remove_it(&format!("{pony_location}{SLASH}.git"));
 	pdtfs::copy_dir_to_dir(&zompony_location, pony_location, true);
 	pdtfs::find_files_in_dir(&zompony_location, true, &extensions)
 }

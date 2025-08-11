@@ -51,7 +51,7 @@ fn main() {
 		}
 	}
 	for change in &changes {
-		println!("{}", change);
+		println!("{change}");
 	}
 	eprintln!("{}", &changes.len());
 }
@@ -80,7 +80,7 @@ fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
 			.map(|dir| {
 				let presence = Utf8Path::new(&format!("{}{}", &dir, &file)).is_file();
 				match presence {
-					true => Some(pdthash::get_hash(&format!("{}{}", dir, file), false)),
+					true => Some(pdthash::get_hash(&format!("{dir}{file}"), false)),
 					false => None,
 				}
 			})

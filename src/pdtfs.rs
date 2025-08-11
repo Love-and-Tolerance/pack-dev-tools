@@ -68,7 +68,7 @@ pub fn find_files_in_multiple_dirs(
 ) -> Vec<String> {
 	let files = pdtthread::multithread(dirs, None, move |thread_num, dir| {
 		if announce {
-			println!("[thread {thread_num:02}] finding files in dir: {}", dir);
+			println!("[thread {thread_num:02}] finding files in dir: {dir}");
 		}
 		let dir_files = if exclude_dir_name {
 			find_files_in_dir(&dir, recursive, &extensions)
@@ -114,7 +114,7 @@ pub fn create_output_dir(name: &str) -> String {
 
 pub fn copy_files_to_dir(folder: String, items: Vec<String>, content_only: bool) {
 	pdtthread::multithread(items, None, move |thread_num, item| {
-		println!("[thread {thread_num:02}] copying: {}", item);
+		println!("[thread {thread_num:02}] copying: {item}");
 		if Utf8Path::new(&item).is_dir() {
 			copy_dir_to_dir(&folder, item, content_only);
 		} else if Utf8Path::new(&item).is_file() {
@@ -170,12 +170,12 @@ pub fn delete_files_in_dir(dir: &str, recursive: bool, extensions: &Option<Vec<S
 					for ext in extensions {
 						if path.ends_with(ext) {
 							fs::remove_file(path.clone())
-								.unwrap_or_else(|_| panic!("Failed to remove file: {}", path))
+								.unwrap_or_else(|_| panic!("Failed to remove file: {path}"))
 						}
 					}
 				}
 				None => fs::remove_file(path.clone())
-					.unwrap_or_else(|_| panic!("Failed to remove file: {}", path)),
+					.unwrap_or_else(|_| panic!("Failed to remove file: {path}")),
 			}
 		}
 	}

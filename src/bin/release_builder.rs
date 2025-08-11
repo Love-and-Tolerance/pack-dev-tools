@@ -36,7 +36,7 @@ async fn release_builder(
 	platform: Option<MinecraftPlatform>,
 ) -> Result<(), Box<dyn std::error::Error>> {
 	if platform.is_some() {
-		println!("{:#?}", platform);
+		println!("{platform:#?}");
 	}
 	let bedrock = reqwest::get(
 		"https://raw.githubusercontent.com/Love-and-Tolerance/pack-builder-assets/mane/assets/bedrock.json",
@@ -44,14 +44,14 @@ async fn release_builder(
 	.await?
    .json::<BedrockAssets>()
    .await?;
-	println!("{:#?}", bedrock);
+	println!("{bedrock:#?}");
 	let java = reqwest::get(
 		"https://raw.githubusercontent.com/Love-and-Tolerance/pack-builder-assets/mane/assets/java.json",
 	)
 	.await?
    .json::<JavaAssets>()
    .await?;
-	println!("{:#?}", java);
+	println!("{java:#?}");
 	Ok(())
 }
 
