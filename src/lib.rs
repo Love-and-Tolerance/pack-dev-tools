@@ -8,5 +8,3 @@ pub mod pdtfs;
 pub mod pdthash;
 #[cfg(feature = "stdin")]
 pub mod pdtstdin;
-#[cfg(feature = "struct")]
-pub mod pdtstruct;
