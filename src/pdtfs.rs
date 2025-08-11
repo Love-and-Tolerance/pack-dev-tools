@@ -1,6 +1,6 @@
-use super::pdtthread;
 use camino::Utf8Path;
 use fs_extra::dir;
+use pony::threads::multithread;
 use pony::traits::{BasicVector, OrderedVector};
 use std::fs;
 use std::path::MAIN_SEPARATOR as SLASH;
@@ -66,7 +66,7 @@ pub fn find_files_in_multiple_dirs(
 	dirs: Vec<String>, recursive: bool, extensions: Option<Vec<String>>, exclude_dir_name: bool,
 	announce: bool,
 ) -> Vec<String> {
-	let files = pdtthread::multithread(dirs, None, move |thread_num, dir| {
+	let files = multithread(dirs, None, move |thread_num, dir| {
 		if announce {
 			println!("[thread {thread_num:02}] finding files in dir: {dir}");
 		}
@@ -113,7 +113,7 @@ pub fn create_output_dir(name: &str) -> String {
 }
 
 pub fn copy_files_to_dir(folder: String, items: Vec<String>, content_only: bool) {
-	pdtthread::multithread(items, None, move |thread_num, item| {
+	multithread(items, None, move |thread_num, item| {
 		println!("[thread {thread_num:02}] copying: {item}");
 		if Utf8Path::new(&item).is_dir() {
 			copy_dir_to_dir(&folder, item, content_only);

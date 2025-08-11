@@ -1,11 +1,10 @@
+use pony::threads::multithread;
 use sha2::{Digest, Sha256};
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::{fs, io};
 
-use super::pdtthread;
-
 pub fn get_hashes(files: Vec<String>) -> Vec<(String, String)> {
-	pdtthread::multithread(files, None, |thread_num, file| {
+	multithread(files, None, |thread_num, file| {
 		println!(
 			"[thread {thread_num:02}] getting hash of file: {}",
 			file.split(SLASH).next_back().unwrap()

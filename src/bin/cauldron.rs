@@ -2,7 +2,8 @@ use clap::{Parser, value_parser};
 use colors_transform::{Color, Hsl, Rgb};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use pdt::pdtstdin;
-use pdt::{pdtcolor, pdtfs, pdtthread};
+use pdt::{pdtcolor, pdtfs};
+use pony::threads::multithread;
 use pony::traits::BasicVector;
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
@@ -58,7 +59,7 @@ fn dye_images_in_cauldron(images: Vec<String>, color: Hsl, saturation: Option<f3
 		.map(|i| (i, Arc::clone(&color), Arc::clone(&saturation)))
 		.collect();
 
-	pdtthread::multithread(
+	multithread(
 		images,
 		None,
 		move |thread_num, (image, color, saturation)| {

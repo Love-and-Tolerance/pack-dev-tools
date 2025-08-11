@@ -1,7 +1,8 @@
 use clap::Parser;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
+use pdt::pdtfs;
 use pdt::pdtstdin;
-use pdt::{pdtfs, pdtthread};
+use pony::threads::multithread;
 use pony::traits::BasicVector;
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
@@ -96,7 +97,7 @@ fn villager_infector(
 		.map(|p| (p, Arc::clone(&trigger_pixels), Arc::clone(&overlay_pixels)))
 		.collect();
 
-	pdtthread::multithread(
+	multithread(
 		ponies,
 		None,
 		move |thread_num, (pony, trigger_pixels, overlay_pixels)| {

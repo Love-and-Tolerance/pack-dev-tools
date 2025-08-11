@@ -2,7 +2,8 @@ use clap::{Parser, value_parser};
 use deltae::*;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use pdt::pdtstdin;
-use pdt::{pdtcolor, pdtfs, pdtthread};
+use pdt::{pdtcolor, pdtfs};
+use pony::threads::multithread;
 use pony::traits::{BasicVector, compare};
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::{Arc, Mutex};
@@ -49,7 +50,7 @@ fn blockify(pixels: u32, blocks_dir: String, paths: Vec<String>) {
 }
 
 fn get_average_colors(blocks: Vec<String>, pixels: u32) -> Vec<Block> {
-	pdtthread::multithread(blocks, None, move |thread_num, image| {
+	multithread(blocks, None, move |thread_num, image| {
 		println!(
 			"[thread {thread_num:02} get_average_colors] averaging {}",
 			image.split(SLASH).next_back().unwrap()
@@ -97,7 +98,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>, block_pixels: u32) {
 		.map(|i| (i, Arc::clone(&pixels), Arc::clone(&blocks)))
 		.collect();
 
-	pdtthread::multithread(
+	multithread(
 		images,
 		None,
 		move |thread_num, (texture, pixels, blocks)| {

@@ -1,5 +1,6 @@
 use camino::Utf8Path;
-use pdt::{pdtfs, pdthash, pdtthread};
+use pdt::{pdtfs, pdthash};
+use pony::threads::multithread;
 use pony::traits::OrderedVector;
 use std::env;
 
@@ -74,7 +75,7 @@ enum Structure {
 }
 
 fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
-	pdtthread::multithread(files, None, move |_, file| {
+	multithread(files, None, move |_, file| {
 		let dir_data = dirs
 			.iter()
 			.map(|dir| {
@@ -94,7 +95,7 @@ fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
 }
 
 fn compare_files(dirs: Vec<String>, files: Vec<FileData>) -> Vec<PresenceData> {
-	pdtthread::multithread(files, None, move |_, file| {
+	multithread(files, None, move |_, file| {
 		let mut presence_data: Vec<usize> = vec![];
 		for i in 0..dirs.len() {
 			let mut id = 0;

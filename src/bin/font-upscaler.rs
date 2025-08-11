@@ -2,7 +2,7 @@ use camino::Utf8Path;
 use image::{GenericImageView as _, Rgba};
 use itertools::Itertools as _;
 use pdt::pdtfs::{create_output_dir, find_files_in_dir};
-use pdt::pdtthread::multithread;
+use pony::threads::multithread;
 use std::fs;
 use std::num::NonZeroUsize;
 
@@ -217,7 +217,7 @@ impl CellHelper {
 				.pixels
 				.get(x as usize + (y as usize * self.width))
 				.unwrap();
-			match pixel.2 .0[3] {
+			match pixel.2.0[3] {
 				0 => {
 					/* println!("({x}, {y}): false, h{} w{}", self.height, self.width); */
 					false
