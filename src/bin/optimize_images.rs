@@ -51,9 +51,9 @@ enum Strip {
 fn optimize_images(level: u8, strip: Strip, fix: bool, interlace: bool, paths: Vec<String>) {
 	let mut options = Options::from_preset(level);
 	options.strip = match strip {
-		Strip::None => oxipng::Headers::None,
-		Strip::Safe => oxipng::Headers::Safe,
-		Strip::All => oxipng::Headers::All,
+		Strip::None => oxipng::StripChunks::None,
+		Strip::Safe => oxipng::StripChunks::Safe,
+		Strip::All => oxipng::StripChunks::All,
 	};
 	options.fix_errors = fix;
 	options.interlace = match interlace {
@@ -67,7 +67,7 @@ fn optimize_images(level: u8, strip: Strip, fix: bool, interlace: bool, paths: V
 	for image in images {
 		println!("optimizing image: {}", &image);
 		let input = InFile::Path(Utf8PathBuf::from(&image).into());
-		let output = OutFile::Path(Some(Utf8PathBuf::from(&image).into()));
+		let output = OutFile::from_path(Utf8PathBuf::from(&image).into());
 		optimize(&input, &output, &options).expect("Failed to optimize image.");
 	}
 }
