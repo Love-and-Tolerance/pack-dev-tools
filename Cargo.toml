@@ -33,12 +33,11 @@ pdt-macros = { path = "./macros" }
 members = ["macros"]
 
 [features]
-default = ["cmd", "color", "fs", "hash", "stdin"]
+default = ["cmd", "color", "fs", "hash"]
 cmd = []
 color = []
 fs = []
 hash = []
-stdin = []
 
 [profile.dev]
 opt-level = 0

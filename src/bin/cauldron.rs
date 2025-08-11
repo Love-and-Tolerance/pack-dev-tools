@@ -1,8 +1,8 @@
 use clap::{Parser, value_parser};
 use colors_transform::{Color, Hsl, Rgb};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
-use pdt::pdtstdin;
 use pdt::{pdtcolor, pdtfs};
+use pony::stdin::get_stdin;
 use pony::threads::multithread;
 use pony::traits::BasicVector;
 use std::path::MAIN_SEPARATOR as SLASH;
@@ -31,8 +31,11 @@ struct Args {
 
 fn main() {
 	let args = Args::parse();
-	let paths = pdtstdin::get_stdin()
+	let paths = get_stdin()
 		.unwrap_or_default()
+		.split(" ")
+		.map(String::from)
+		.collect::<Vec<_>>()
 		.extend_vec(args.input_paths);
 	let saturation: Option<f32> = match args.saturation {
 		Some(_) => Some(args.saturation.unwrap() as f32),

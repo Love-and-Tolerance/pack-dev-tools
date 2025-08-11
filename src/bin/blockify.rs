@@ -1,8 +1,8 @@
 use clap::{Parser, value_parser};
 use deltae::*;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
-use pdt::pdtstdin;
 use pdt::{pdtcolor, pdtfs};
+use pony::stdin::get_stdin;
 use pony::threads::multithread;
 use pony::traits::{BasicVector, compare};
 use std::path::MAIN_SEPARATOR as SLASH;
@@ -33,8 +33,11 @@ type Block = (String, Vec<Pixel>);
 
 fn main() {
 	let args = Args::parse();
-	let paths = pdtstdin::get_stdin()
+	let paths = get_stdin()
 		.unwrap_or_default()
+		.split(" ")
+		.map(String::from)
+		.collect::<Vec<_>>()
 		.extend_vec(args.input_paths);
 	blockify(args.block_pixels, args.blocks_path, paths);
 }

@@ -6,5 +6,3 @@ pub mod pdtcolor;
 pub mod pdtfs;
 #[cfg(feature = "hash")]
 pub mod pdthash;
-#[cfg(feature = "stdin")]
-pub mod pdtstdin;

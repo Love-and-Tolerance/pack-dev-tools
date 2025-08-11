@@ -1,7 +1,7 @@
 use clap::Parser;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use pdt::pdtfs;
-use pdt::pdtstdin;
+use pony::stdin::get_stdin;
 use pony::threads::multithread;
 use pony::traits::BasicVector;
 use std::path::MAIN_SEPARATOR as SLASH;
@@ -29,8 +29,11 @@ struct Args {
 fn main() {
 	let overlay = include_bytes!("../../assets/zompony_overlay.png");
 	let args = Args::parse();
-	let paths = pdtstdin::get_stdin()
+	let paths = get_stdin()
 		.unwrap_or_default()
+		.split(" ")
+		.map(String::from)
+		.collect::<Vec<_>>()
 		.extend_vec(args.input_paths);
 	infect_villagers(paths, overlay, args.convert);
 }

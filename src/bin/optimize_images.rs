@@ -3,7 +3,7 @@ use clap::ValueEnum;
 use clap::{Parser, value_parser};
 use oxipng::{InFile, Options, OutFile, optimize};
 use pdt::pdtfs::get_files_in_list;
-use pdt::pdtstdin;
+use pony::stdin::get_stdin;
 use pony::traits::BasicVector;
 use std::path::MAIN_SEPARATOR as SLASH;
 
@@ -36,8 +36,11 @@ struct Args {
 
 fn main() {
 	let args = Args::parse();
-	let paths = pdtstdin::get_stdin()
+	let paths = get_stdin()
 		.unwrap_or_default()
+		.split(" ")
+		.map(String::from)
+		.collect::<Vec<_>>()
 		.extend_vec(args.paths);
 	optimize_images(args.level, args.strip, args.fix, args.interlace, paths);
 }
