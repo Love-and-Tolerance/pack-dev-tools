@@ -1,7 +1,8 @@
 use clap::Parser;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
+use pdt::pdtstdin;
 use pdt::{pdtfs, pdtthread};
-use pdt::{pdtstdin, pdttrait::Vector};
+use pony::traits::BasicVector;
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
 
@@ -38,7 +39,7 @@ fn infect_villagers(paths: Vec<String>, overlay: &[u8], resource_pack_conversion
 	let overlay_pixels = image::load_from_memory(overlay)
 		.unwrap_or_else(|_| panic!("Failed to load overlay image."))
 		.pixels()
-		.filter(|p| p.2 .0[3] == 255)
+		.filter(|p| p.2.0[3] == 255)
 		.collect::<Vec<_>>();
 	let extensions = Some(vec![".png".to_string()]);
 	let texture_files = match resource_pack_conversion {
@@ -61,9 +62,8 @@ fn resource_pack_conversion_setup(
 			paths.len()
 		);
 	}
-	let location = format!(
-		"Villager-Skin-Pack{SLASH}assets{SLASH}minelittlepony{SLASH}textures{SLASH}entity"
-	);
+	let location =
+		format!("Villager-Skin-Pack{SLASH}assets{SLASH}minelittlepony{SLASH}textures{SLASH}entity");
 	let pony_location = pdtfs::create_output_dir(&format!("{location}{SLASH}pony"));
 	let zompony_location = pdtfs::create_output_dir(&format!("{location}{SLASH}zompony"));
 	pdtfs::copy_dir_to_dir(&pony_location, paths[0].to_string(), true);
@@ -118,16 +118,16 @@ fn villager_infector(
 			let mut infected_pony: RgbaImage =
 				ImageBuffer::from_fn(width, height, |_, _| image::Rgba([0, 0, 0, 0]));
 			for pixel in img.pixels() {
-				let a = pixel.2 .0[3];
+				let a = pixel.2.0[3];
 				if a == 0 {
 					continue;
 				}
 				let (x, y) = (pixel.0, pixel.1);
 				let average =
-					(pixel.2 .0[0] as f32 + pixel.2 .0[1] as f32 + pixel.2 .0[2] as f32) / 3.0;
-				let new_r = (average + ((pixel.2 .0[0] as f32 - average) / 2.0)).round() as u8;
-				let new_g = (average + ((pixel.2 .0[1] as f32 - average) / 2.0)).round() as u8;
-				let new_b = (average + ((pixel.2 .0[2] as f32 - average) / 2.0)).round() as u8;
+					(pixel.2.0[0] as f32 + pixel.2.0[1] as f32 + pixel.2.0[2] as f32) / 3.0;
+				let new_r = (average + ((pixel.2.0[0] as f32 - average) / 2.0)).round() as u8;
+				let new_g = (average + ((pixel.2.0[1] as f32 - average) / 2.0)).round() as u8;
+				let new_b = (average + ((pixel.2.0[2] as f32 - average) / 2.0)).round() as u8;
 				let rgba = [new_r, new_g, new_b, a];
 				infected_pony.put_pixel(x, y, image::Rgba(rgba));
 			}

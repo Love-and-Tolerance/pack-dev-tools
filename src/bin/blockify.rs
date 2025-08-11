@@ -1,8 +1,9 @@
-use clap::{value_parser, Parser};
+use clap::{Parser, value_parser};
 use deltae::*;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
-use pdt::{pdtcolor, pdtfs, pdtthread, pdttrait};
-use pdt::{pdtstdin, pdttrait::Vector};
+use pdt::pdtstdin;
+use pdt::{pdtcolor, pdtfs, pdtthread};
+use pony::traits::{BasicVector, compare};
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::{Arc, Mutex};
 
@@ -66,7 +67,7 @@ fn get_average_colors(blocks: Vec<String>, pixels: u32) -> Vec<Block> {
 			let lab = pdtcolor::rgb_to_lab(pixel);
 			let mut distance: f64 = 0.0;
 			for sub_pixel in img.pixels() {
-				if sub_pixel.2 .0[3] < 255 {
+				if sub_pixel.2.0[3] < 255 {
 					return None;
 				}
 				let sub_lab = pdtcolor::rgb_to_lab(sub_pixel);
@@ -77,7 +78,7 @@ fn get_average_colors(blocks: Vec<String>, pixels: u32) -> Vec<Block> {
 			distances.push((distance, pixel.2, lab));
 		}
 
-		distances.sort_by(|a, b| pdttrait::compare(&a.0, &b.0));
+		distances.sort_by(|a, b| compare(&a.0, &b.0));
 		distances.dedup();
 
 		if distances.is_empty() {
@@ -117,7 +118,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>, block_pixels: u32) {
 				});
 
 			for pixel in img.pixels() {
-				let a = pixel.2 .0[3];
+				let a = pixel.2.0[3];
 				if a == 0 {
 					continue;
 				}
@@ -129,7 +130,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>, block_pixels: u32) {
 				for sub_pixel in block_img.pixels() {
 					let sub_x = (x * block_pixels) + sub_pixel.0;
 					let sub_y = (y * block_pixels) + sub_pixel.1;
-					let rgba = [sub_pixel.2 .0[0], sub_pixel.2 .0[1], sub_pixel.2 .0[2], a];
+					let rgba = [sub_pixel.2.0[0], sub_pixel.2.0[1], sub_pixel.2.0[2], a];
 					new_texture.put_pixel(sub_x, sub_y, image::Rgba(rgba));
 				}
 			}
@@ -153,7 +154,7 @@ fn get_closest_match(lab: LabValue, blocks: Vec<Block>) -> String {
 			(delta, block)
 		})
 		.collect::<Vec<_>>();
-	new_blocks.sort_by(|a, b| pdttrait::compare(&a.0, &b.0));
+	new_blocks.sort_by(|a, b| compare(&a.0, &b.0));
 
 	let matches = new_blocks
 		.iter()
@@ -161,15 +162,15 @@ fn get_closest_match(lab: LabValue, blocks: Vec<Block>) -> String {
 		.collect::<Vec<_>>();
 
 	if matches.len() == 1 {
-		return matches[0].1 .0.clone();
+		return matches[0].1.0.clone();
 	}
 	let next_blocks = matches
 		.iter()
-		.filter(|block| block.1 .1.len() > 1)
-		.map(|block| (block.1 .0.to_string(), block.1 .1[1..].to_vec()))
+		.filter(|block| block.1.1.len() > 1)
+		.map(|block| (block.1.0.to_string(), block.1.1[1..].to_vec()))
 		.collect::<Vec<_>>();
 	if next_blocks.len() > 1 {
 		return get_closest_match(lab, next_blocks);
 	}
-	matches[0].1 .0.clone()
+	matches[0].1.0.clone()
 }

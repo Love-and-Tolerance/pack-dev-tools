@@ -1,6 +1,6 @@
 use camino::Utf8Path;
-use pdt::pdttrait::Vector;
 use pdt::{pdtfs, pdthash, pdtthread};
+use pony::traits::OrderedVector;
 use std::env;
 
 fn main() {

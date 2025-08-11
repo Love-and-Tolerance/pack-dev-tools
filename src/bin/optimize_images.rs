@@ -1,9 +1,10 @@
 use camino::Utf8PathBuf;
 use clap::ValueEnum;
-use clap::{value_parser, Parser};
-use oxipng::{optimize, InFile, Options, OutFile};
+use clap::{Parser, value_parser};
+use oxipng::{InFile, Options, OutFile, optimize};
 use pdt::pdtfs::get_files_in_list;
-use pdt::{pdtstdin, pdttrait::Vector};
+use pdt::pdtstdin;
+use pony::traits::BasicVector;
 use std::path::MAIN_SEPARATOR as SLASH;
 
 #[derive(Debug, Parser)]

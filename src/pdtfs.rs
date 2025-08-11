@@ -1,7 +1,7 @@
 use super::pdtthread;
-use super::pdttrait::Vector;
 use camino::Utf8Path;
 use fs_extra::dir;
+use pony::traits::{BasicVector, OrderedVector};
 use std::fs;
 use std::path::MAIN_SEPARATOR as SLASH;
 

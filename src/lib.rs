@@ -12,5 +12,3 @@ pub mod pdtstdin;
 pub mod pdtstruct;
 #[cfg(feature = "thread")]
 pub mod pdtthread;
-#[cfg(feature = "trait")]
-pub mod pdttrait;

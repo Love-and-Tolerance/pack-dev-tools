@@ -1,8 +1,9 @@
-use clap::{value_parser, Parser};
+use clap::{Parser, value_parser};
 use colors_transform::{Color, Hsl, Rgb};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
+use pdt::pdtstdin;
 use pdt::{pdtcolor, pdtfs, pdtthread};
-use pdt::{pdtstdin, pdttrait::Vector};
+use pony::traits::BasicVector;
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
 
@@ -71,7 +72,7 @@ fn dye_images_in_cauldron(images: Vec<String>, color: Hsl, saturation: Option<f3
 			let mut new_image: RgbaImage =
 				ImageBuffer::from_fn(width, height, |_, _| image::Rgba([0, 0, 0, 0]));
 			for pixel in img.pixels() {
-				let a = pixel.2 .0[3];
+				let a = pixel.2.0[3];
 				let (x, y) = (pixel.0, pixel.1);
 				let hsl =
 					Rgb::from(pixel.2[0].into(), pixel.2[1].into(), pixel.2[2].into()).to_hsl();
