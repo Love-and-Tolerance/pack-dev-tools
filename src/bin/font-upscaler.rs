@@ -209,7 +209,7 @@ struct CellHelper {
 
 impl CellHelper {
 	fn is_present_with_overflow(&self, x: isize, y: isize) -> bool {
-		let res = if x < 0 || y < 0 || x >= self.width as _ || y >= self.height as _ {
+		if x < 0 || y < 0 || x >= self.width as _ || y >= self.height as _ {
 			// println!("({x}, {y}): false OOB, h{} w{}", self.height, self.width);
 			false
 		} else {
@@ -230,8 +230,7 @@ impl CellHelper {
 					panic!("pixel not fully opaque/transparent")
 				}
 			}
-		};
-		res
+		}
 	}
 	fn get_pixels(&self) -> Vec<upscaler::Pixel> {
 		self.pixels
