@@ -1,7 +1,7 @@
 use camino::Utf8Path;
 use pdt::pdtfs;
 use serde::ser::Serialize;
-use serde_json::{ser::PrettyFormatter, Serializer, Value};
+use serde_json::{Serializer, Value, ser::PrettyFormatter};
 use std::any::{Any, TypeId};
 use std::env;
 use std::fs;
@@ -45,7 +45,9 @@ fn parse_space_indent(mut i: usize, args: Vec<String>, num: usize) -> (usize, In
 		indent = Indent::Space(args[i + num].parse::<u8>().unwrap_or_else(|_| {
 			panic!("Failed to parse to u8."); // help go here.
 		}));
-		if let Indent::Space(num) = indent && !(1..=16).contains(&num) {
+		if let Indent::Space(num) = indent
+			&& !(1..=16).contains(&num)
+		{
 			panic!("Num of spaces out of bounds."); // help go here.
 		}
 		i += num;

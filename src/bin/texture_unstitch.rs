@@ -1,4 +1,4 @@
-use image::{imageops, GenericImageView};
+use image::{GenericImageView, imageops};
 use pdt::pdtfs;
 use std::env;
 use std::path::MAIN_SEPARATOR as SLASH;
