@@ -1,5 +1,3 @@
-#[cfg(feature = "cmd")]
-pub mod pdtcmd;
 #[cfg(feature = "color")]
 pub mod pdtcolor;
 #[cfg(feature = "fs")]

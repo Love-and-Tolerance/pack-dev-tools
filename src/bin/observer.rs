@@ -1,26 +1,27 @@
 use camino::Utf8Path;
-use pdt::{pdtcmd, pdtfs};
+use pdt::pdtfs;
+use pony::command::{execute_command, execute_command_with_return};
+use std::error::Error;
 use std::io::Write;
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::process::Output;
 use std::{env, fs};
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let args: Vec<String> = env::args().collect();
 	let old_release = args[1].to_string();
 	let new_release = args[2].to_string();
-	observe(old_release, new_release);
+	observe(old_release, new_release)?;
+	Ok(())
 }
 
-fn observe(old_release: String, new_release: String) {
+fn observe(old_release: String, new_release: String) -> Result<(), Box<dyn Error>> {
 	pdtfs::check_if_dir_exists(&old_release);
 	pdtfs::check_if_dir_exists(&new_release);
 
-	#[cfg(target_os = "windows")]
-	pdtcmd::execute_windows_command_with_fail_msg("git --version", "git not installed!");
-
-	#[cfg(not(target_os = "windows"))]
-	pdtcmd::execute_unix_command_with_fail_msg("git --version", "git not installed!");
+	if !execute_command("git --version")?.success() {
+		return Err("git not installed".into());
+	}
 
 	let observer_dir = pdtfs::create_output_dir("observer_output");
 
@@ -32,19 +33,9 @@ fn observe(old_release: String, new_release: String) {
 
 	assert!(env::set_current_dir(&observer_dir).is_ok());
 
-	#[cfg(target_os = "windows")]
-	{
-		pdtcmd::execute_windows_command("git init");
-		pdtcmd::execute_windows_command("git add -A");
-		pdtcmd::execute_windows_command("git commit -m \"Initial commit\"");
-	}
-
-	#[cfg(not(target_os = "windows"))]
-	{
-		pdtcmd::execute_unix_command("git init");
-		pdtcmd::execute_unix_command("git add -A");
-		pdtcmd::execute_unix_command("git commit -m \"Initial commit\"");
-	}
+	execute_command("git init")?;
+	execute_command("git add -A")?;
+	execute_command("git commit -m \"Initial commit\"")?;
 
 	let paths = fs::read_dir(format!(".{SLASH}")).unwrap();
 
@@ -74,19 +65,8 @@ fn observe(old_release: String, new_release: String) {
 		pdtfs::rename(&format!(".{SLASH}.git_temp"), &format!(".{SLASH}.git"));
 	}
 
-	let changes: Output;
-
-	#[cfg(target_os = "windows")]
-	{
-		pdtcmd::execute_windows_command("git add -A");
-		changes = pdtcmd::execute_windows_command_with_return("git status -s");
-	}
-
-	#[cfg(not(target_os = "windows"))]
-	{
-		pdtcmd::execute_unix_command("git add -A");
-		changes = pdtcmd::execute_unix_command_with_return("git status -s");
-	}
+	execute_command("git add -A")?;
+	let changes: Output = execute_command_with_return("git status -s")?;
 
 	let mut added: Vec<String> = vec![];
 	let mut changed: Vec<String> = vec![];
@@ -155,4 +135,6 @@ fn observe(old_release: String, new_release: String) {
 
 	file.write_all(changelog.join("\n").as_bytes())
 		.expect("Failed to write changelog file.");
+
+	Ok(())
 }

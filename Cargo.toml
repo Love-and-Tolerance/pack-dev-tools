@@ -33,8 +33,7 @@ pdt-macros = { path = "./macros" }
 members = ["macros"]
 
 [features]
-default = ["cmd", "color", "fs", "hash"]
-cmd = []
+default = ["color", "fs", "hash"]
 color = []
 fs = []
 hash = []
