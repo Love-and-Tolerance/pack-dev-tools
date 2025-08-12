@@ -1,5 +1,6 @@
 use camino::Utf8Path;
-use pdt::{pdtfs, pdthash};
+use pdt::pdtfs;
+use pony::hash::get_hash_blake3;
 use pony::threads::multithread;
 use pony::traits::OrderedVector;
 use std::env;
@@ -81,7 +82,7 @@ fn get_files_data(dirs: Vec<String>, files: Vec<String>) -> Vec<FileData> {
 			.map(|dir| {
 				let presence = Utf8Path::new(&format!("{}{}", &dir, &file)).is_file();
 				match presence {
-					true => Some(pdthash::get_hash(&format!("{dir}{file}"), false)),
+					true => Some(get_hash_blake3(&format!("{dir}{file}"), None).unwrap()),
 					false => None,
 				}
 			})

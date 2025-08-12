@@ -2,5 +2,3 @@
 pub mod pdtcolor;
 #[cfg(feature = "fs")]
 pub mod pdtfs;
-#[cfg(feature = "hash")]
-pub mod pdthash;

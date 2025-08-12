@@ -1,4 +1,5 @@
-use pdt::{pdtfs, pdthash};
+use pdt::pdtfs;
+use pony::hash::get_hash_blake3;
 use pony::traits::OrderedVector;
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::time::SystemTime;
@@ -36,7 +37,11 @@ fn dedupe(dir: String) -> Vec<Vec<String>> {
 	let recursive = true;
 	let extensions = Some(vec![".zip".to_string()]);
 	let files = pdtfs::find_files_in_dir(&dir, recursive, &extensions);
-	let records = pdthash::get_hashes(files).sort_vec();
+	let records = files
+		.into_iter()
+		.map(|file| (get_hash_blake3(&file, None).unwrap(), file))
+		.collect::<Vec<_>>()
+		.sort_vec();
 	let mut dupes: Vec<Vec<String>> = vec![];
 	let mut i = 0;
 	while i < records.len() {
