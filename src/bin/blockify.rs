@@ -1,7 +1,7 @@
 use clap::{Parser, value_parser};
 use deltae::*;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
-use pdt::{pdtcolor, pdtfs};
+use pdt::pdtfs;
 use pony::stdin::get_stdin;
 use pony::threads::multithread;
 use pony::traits::{BasicVector, compare};
@@ -68,13 +68,13 @@ fn get_average_colors(blocks: Vec<String>, pixels: u32) -> Vec<Block> {
 		let mut distances: Vec<Pixel> = vec![];
 
 		for pixel in img.pixels() {
-			let lab = pdtcolor::rgb_to_lab(pixel);
+			let lab = rgb_to_lab(pixel);
 			let mut distance: f64 = 0.0;
 			for sub_pixel in img.pixels() {
 				if sub_pixel.2.0[3] < 255 {
 					return None;
 				}
-				let sub_lab = pdtcolor::rgb_to_lab(sub_pixel);
+				let sub_lab = rgb_to_lab(sub_pixel);
 				let delta: f64 = DeltaE::new(lab, sub_lab, DE2000).value().to_owned().into();
 				distance += delta;
 			}
@@ -127,7 +127,7 @@ fn blockify_images(images: Vec<String>, blocks: Vec<Block>, block_pixels: u32) {
 					continue;
 				}
 				let (x, y) = (pixel.0, pixel.1);
-				let lab = pdtcolor::rgb_to_lab(pixel);
+				let lab = rgb_to_lab(pixel);
 				let selected = get_closest_match(lab, blocks.to_vec());
 				let block_img = image::open(&selected)
 					.unwrap_or_else(|_| panic!("Failed to load image: {selected}"));
@@ -177,4 +177,14 @@ fn get_closest_match(lab: LabValue, blocks: Vec<Block>) -> String {
 		return get_closest_match(lab, next_blocks);
 	}
 	matches[0].1.0.clone()
+}
+
+pub fn rgb_to_lab(pixel: (u32, u32, Rgba<u8>)) -> LabValue {
+	let rgb = [[pixel.2.0[0], pixel.2.0[1], pixel.2.0[2]]];
+	let lab = lab::rgbs_to_labs(&rgb)[0];
+	LabValue {
+		l: lab.l,
+		a: lab.a,
+		b: lab.b,
+	}
 }

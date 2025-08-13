@@ -1,7 +1,7 @@
 use clap::{Parser, value_parser};
 use colors_transform::{Color, Hsl, Rgb};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
-use pdt::{pdtcolor, pdtfs};
+use pdt::pdtfs;
 use pony::stdin::get_stdin;
 use pony::threads::multithread;
 use pony::traits::BasicVector;
@@ -50,7 +50,12 @@ fn cauldron(color: String, items: Vec<String>, saturation: Option<f32>) {
 	let recursive = true;
 	let extensions = Some(vec![".png".to_string()]);
 	let files = pdtfs::find_files_in_dir(&output, recursive, &extensions);
-	let color = pdtcolor::hex_to_hsl(color);
+	let hex = if color.starts_with('#') {
+		color
+	} else {
+		format!("#{color}")
+	};
+	let color = Rgb::from_hex_str(&hex).unwrap().to_hsl();
 	dye_images_in_cauldron(files, color, saturation);
 }
 
