@@ -20,9 +20,9 @@ image = "0.25.6"
 itertools = "0.14.0"
 lab = "0.11.0"
 num_cpus = "1.17.0"
-pony = { git = "https://github.com/SilkRose/Pony" }
-# todo this is a major update to 9.1.5
 oxipng = "9.1.5"
+pony = { git = "https://github.com/SilkRose/Pony" }
+regex = { version = "1.11.1" }
 serde = { version = "1.0.219", features = ["derive"] }
 sha2 = "0.10.9"
 serde_json = { version = "1.0.142", features = ["preserve_order"] }

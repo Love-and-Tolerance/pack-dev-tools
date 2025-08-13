@@ -1731,6 +1731,7 @@ dependencies = [
  "oxipng",
  "pdt-macros",
  "pony",
+ "regex",
  "serde",
  "serde_json",
  "sha2",

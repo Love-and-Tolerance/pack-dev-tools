@@ -3,10 +3,12 @@ use clap::Parser;
 use fs_extra::dir;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use pdt::pdtfs;
-use pony::fs::find_dirs_in_dir;
+use pony::fs::{find_dirs_in_dir, find_files_in_dir};
+use pony::regex::matches;
 use pony::stdin::get_stdin;
 use pony::threads::multithread;
 use pony::traits::BasicVector;
+use regex::Regex;
 use std::fs;
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
@@ -98,12 +100,14 @@ fn resource_pack_conversion_setup(
 		);
 		fs::rename(dir, &new_name).unwrap();
 	}
-	let remove_extensions = Some(vec![
-		".md".to_string(),
-		".txt".to_string(),
-		".json".to_string(),
-	]);
-	pdtfs::delete_files_in_dir(&pony_location, true, &remove_extensions);
+	let incude = Some(Regex::new(r".*\.(md|txt|json)$").unwrap());
+	find_files_in_dir(&pony_location, true)
+		.unwrap()
+		.iter()
+		.filter(|file| matches(file, &incude, &None))
+		.for_each(|file| {
+			fs::remove_file(file).unwrap();
+		});
 	fs::remove_dir_all(format!("{pony_location}{SLASH}.git")).unwrap();
 
 	let mut options = dir::CopyOptions::new();
