@@ -1,7 +1,7 @@
 use camino::Utf8Path;
 use image::{GenericImageView as _, Rgba};
 use itertools::Itertools as _;
-use pdt::pdtfs::{create_output_dir, find_files_in_dir};
+use pdt::pdtfs::find_files_in_dir;
 use pony::threads::multithread;
 use std::fs;
 use std::num::NonZeroUsize;
@@ -66,7 +66,10 @@ fn main() {
 		.into_iter()
 		.map(|d| (d, output_dir.clone(), exts.clone()))
 		.collect();
-	create_output_dir(&output_dir);
+	if Utf8Path::new(&output_dir).is_dir() {
+		fs::remove_dir_all(&output_dir).unwrap();
+		fs::create_dir_all(&output_dir).unwrap();
+	}
 
 	multithread(dirs, None, move |_tn, (in_dir, out_dir, exts)| {
 		let files = find_files_in_dir(&in_dir, true, &Some(exts));

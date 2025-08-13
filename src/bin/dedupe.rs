@@ -1,3 +1,4 @@
+use camino::Utf8Path;
 use pdt::pdtfs;
 use pony::hash::get_hash_blake3;
 use pony::traits::OrderedVector;
@@ -33,7 +34,9 @@ fn main() {
 }
 
 fn dedupe(dir: String) -> Vec<Vec<String>> {
-	pdtfs::check_if_dir_exists(&dir);
+	if !Utf8Path::new(&dir).is_dir() {
+		panic!("Directory not found: {dir}")
+	}
 	let recursive = true;
 	let extensions = Some(vec![".zip".to_string()]);
 	let files = pdtfs::find_files_in_dir(&dir, recursive, &extensions);

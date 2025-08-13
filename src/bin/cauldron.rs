@@ -1,3 +1,4 @@
+use camino::Utf8Path;
 use clap::{Parser, value_parser};
 use colors_transform::{Color, Hsl, Rgb};
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
@@ -5,6 +6,7 @@ use pdt::pdtfs;
 use pony::stdin::get_stdin;
 use pony::threads::multithread;
 use pony::traits::BasicVector;
+use std::fs;
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
 
@@ -45,7 +47,11 @@ fn main() {
 }
 
 fn cauldron(color: String, items: Vec<String>, saturation: Option<f32>) {
-	let output = pdtfs::create_output_dir("cauldron_output");
+	let output = format!(".{SLASH}cauldron_output/");
+	if Utf8Path::new(&output).is_dir() {
+		fs::remove_dir_all(&output).unwrap();
+		fs::create_dir_all(&output).unwrap();
+	}
 	pdtfs::copy_files_to_dir(output.clone(), items, false);
 	let recursive = true;
 	let extensions = Some(vec![".png".to_string()]);

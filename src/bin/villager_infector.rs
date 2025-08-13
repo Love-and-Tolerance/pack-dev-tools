@@ -1,9 +1,13 @@
+use camino::Utf8Path;
 use clap::Parser;
+use fs_extra::dir;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use pdt::pdtfs;
+use pony::fs::find_dirs_in_dir;
 use pony::stdin::get_stdin;
 use pony::threads::multithread;
 use pony::traits::BasicVector;
+use std::fs;
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::Arc;
 
@@ -49,7 +53,11 @@ fn infect_villagers(paths: Vec<String>, overlay: &[u8], resource_pack_conversion
 	let texture_files = match resource_pack_conversion {
 		true => resource_pack_conversion_setup(paths, extensions),
 		false => {
-			let output = pdtfs::create_output_dir("infected_ponies");
+			let output = format!(".{SLASH}infected_ponies{SLASH}");
+			if Utf8Path::new(&output).is_dir() {
+				fs::remove_dir_all(&output).unwrap();
+				fs::create_dir_all(&output).unwrap();
+			}
 			pdtfs::copy_files_to_dir(output.clone(), paths, true);
 			pdtfs::find_files_in_dir(&output, true, &extensions)
 		}
@@ -68,16 +76,27 @@ fn resource_pack_conversion_setup(
 	}
 	let location =
 		format!("Villager-Skin-Pack{SLASH}assets{SLASH}minelittlepony{SLASH}textures{SLASH}entity");
-	let pony_location = pdtfs::create_output_dir(&format!("{location}{SLASH}pony"));
-	let zompony_location = pdtfs::create_output_dir(&format!("{location}{SLASH}zompony"));
-	pdtfs::copy_dir_to_dir(&pony_location, paths[0].to_string(), true);
-	for dir in pdtfs::find_dirs_in_dir(&pony_location, true).iter().rev() {
+	let pony_location = format!("{location}{SLASH}pony");
+	if Utf8Path::new(&pony_location).is_dir() {
+		fs::remove_dir_all(&pony_location).unwrap();
+		fs::create_dir_all(&pony_location).unwrap();
+	}
+	let zompony_location = format!("{location}{SLASH}zompony");
+	if Utf8Path::new(&zompony_location).is_dir() {
+		fs::remove_dir_all(&zompony_location).unwrap();
+		fs::create_dir_all(&zompony_location).unwrap();
+	}
+
+	let mut options = dir::CopyOptions::new();
+	options.content_only = true;
+	dir::copy(paths[0].clone(), &pony_location, &options).unwrap();
+	for dir in find_dirs_in_dir(&pony_location, true).unwrap().iter().rev() {
 		let (location, folder) = dir.rsplit_once(SLASH).unwrap();
 		let new_name = format!(
 			"{location}{SLASH}{}",
 			folder.replace(' ', "_").to_lowercase()
 		);
-		pdtfs::rename(dir, &new_name);
+		fs::rename(dir, &new_name).unwrap();
 	}
 	let remove_extensions = Some(vec![
 		".md".to_string(),
@@ -85,8 +104,11 @@ fn resource_pack_conversion_setup(
 		".json".to_string(),
 	]);
 	pdtfs::delete_files_in_dir(&pony_location, true, &remove_extensions);
-	pdtfs::if_dir_exists_remove_it(&format!("{pony_location}{SLASH}.git"));
-	pdtfs::copy_dir_to_dir(&zompony_location, pony_location, true);
+	fs::remove_dir_all(format!("{pony_location}{SLASH}.git")).unwrap();
+
+	let mut options = dir::CopyOptions::new();
+	options.content_only = true;
+	dir::copy(pony_location, &zompony_location, &options).unwrap();
 	pdtfs::find_files_in_dir(&zompony_location, true, &extensions)
 }
 

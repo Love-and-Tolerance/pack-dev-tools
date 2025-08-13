@@ -1,5 +1,5 @@
 use camino::Utf8Path;
-use pdt::pdtfs;
+use fs_extra::dir;
 use pony::command::{execute_command, execute_command_with_return};
 use std::error::Error;
 use std::io::Write;
@@ -16,20 +16,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn observe(old_release: String, new_release: String) -> Result<(), Box<dyn Error>> {
-	pdtfs::check_if_dir_exists(&old_release);
-	pdtfs::check_if_dir_exists(&new_release);
+	if !Utf8Path::new(&old_release).is_dir() {
+		panic!("old release directory not found: {old_release}")
+	} else if !Utf8Path::new(&new_release).is_dir() {
+		panic!("new release directory not found: {new_release}")
+	}
 
 	if !execute_command("git --version")?.success() {
 		return Err("git not installed".into());
 	}
 
-	let observer_dir = pdtfs::create_output_dir("observer_output");
+	let observer_dir = format!(".{SLASH}observer_output/");
 
-	pdtfs::if_dir_exists_remove_and_remake_it(&observer_dir);
+	if Utf8Path::new(&observer_dir).is_dir() {
+		fs::remove_dir_all(&observer_dir).unwrap();
+		fs::create_dir_all(&observer_dir).unwrap();
+	}
 
-	pdtfs::copy_dir_to_dir(&observer_dir, old_release, true);
+	let mut options = dir::CopyOptions::new();
+	options.content_only = true;
+	dir::copy(&observer_dir, old_release, &options).unwrap();
 
-	pdtfs::if_dir_exists_remove_it(&format!("{}{}.git", &observer_dir, SLASH));
+	fs::remove_dir_all(format!("{}{}.git", &observer_dir, SLASH)).unwrap();
 
 	assert!(env::set_current_dir(&observer_dir).is_ok());
 
@@ -55,14 +63,16 @@ fn observe(old_release: String, new_release: String) -> Result<(), Box<dyn Error
 	if Utf8Path::new(&format!("{}{}.git", &new_release, SLASH)).is_dir()
 		|| Utf8Path::new(&format!("{}.git", &new_release)).is_dir()
 	{
-		pdtfs::rename(&format!(".{SLASH}.git"), &format!(".{SLASH}.git_temp"));
+		fs::rename(format!(".{SLASH}.git"), format!(".{SLASH}.git_temp")).unwrap();
 	}
 
-	pdtfs::copy_dir_to_dir(&".".to_string(), new_release, true);
+	let mut options = dir::CopyOptions::new();
+	options.content_only = true;
+	dir::copy(&new_release, ".", &options).unwrap();
 
 	if Utf8Path::new(&format!(".{SLASH}.git_temp")).is_dir() {
-		pdtfs::if_dir_exists_remove_it(&format!(".{SLASH}.git"));
-		pdtfs::rename(&format!(".{SLASH}.git_temp"), &format!(".{SLASH}.git"));
+		fs::remove_dir_all(format!(".{SLASH}.git")).unwrap();
+		fs::rename(format!(".{SLASH}.git_temp"), format!(".{SLASH}.git")).unwrap();
 	}
 
 	execute_command("git add -A")?;

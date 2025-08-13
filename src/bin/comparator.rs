@@ -4,6 +4,7 @@ use pony::hash::get_hash_blake3;
 use pony::threads::multithread;
 use pony::traits::OrderedVector;
 use std::env;
+use std::path::MAIN_SEPARATOR as SLASH;
 
 fn main() {
 	let args: Vec<String> = env::args().collect();
@@ -21,9 +22,15 @@ fn main() {
 	}
 	dirs = dirs
 		.iter()
-		.map(|d| {
-			pdtfs::check_if_dir_exists(d);
-			pdtfs::check_dir_ends_with_slash(d.to_string())
+		.map(|dir| {
+			if !Utf8Path::new(&dir).is_dir() {
+				panic!("Directory not found: {dir}")
+			}
+			if dir.ends_with(SLASH) {
+				dir.to_string()
+			} else {
+				format!("{dir}{SLASH}")
+			}
 		})
 		.collect::<Vec<String>>();
 

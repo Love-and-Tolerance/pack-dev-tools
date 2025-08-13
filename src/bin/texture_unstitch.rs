@@ -1,7 +1,7 @@
+use camino::Utf8Path;
 use image::{GenericImageView, imageops};
-use pdt::pdtfs;
-use std::env;
 use std::path::MAIN_SEPARATOR as SLASH;
+use std::{env, fs};
 
 fn main() {
 	let args: Vec<String> = env::args().collect();
@@ -27,7 +27,10 @@ fn unstitch_texture(filename: String, width: u32, height: u32) {
 
 	let output_dir = format!(".{SLASH}output_dir");
 
-	pdtfs::if_dir_exists_remove_and_remake_it(&output_dir);
+	if Utf8Path::new(&output_dir).is_dir() {
+		fs::remove_dir_all(&output_dir).unwrap();
+		fs::create_dir_all(&output_dir).unwrap();
+	}
 
 	for y in 0..width as usize {
 		for x in 0..height as usize {

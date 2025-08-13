@@ -1,3 +1,4 @@
+use camino::Utf8Path;
 use clap::{Parser, value_parser};
 use deltae::*;
 use image::{GenericImageView, ImageBuffer, Rgba, RgbaImage};
@@ -5,6 +6,7 @@ use pdt::pdtfs;
 use pony::stdin::get_stdin;
 use pony::threads::multithread;
 use pony::traits::{BasicVector, compare};
+use std::fs;
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::sync::{Arc, Mutex};
 
@@ -43,7 +45,11 @@ fn main() {
 }
 
 fn blockify(pixels: u32, blocks_dir: String, paths: Vec<String>) {
-	let output = pdtfs::create_output_dir("blockify_output");
+	let output = format!(".{SLASH}blockify_output/");
+	if Utf8Path::new(&output).is_dir() {
+		fs::remove_dir_all(&output).unwrap();
+		fs::create_dir_all(&output).unwrap();
+	}
 	pdtfs::copy_files_to_dir(output.clone(), paths, true);
 	let extensions = Some(vec![".png".to_string()]);
 	let block_files = pdtfs::find_files_in_dir(&blocks_dir, false, &extensions);
