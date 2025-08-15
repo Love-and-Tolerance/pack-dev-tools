@@ -1809,7 +1809,7 @@ dependencies = [
 [[package]]
 name = "pony"
 version = "0.0.0"
-source = "git+https://github.com/SilkRose/Pony#46ce068905c004d3686e963acc16be4e23075190"
+source = "git+https://github.com/SilkRose/Pony#cb57e3587ba1a49dfd8ee6eb92a7bf0ca6caf180"
 dependencies = [
  "blake3",
  "camino",

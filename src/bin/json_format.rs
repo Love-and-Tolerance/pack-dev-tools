@@ -5,6 +5,7 @@ use pony::json::{JsonFormat, format_json};
 use pony::regex::matches;
 use regex::Regex;
 use std::process::exit;
+use std::str::FromStr;
 use std::{env, fs};
 
 type Result<T, E = Box<dyn ::std::error::Error>> = ::std::result::Result<T, E>;
@@ -24,7 +25,8 @@ fn main() -> Result<()> {
 		.collect::<Vec<_>>();
 	for file in files {
 		let json = fs::read_to_string(file)?;
-		let text = format_json(&json, &format)?;
+		let value = serde_json::Value::from_str(&json)?;
+		let text = format_json(&value, &format)?;
 		fs::write(file, text.as_bytes())?;
 	}
 	Ok(())
