@@ -21,7 +21,11 @@ indoc = "2.0.6"
 itertools = "0.14.0"
 lab = "0.11.0"
 num_cpus = "1.17.0"
-oxipng = "9.1.5"
+oxipng = { version = "9.1.5", features = [
+	"parallel",
+	"zopfli",
+	"filetime",
+], default-features = false }
 pony = { git = "https://github.com/SilkRose/Pony" }
 regex = { version = "1.11.1" }
 serde = { version = "1.0.219", features = ["derive"] }
