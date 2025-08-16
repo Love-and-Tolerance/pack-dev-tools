@@ -36,15 +36,20 @@ fn parse_argument(args: &[String]) -> Result<JsonFormat> {
 	if args.is_empty() {
 		return Err("No arguments provided!".into());
 	}
-	match args.iter().next().unwrap().as_str() {
+	match args.first().unwrap().as_str() {
 		"-m" | "--minify" => Ok(JsonFormat::Minify),
 		"-t" | "--tab" => Ok(JsonFormat::Tab),
-		"-s" | "--space" => match args.iter().next() {
+		"-s" | "--space" => match args.get(1) {
 			None => Err("No space count provided!".into()),
 			Some(count) => {
 				let count = count.parse::<u8>();
 				match count {
-					Ok(count) => Ok(JsonFormat::Space(count)),
+					Ok(count) => {
+						if count == 0 || count > 8 {
+							return Err("Space count provided outside of bounds! (1-8)".into());
+						}
+						Ok(JsonFormat::Space(count))
+					}
 					Err(_) => Err("Failed to parse space count".into()),
 				}
 			}
