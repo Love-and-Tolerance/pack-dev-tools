@@ -1,13 +1,14 @@
 use camino::Utf8PathBuf;
 use oxipng::{InFile, Options, OutFile, optimize};
-use pony::{fs::find_files_in_dir, threads::multithread};
+use pony::fs::find_files_in_dir;
+use pony::threads::multithread;
 use std::env::args;
 
 type Result<T, E = Box<dyn ::std::error::Error>> = ::std::result::Result<T, E>;
 
 fn main() -> Result<()> {
-	let args = args().collect::<Vec<_>>();
-	optimize_images(&args[1])?;
+	let dir = args().next_back().unwrap();
+	optimize_images(&dir)?;
 	Ok(())
 }
 
@@ -22,11 +23,11 @@ fn optimize_images(dir: &str) -> Result<()> {
 		.into_iter()
 		.filter(|file| file.ends_with("png"))
 		.collect::<Vec<_>>();
-	multithread(images, None, move |_, image| {
-		println!("optimizing image: {}", &image);
+	multithread(images, None, move |thread, image| {
 		let input = InFile::Path(Utf8PathBuf::from(&image).into());
 		let output = OutFile::from_path(Utf8PathBuf::from(&image).into());
 		optimize(&input, &output, &options).unwrap();
+		println!("Thread {thread:0>2} optimized image: {}", &image);
 		None::<()>
 	});
 	Ok(())
