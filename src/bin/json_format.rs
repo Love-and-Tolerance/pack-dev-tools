@@ -4,6 +4,7 @@ use pony::fs::find_files_in_dir;
 use pony::json::{JsonFormat, format_json};
 use pony::regex::matches;
 use regex::Regex;
+use std::path::MAIN_SEPARATOR as SLASH;
 use std::process::exit;
 use std::str::FromStr;
 use std::{env, fs};
@@ -68,13 +69,14 @@ fn parse_argument(args: &[String]) -> Result<JsonFormat> {
 
 fn print_help() {
 	printdoc! {"
-		{} {}
+		{bin} {}
 
 		Format .json and .mcmeta files with tabs or spaces.
 
 		Usage Examples:
-		  json_format ./dir
-		  json_format -s 3 ./dir
+		  {bin} .{SLASH}resource-pack
+		  {bin} -s 3 .{SLASH}resource-pack
+		  {bin} --minify .{SLASH}resource-pack
 
 		Options:
 		  -m,  --minify      Format onto one line
@@ -82,7 +84,7 @@ fn print_help() {
 		  -t,  --tab         Format with tabs (default)
 		  -h,  --help        Print help
 		  -v,  --version     Print version\n",
-		env!("CARGO_BIN_NAME"),
-		env!("CARGO_PKG_VERSION")
+		env!("CARGO_PKG_VERSION"),
+		bin = env!("CARGO_BIN_NAME")
 	}
 }
