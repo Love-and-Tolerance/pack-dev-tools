@@ -1,14 +1,18 @@
 use camino::Utf8PathBuf;
+use indoc::printdoc;
 use oxipng::{InFile, Options, OutFile, optimize};
 use pony::fs::find_files_in_dir;
 use pony::threads::multithread;
 use std::env::args;
+use std::process::exit;
 
 type Result<T, E = Box<dyn ::std::error::Error>> = ::std::result::Result<T, E>;
 
 fn main() -> Result<()> {
-	let dir = args().next_back().unwrap();
-	optimize_images(&dir)?;
+	let args: Vec<String> = args().skip(1).collect();
+	parse_argument(&args)?;
+	let dir = args.iter().next_back().unwrap();
+	optimize_images(dir)?;
 	Ok(())
 }
 
@@ -31,4 +35,39 @@ fn optimize_images(dir: &str) -> Result<()> {
 		None::<()>
 	});
 	Ok(())
+}
+
+fn parse_argument(args: &[String]) -> Result<()> {
+	if args.is_empty() {
+		return Err("No arguments provided!".into());
+	}
+	match args.first().unwrap().as_str() {
+		"-h" | "--help" => {
+			print_help();
+			exit(0);
+		}
+		"-v" | "--version" => {
+			println!("{} {}", env!("CARGO_BIN_NAME"), env!("CARGO_PKG_VERSION"));
+			exit(0);
+		}
+		_ => {}
+	}
+	Ok(())
+}
+
+fn print_help() {
+	printdoc! {"
+		{} {}
+
+		Optimize .png files for resource packs.
+
+		Usage Examples:
+		  optimize_images ./resource-pack
+
+		Options:
+		  -h,  --help        Print help
+		  -v,  --version     Print version\n",
+		env!("CARGO_BIN_NAME"),
+		env!("CARGO_PKG_VERSION")
+	}
 }
