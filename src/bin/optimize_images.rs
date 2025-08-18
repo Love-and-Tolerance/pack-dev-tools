@@ -4,6 +4,7 @@ use oxipng::{InFile, Options, OutFile, optimize};
 use pony::fs::find_files_in_dir;
 use pony::threads::multithread;
 use std::env::args;
+use std::path::MAIN_SEPARATOR as SLASH;
 use std::process::exit;
 
 type Result<T, E = Box<dyn ::std::error::Error>> = ::std::result::Result<T, E>;
@@ -57,17 +58,17 @@ fn parse_argument(args: &[String]) -> Result<()> {
 
 fn print_help() {
 	printdoc! {"
-		{} {}
+		{bin} {}
 
 		Optimize .png files for resource packs.
 
 		Usage Examples:
-		  optimize_images ./resource-pack
+		  {bin} .{SLASH}resource-pack
 
 		Options:
 		  -h,  --help        Print help
 		  -v,  --version     Print version\n",
-		env!("CARGO_BIN_NAME"),
-		env!("CARGO_PKG_VERSION")
+		env!("CARGO_PKG_VERSION"),
+		bin = env!("CARGO_BIN_NAME")
 	}
 }
