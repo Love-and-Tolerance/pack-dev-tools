@@ -10,33 +10,25 @@ resolver = "2"
 publish = false
 
 [dependencies]
-atty = "0.2.14"
-camino = "1.1.11"
-clap = { version = "4.5.43", features = ["derive"] }
-colors-transform = "0.2.11"
-deltae = "0.3.2"
-fs_extra = "1.3.0"
-image = "0.25.6"
-indoc = "2.0.6"
-itertools = "0.14.0"
-lab = "0.11.0"
-num_cpus = "1.17.0"
-oxipng = { version = "9.1.5", features = [], default-features = false }
+camino = { version = "1.1.11" }
+clap = { version = "4.5.45", features = ["derive"] }
+colors-transform = { version = "0.2.11" }
+deltae = { version = "0.3.2" }
+fs_extra = { version = "1.3.0" }
+image = { version = "0.25.6" }
+indoc = { version = "2.0.6" }
+itertools = { version = "0.14.0" }
+lab = { version = "0.11.0" }
+oxipng = { version = "9.1.5", default-features = false }
+pdt-macros = { path = "./macros" }
 pony = { git = "https://github.com/SilkRose/Pony" }
 regex = { version = "1.11.1" }
 serde = { version = "1.0.219", features = ["derive"] }
-sha2 = "0.10.9"
-serde_json = { version = "1.0.142", features = ["preserve_order"] }
-tokio = { version = "1.47.1", features = ["full"] }
-pdt-macros = { path = "./macros" }
+serde_json = { version = "1.0.143", features = ["preserve_order"] }
 
 [workspace]
 members = ["macros"]
 
-[features]
-default = ["color", "fs"]
-color = []
-fs = []
 
 [profile.dev]
 opt-level = 0
