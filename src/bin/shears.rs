@@ -3,18 +3,21 @@ use image::{GenericImageView, imageops};
 use std::path::MAIN_SEPARATOR as SLASH;
 use std::{env, fs};
 
-fn main() {
+type Result<T, E = Box<dyn ::std::error::Error>> = ::std::result::Result<T, E>;
+
+fn main() -> Result<()> {
 	let args: Vec<String> = env::args().collect();
 	let filename = args[1].to_string();
-	let width = args[2].to_string().parse::<u32>().unwrap();
-	let height = args[3].to_string().parse::<u32>().unwrap();
-	shears(filename, width, height);
+	let width = args[2].to_string().parse::<u32>()?;
+	let height = args[3].to_string().parse::<u32>()?;
+	shears(filename, width, height)?;
+	Ok(())
 }
 
-fn shears(filename: String, width: u32, height: u32) {
+fn shears(filename: String, width: u32, height: u32) -> Result<()> {
 	let name = filename.split('.').collect::<Vec<&str>>()[0].to_string();
 	let filetype = filename.split('.').collect::<Vec<&str>>()[1].to_string();
-	let mut img = image::open(filename).unwrap();
+	let mut img = image::open(filename)?;
 	let image_width = img.dimensions().0;
 	let image_height = img.dimensions().1;
 
@@ -28,8 +31,8 @@ fn shears(filename: String, width: u32, height: u32) {
 	let output_dir = format!(".{SLASH}output_dir");
 
 	if Utf8Path::new(&output_dir).is_dir() {
-		fs::remove_dir_all(&output_dir).unwrap();
-		fs::create_dir_all(&output_dir).unwrap();
+		fs::remove_dir_all(&output_dir)?;
+		fs::create_dir_all(&output_dir)?;
 	}
 
 	for y in 0..width as usize {
@@ -44,8 +47,8 @@ fn shears(filename: String, width: u32, height: u32) {
 			);
 			subimg
 				.to_image()
-				.save(format!("{output_dir}{SLASH}{name}-{x}-{y}.{filetype}"))
-				.unwrap();
+				.save(format!("{output_dir}{SLASH}{name}-{x}-{y}.{filetype}"))?;
 		}
 	}
+	Ok(())
 }
